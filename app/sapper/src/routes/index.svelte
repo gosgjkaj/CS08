@@ -1,3 +1,7 @@
+<script>
+	import { session } from '../stores'
+</script>
+
 <svelte:head>
 	<title>Sapper/Prisma/Bulma app template</title>
 </svelte:head>
@@ -12,6 +16,8 @@
 	</p>
 </div>
 
-<div>
-	\SOmething somethin 
-</div>
+{#if $session.user}
+	<p class="content">
+		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
+	</p>
+{/if}
