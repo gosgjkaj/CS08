@@ -18,3 +18,25 @@ type Post {
 	updatedAt: DateTime! @updatedAt
 	postedBy: User! @relation(link: INLINE)
 }
+
+type Course {
+  id: ID! @id
+  courseID: String!
+  weight: Float!
+}
+
+type StudentCourseGrade {
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  student: Student! @relation(link: INLINE)
+  weight: Float!
+  grade: Float!
+}
+
+type Student {
+  id: ID! @id
+  firstname: String!
+  surname: String!
+  guid: String!
+   
+}

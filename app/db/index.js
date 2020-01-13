@@ -5,11 +5,13 @@ const { prisma } = require('./generated/prisma-client')
 const Mutation = require('./resolvers/Mutation.js')
 const Query = require('./resolvers/Query.js')
 const Post = require('./resolvers/Post.js')
+const StudentCourseGrade = require('./resolvers/StudentCourseGrade.js')
 
 const resolvers = {
   Query,
   Mutation,
-  Post
+  Post,
+  StudentCourseGrade
 }
 
 const server = new GraphQLServer({
