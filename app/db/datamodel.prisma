@@ -3,6 +3,14 @@ enum Role {
 	Normal
 }
 
+enum Year {
+  First 
+  Second
+  Third
+  Fourth
+  Fifth
+}
+
 type User {
   id: ID! @id
   name: String!
@@ -23,6 +31,12 @@ type Course {
   id: ID! @id
   courseID: String!
   weight: Float!
+  level: Year!
+}
+type CourseRun { 
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  year: Int!
 }
 
 type StudentCourseGrade {
@@ -31,6 +45,7 @@ type StudentCourseGrade {
   student: Student! @relation(link: INLINE)
   weight: Float!
   grade: Float!
+  createdAt: DateTime! @createdAt
 }
 
 type Student {
@@ -38,5 +53,7 @@ type Student {
   firstname: String!
   surname: String!
   guid: String!
+  degreeCode: String!
+  year: Year!
    
 }
