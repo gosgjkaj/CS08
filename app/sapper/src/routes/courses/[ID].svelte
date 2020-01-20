@@ -1,7 +1,6 @@
 <script context="module">
     export async function preload(page, session) {
         const  id = page.params['ID']
-        console.log(id)
         return { id }
     }
 </script>
@@ -11,7 +10,6 @@
 	import { client } from '../../gqlClient'
 	import { query } from 'svelte-apollo'
 	import { gql } from 'apollo-boost'
-    console.log(`this is it ${ id }`)
     let studentGrade = query(client(), {query: gql`
             query{
                 fromCourseID(id: "${ id }"){
