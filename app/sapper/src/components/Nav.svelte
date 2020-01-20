@@ -21,7 +21,7 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
 
 	<div class="navbar-brand">
-    <p class="navbar-item">Authentication example</p>
+    <p class="navbar-item">University of Glasgow - School of Chemistry</p>
 
     <div role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" onclick="document.querySelector('.navbar-menu').classList.toggle('is-active');">
       <span aria-hidden="true"></span>

@@ -4,6 +4,7 @@ type Query {
 	userPosts(userID: ID!): [Post!]!
 	coursesFromYear(year: Int!): [Course!]!
 	checkPermission: String
+  fromCourseID(id: ID!): [StudentCourseGrade!]!
 }
 
 type Mutation {
