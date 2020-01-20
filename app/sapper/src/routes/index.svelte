@@ -15,11 +15,16 @@
 			}
 		}`
 	})
- function gotoCourse(idcourse) {
-		goto(`/courses/${idcourse}`)
-		
-		
-	}
+
+	function gotoCourse(idcourse) {
+			goto(`/courses/${idcourse}`)
+			
+			
+		}
+
+	let yearRuns =[
+		{id:2019, text: "year 2019-2020"},
+		{id:2020, text: "year 2020-2021"}]
  
 </script>
 
@@ -40,16 +45,18 @@
 		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
 	</p>
 
+
+
 	{#await $courses}
 	<p>Loading courses</p>
 	{:then result}
 	<div class="box has-background-info">
-		<p class="title has-text-white">Courses for Year 2019-2020</p>
+		<p class="title has-text-white">Courses for Year {year}-{year+1}</p>
 	</div>
 		<div class="box buttons">
 		{#each result.data.coursesFromYear as course}
 
-		<p on:click={gotoCourse(course.id)} class="button is-info is-outlined">{course.courseID} </p>
+		<p on:click={gotoCourse(course.id)} class="button is-large is-info is-outlined">{course.courseID} </p>
 		{/each}
 		</div>
 	

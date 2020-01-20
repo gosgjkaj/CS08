@@ -35,7 +35,7 @@
 
 		if(response.status == 201) {
 			session.set({ user: (await response.json()).user})
-			goto('/admin')
+			goto('/')
 		} else {
 			console.log("ERROR")
 		}

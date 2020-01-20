@@ -16,6 +16,7 @@
                     student{
                         firstname
                         surname
+                        guid
                     }
                     course{
                         courseID
@@ -39,11 +40,22 @@
 	<div class="box has-background-info">
 	<p class="title has-text-white">Data for course: {result.data.fromCourseID[0].course.courseID} </p>
 	</div>
-		<div class="box buttons">
-		{#each result.data.fromCourseID as grade}
-		<p  class="content">{grade.student.firstname} {grade.student.surname} {grade.grade} </p>
-		{/each}
-		</div>
+		<table class="table">
+            <tr>
+                <th>Firstname</th>
+                <th>Surname</th>
+                <th>GUID</th>
+                <th>Grade</th>
+            </tr>
+		    {#each result.data.fromCourseID as grade}
+		    <tr  class="content">
+               <td>{grade.student.firstname}</td>  
+               <td>{grade.student.surname}</td> 
+               <td>{grade.student.guid}</td>
+               <td>{grade.grade} </td> 
+            </tr>
+		    {/each}
+		</table>
 	
 	{/await}
 {/if}
