@@ -9,10 +9,12 @@
     import { session } from '../../stores'
 	import { client } from '../../gqlClient'
 	import { query } from 'svelte-apollo'
-	import { gql } from 'apollo-boost'
+    import { gql } from 'apollo-boost'
+    import StudentRow from '../../components/StudentRow.svelte'
+    let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
             query{
-                fromCourseID(id: "${ id }"){
+                gradeFromCourseID(id: "${ id }"){
                     student{
                         firstname
                         surname
@@ -22,9 +24,13 @@
                         courseID
                     }
                     grade
+                    id
+                    weight
                 }
             }`
         })
+    
+
 
 </script>
 
@@ -35,28 +41,25 @@
 	</p>
 
 	{#await $studentGrade}
-	<p>Loading courses</p>
+	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 	{:then result}
 	<div class="box has-background-info">
-	<p class="title has-text-white">Data for course: {result.data.fromCourseID[0].course.courseID} </p>
+	<p class="title has-text-white">Data for course: {result.data.gradeFromCourseID[0].course.courseID} </p>
 	</div>
-		<table class="table">
-            <tr>
-                <th>Firstname</th>
-                <th>Surname</th>
-                <th>GUID</th>
-                <th>Grade</th>
-            </tr>
-		    {#each result.data.fromCourseID as grade}
-		    <tr  class="content">
-               <td>{grade.student.firstname}</td>  
-               <td>{grade.student.surname}</td> 
-               <td>{grade.student.guid}</td>
-               <td>{grade.grade} </td> 
-            </tr>
+    <div class="content">
+		<div class="box ">
+            <div class="columns has-text-weight-bold">
+               <div class="column is-1">Firstname</div>
+                <div class="column is-1">Surname</div>
+                <div class="column is-1">GUID</div>
+                <div class="column is-1">Grade</div>
+                <div class="column is-1">Weight</div>
+            </div>
+		    {#each result.data.gradeFromCourseID as grade}
+		    <StudentRow grade={grade} class="content" />
 		    {/each}
-		</table>
-	
+		</div>
+	</div>
 	{/await}
 {/if}
 <p> </p>

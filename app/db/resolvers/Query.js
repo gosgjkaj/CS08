@@ -14,14 +14,19 @@ async function coursesFromYear(root, args, context) {
 	courseRuns = courseRuns.map(item => item.course)
 	return courseRuns
 }
-async function fromCourseID(root, args, context){
+async function gradeFromCourseID(root, args, context) {
 	let courseGradeStudent = await context.prisma.studentCourseGrades({where: {course: { id: args.id }}})
 	return courseGradeStudent
 }
+async function getGradeByID(root, args, context) {
+	return await context.prisma.studentCourseGrade({id:args.id})
+}
+
 
 module.exports = {
 	userPosts,
 	coursesFromYear,
 	checkPermission,
-	fromCourseID
+	gradeFromCourseID,
+	getGradeByID
 }

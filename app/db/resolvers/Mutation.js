@@ -40,7 +40,22 @@ async function login(parent, args, context, info) {
   }
 }
 
+async function changeGradeWeight(parent,args,context, info){
+
+  let newgrade = await context.prisma.updateStudentCourseGrade({
+    data:{
+      grade: args.grade,
+      weight: args.weight
+    },
+    where: {
+      id: args.id
+    }
+  }, info)
+  return newgrade
+}
+
 module.exports = {
 	signup, login,
-	createPost
+  createPost,
+  changeGradeWeight
 }
