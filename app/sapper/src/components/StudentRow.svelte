@@ -46,9 +46,6 @@ async function updateEntry(id, newgrade, weight){
 
     }
 
-    
-    
-
     let newgrade = valueOfGrade
     let newweight = weightOfGrade
 

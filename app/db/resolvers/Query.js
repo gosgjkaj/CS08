@@ -21,6 +21,17 @@ async function gradeFromCourseID(root, args, context) {
 async function getGradeByID(root, args, context) {
 	return await context.prisma.studentCourseGrade({id:args.id})
 }
+async function getOverallGrade(root, args, context) {
+	return await context.prisma.overallGrade( {
+		where: {
+			year: arg.year,
+			studentLevel: args.level,
+			student: {
+				id: args.id
+			}
+		}
+	})
+}
 
 
 module.exports = {
@@ -28,5 +39,6 @@ module.exports = {
 	coursesFromYear,
 	checkPermission,
 	gradeFromCourseID,
-	getGradeByID
+	getGradeByID,
+	getOverallGrade
 }

@@ -6,12 +6,14 @@ const Mutation = require('./resolvers/Mutation.js')
 const Query = require('./resolvers/Query.js')
 const Post = require('./resolvers/Post.js')
 const StudentCourseGrade = require('./resolvers/StudentCourseGrade.js')
+const OverallGrade = require('./resolvers/OverallGrade.js')
 
 const resolvers = {
   Query,
   Mutation,
   Post,
-  StudentCourseGrade
+  StudentCourseGrade,
+  OverallGrade
 }
 
 const server = new GraphQLServer({

@@ -6,6 +6,7 @@ type Query {
 	checkPermission: String
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
+  getOverallGrade(year: Int!, id: ID!, level: Year!): OverallGrade!
 }
 
 type Mutation {
@@ -28,4 +29,12 @@ type StudentCourseGrade {
   weight: Float!
   grade: Float!
   createdAt: DateTime!
+}
+
+type OverallGrade {
+  id: ID!
+  student: Student!
+  year: Int!
+  studentLevel: Year!
+  grade: Float!
 }

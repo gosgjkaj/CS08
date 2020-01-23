@@ -1,6 +1,7 @@
 enum Role {
   Admin
 	Normal
+  Restricted
 }
 
 enum Year {
@@ -29,10 +30,11 @@ type Post {
 
 type Course {
   id: ID! @id
-  courseID: String!
   weight: Float!
   level: Year!
+  degrees: [Degree!]! @relation(name: "DegreeCourseRelation")
 }
+
 type CourseRun { 
   id: ID! @id
   course: Course! @relation(link: INLINE)
@@ -46,6 +48,7 @@ type StudentCourseGrade {
   weight: Float!
   grade: Float!
   createdAt: DateTime! @createdAt
+
 }
 
 type Student {
@@ -53,7 +56,23 @@ type Student {
   firstname: String!
   surname: String!
   guid: String!
-  degreeCode: String!
+  degreeID: Degree! @relation(link: INLINE)
   year: Year!
    
+}
+ type Degree {
+   id: ID! @id
+   degreeCode: String!
+   name: String!
+   info: String! @default(value: "")
+   courses: [Course!]! @relation(link: INLINE, name: "DegreeCourseRelation")
+
+ }
+
+type OverallGrade {
+  id: ID! @id
+  student: Student! @relation(link: INLINE)
+  year: Int!
+  studentLevel: Year!
+  grade: Float!
 }
