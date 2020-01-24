@@ -32,7 +32,7 @@ type Course {
   id: ID! @id
   weight: Float!
   level: Year!
-  courseCode: String!
+  courseID: String!
   name: String!
   info: String! @default(value: "")
   degrees: [Degree!]! @relation(name: "DegreeCourseRelation")
