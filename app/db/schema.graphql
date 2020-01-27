@@ -7,6 +7,7 @@ type Query {
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
   getOverallGrade(year: Int!, id: ID!, level: Year!): OverallGrade!
+  getCourses: [Course!]!
 }
 
 type Mutation {

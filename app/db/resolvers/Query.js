@@ -32,6 +32,9 @@ async function getOverallGrade(root, args, context) {
 		}
 	})
 }
+async function getCourses(root, args, context) {
+	return await context.prisma.courses()
+}
 
 
 module.exports = {
@@ -40,5 +43,6 @@ module.exports = {
 	checkPermission,
 	gradeFromCourseID,
 	getGradeByID,
-	getOverallGrade
+	getOverallGrade,
+	getCourses
 }
