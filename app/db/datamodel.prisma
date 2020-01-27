@@ -30,12 +30,10 @@ type Post {
 
 type Course {
   id: ID! @id
-  weight: Float!
   level: Year!
   courseID: String!
   name: String!
   info: String! @default(value: "")
-  degrees: [Degree!]! @relation(name: "DegreeCourseRelation")
 }
 
 type CourseRun { 
@@ -68,10 +66,14 @@ type Student {
    degreeCode: String!
    name: String!
    info: String! @default(value: "")
-   courses: [Course!]! @relation(link: INLINE, name: "DegreeCourseRelation")
 
  }
-
+type CourseDegreeWeight {
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  degree: Degree! @relation(link: INLINE)
+  weight: Float!
+}
 type OverallGrade {
   id: ID! @id
   student: Student! @relation(link: INLINE)
