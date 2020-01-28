@@ -7,13 +7,15 @@ const Query = require('./resolvers/Query.js')
 const Post = require('./resolvers/Post.js')
 const StudentCourseGrade = require('./resolvers/StudentCourseGrade.js')
 const OverallGrade = require('./resolvers/OverallGrade.js')
+const CourseDegreeWeight = require('./resolvers/CourseDegreeWeight.js')
 
 const resolvers = {
   Query,
   Mutation,
   Post,
   StudentCourseGrade,
-  OverallGrade
+  OverallGrade,
+  CourseDegreeWeight
 }
 
 const server = new GraphQLServer({

@@ -42,3 +42,9 @@ type OverallGrade {
   studentLevel: Year!
   grade: Float!
 }
+type CourseDegreeWeight {
+  id: ID!
+  course: Course!
+  degree: Degree!
+  weight: Float!
+}
