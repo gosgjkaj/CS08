@@ -11,7 +11,7 @@ function createPost(root, args, context) {
 
 async function signup(parent, args, context, info) {
   const password = await bcrypt.hash(args.password, 10)
-  const user = await context.prisma.createUser({ ...args, password, role: "Admin" })
+  const user = await context.prisma.createUser({ ...args, password })
 
   const token = jwt.sign({ userId: user.id }, APP_SECRET)
 
@@ -54,8 +54,26 @@ async function changeGradeWeight(parent,args,context, info){
   return newgrade
 }
 
+async function deleteUser(root, args, context ) { 
+  let deleteduser = await context.prisma.deleteUser({ id: args.id })
+    return deleteduser
+}
+
+async function updateUserRole(root, args, context) {
+  return await context.prisma.updateUser({
+    data: {
+      role: args.role
+    },
+    where: {
+      id: args.id
+    }
+  })
+}
+
 module.exports = {
 	signup, login,
   createPost,
-  changeGradeWeight
+  changeGradeWeight,
+  deleteUser,
+  updateUserRole
 }

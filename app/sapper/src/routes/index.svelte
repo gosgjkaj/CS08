@@ -5,13 +5,12 @@
 	import { gql } from 'apollo-boost'
 	import { goto } from '@sapper/app'
 
-
 	let year = 2019
 	let courses = query(client(), {query: gql`
 		query($year: Int!){
 			coursesFromYear(year: $year){
 				courseID
-				weight
+				
 				id
 			}
 		}`,
@@ -35,16 +34,12 @@
 
 
 
-<div class="box">
-	<p class="content">
-		<a href="/admin">Admin Page</a>
-	</p>
-</div>
 
 {#if $session.user}
 	<p class="content">
 		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
 	</p>
+	
 <div>
 	<select bind:value={year} on:change={()=>courses.refetch({year})} >
 	{#each yearRuns as yearRun}
@@ -68,4 +63,6 @@
 		<p class="content has-background-danger ">failed to load courses</p>
 	{/await}
 	</div>
+
+	
 {/if}

@@ -35,6 +35,9 @@ async function getOverallGrade(root, args, context) {
 async function getCourses(root, args, context) {
 	return await context.prisma.courses()
 }
+async function getUsers(root, args,context) {
+	return await context.prisma.users()
+}
 
 
 module.exports = {
@@ -44,5 +47,6 @@ module.exports = {
 	gradeFromCourseID,
 	getGradeByID,
 	getOverallGrade,
-	getCourses
+	getCourses,
+	getUsers
 }

@@ -1,8 +1,8 @@
 <script>
 	import { checkPermission } from '../utils.js'
   import { stores } from '@sapper/app'
-  
   const { session } = stores()
+  import Upload from '../components/Upload.svelte'
 
   export let segment
 
@@ -35,19 +35,23 @@
       <a href="/" class="navbar-item">
         Home
       </a>
+      {#if $session.user != null && $session.user.role=="Admin"}
+      <a href="/admin" class="navbar-item">Admin Page</a>
+      {/if}
     </div>
 
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
           {#if $session.user != null}
+          
+          <Upload/>
           <button on:click={logout} class="button is-danger">
             Log out
           </button>
+
           {:else}
-          <a href="/signup" class="button is-primary">
-            <strong>Register</strong>
-          </a>
+         
           <a href="/login" class="button is-light">
             Log in
           </a>
