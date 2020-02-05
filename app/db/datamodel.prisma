@@ -1,0 +1,98 @@
+enum Role {
+  Admin
+	Normal
+  Restricted
+}
+
+enum Level {
+  First
+  Second
+  Third
+  Fourth
+  Fifth
+}
+
+enum Year {
+    Y1920
+    Y2021
+    Y2122
+    Y2223
+    Y2324
+    Y2425
+    Y2526
+}
+
+type User {
+  id: ID! @id
+  name: String!
+  email: String! @unique  
+  password: String!
+  role: Role!
+}
+
+type Post {
+	id: ID! @id
+	text: String! @default(value: "")
+	createdAt: DateTime! @createdAt
+	updatedAt: DateTime! @updatedAt
+	postedBy: User! @relation(link: INLINE)
+}
+
+type Course {
+  id: ID! @id
+  level: Level
+  year: Year
+  courseID: String!
+  name: String
+  info: String @default(value: "")
+}
+
+type CourseDegreeWeight {
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  degree: Degree! @relation(link: INLINE)
+  weight: Float!
+}
+
+type StudentCourseGrade {
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  student: Student! @relation(link: INLINE)
+  weight: Float!
+  grade: Float!
+  createdAt: DateTime! @createdAt
+
+}
+
+type CourseRun { 
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  year: Int!
+}
+
+
+type Student {
+  id: ID! @id
+  firstname: String!
+  surname: String!
+  guid: String!
+  degreeID: Degree! @relation(link: INLINE)
+  level: Level!
+   
+}
+
+ type Degree {
+   id: ID! @id
+   degreeCode: String!
+   name: String!
+   info: String! @default(value: "")
+   courses: [Course!]! @relation(link: INLINE, name: "DegreeCourseRelation")
+ }
+
+type OverallGrade {
+  id: ID! @id
+  student: Student! @relation(link: INLINE)
+  year: Int!
+  studentLevel: Level!
+  grade: Float!
+}

@@ -1,0 +1,64 @@
+# import * from './generated/prisma.graphql'
+
+type Query {
+	userPosts(userID: ID!): [Post!]!
+	checkPermission: String
+  coursesFromYear(year: Int!): [Course!]!
+  gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
+  getGradeByID(id: ID!): StudentCourseGrade!
+  getOverallGrade(year: Int!, id: ID!, level: Level!): OverallGrade!
+  getCourses: [Course!]!
+  getCoursesFromYear(year: Year): [Course!]!
+  getUsers: [User!]!
+} 
+
+type Mutation {
+	createPost(text: String!, userID: ID!): Post
+	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
+  addCourse(courseID: String!, level: Level, year: Year, name: String, info: String): Course!
+  updateCourse(id: ID!, courseID: String, level: Level, year: Year, name: String, info: String): Course!
+  deleteCourse(id: ID!): Course!
+  deleteUser(id: ID!): User!
+  updateUserRole(id: ID!, role: Role!): User!
+}
+
+type Course {
+  id: ID!
+  level: Level
+  year: Year
+  courseID: String!
+  name: String
+  info: String 
+}
+
+type AuthPayload {
+  token: String
+  user: User
+}
+
+
+type StudentCourseGrade {
+  id: ID!
+  course: Course!
+  student: Student!
+  weight: Float!
+  grade: Float!
+  createdAt: DateTime!
+}
+
+type OverallGrade {
+  id: ID!
+  student: Student!
+  year: Int!
+  studentLevel: Level!
+  grade: Float!
+}
+
+type CourseDegreeWeight {
+  id: ID!
+  course: Course!
+  degree: Degree!
+  weight: Float!
+}
