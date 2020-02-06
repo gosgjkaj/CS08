@@ -54,8 +54,8 @@ import { gql } from 'apollo-boost'
   `;
 
   const EDIT_COURSE_GQL = gql`
-    mutation($id: ID!, $courseID: String, $level: Level, $year: Year, $name: String, $info: String) {
-      updateCourse(id: $id, courseID: $courseID, level: $level, year: $year, name: $name, info: $info) {
+    mutation($id: ID!, $data: updateCourseInput!) {
+      updateCourse(id: $id, data: $data) {
         id
         level
         year
@@ -64,7 +64,7 @@ import { gql } from 'apollo-boost'
         info
       }
     }
-  `;
+  `; 
 
   //----------End of GQLs-------------
 

@@ -69,13 +69,13 @@ async function updateCourse(parent, args, context, info) {
   let updatedCourse = await context.prisma.updateCourse({
     where: {id: args.id},
     data: {
-      courseID: args.courseID,
-      name: args.name,
-      year: args.year,
-      info: args.info,
-      level: args.level
+      courseID: args.data.courseID,
+      name: args.data.name,
+      year: args.data.year,
+      info: args.data.info,
+      level: args.data.level
     }
-})
+});
     return updatedCourse
 }
 
