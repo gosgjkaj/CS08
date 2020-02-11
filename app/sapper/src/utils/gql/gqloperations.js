@@ -15,8 +15,8 @@ import { gql } from 'apollo-boost'
   `;
 
   const GET_YEAR_COURSES_GQL = gql`
-  query getCoursesFromYear($year: Year) {
-    getCoursesFromYear(year: $year) {  
+  query coursesSearch($year: Year, $searchString: String) {
+    coursesSearch(year: $year, searchString: $searchString) {  
         id
         level
         year

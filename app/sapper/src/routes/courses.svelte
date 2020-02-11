@@ -22,6 +22,8 @@
 
   let selectedYear = yearRuns[0];
 
+  let searchString = "";
+
   let buttonSaveIsLoading = false;
   $: buttonSaveClass =
     buttonSaveIsLoading === true
@@ -42,6 +44,28 @@
     modalDeleteIsVisible === true ? "modal is-active" : "modal";
 
   //============Validation etc =======================
+
+  //Search String change
+
+  function  resetSearch() {
+    searchString="";
+    GET_COURSES_LIST.refetch({ searchString  });
+  }
+
+  function SearchEvent(e) {
+    console.log("e.target.value=", e.target.value, ", searchString=", searchString);
+    GET_COURSES_LIST.refetch({ searchString  });
+    
+  }
+  function TitleBarChangeEvent() {
+        //console.log("TitleBarChangeEvent called");
+        RefreshYearData();
+  }
+  function TitleBarclickEvent() {
+        //console.log("TitleBarclickEvent called");
+        onNewClick();
+  }
+
   function validateCourse(course) {
     if (
       course.courseID.length < 1 ||
@@ -133,7 +157,7 @@
 
   let GET_COURSES_LIST = query(client(), {
     query: GET_YEAR_COURSES_GQL,
-    variables: { year: selectedYear.id }
+    variables: { year: selectedYear.id, searchString }
   });
 
   function ReloadCourses() {
@@ -231,10 +255,45 @@
       <div class="level-left">
         <div class="level-item">
           <p class="subtitle is-5">
-            <strong>Courses for Year {selectedYear.text}</strong>
+          <!-- Search String change -->
+            <strong>Courses for {searchString.trim().length > 0 ? "search query " + searchString : " Year " + selectedYear.text}</strong>
           </p>
         </div>
       </div>
+
+      <!-- Search  -->
+      <div class="level-right">
+        <div class="level-item">
+          <div class="field">
+            <p class="control has-icons-right">
+              <input
+                id="searchStringElement"
+                on:input={SearchEvent}
+                bind:value={searchString}
+                class="input is-rounded"
+                type="text"
+                placeholder="Search Course" />
+              <span class="icon is-small is-right">
+                <i class="fas fa-search" />
+              </span>
+            </p>
+
+          </div>
+
+        </div>
+        {#if searchString.trim().length > 0}
+          <p class="level-item">
+            <a
+              href="javascript:;"
+              on:click={resetSearch}
+              class="button is-success">
+              Reset Search
+            </a>
+          </p>
+        {/if}
+      </div>
+
+      <!-- End of Search -->
 
       <!-- Right side -->
       <div class="level-right">
@@ -277,7 +336,7 @@
     <div class="container">
       <div class="columns is-multiline">
 
-        {#each data.data['getCoursesFromYear'] as course, i}
+        {#each data.data['coursesSearch'] as course, i}
           <div class="column img1 toaster is-quarter">
             <Card title={course.name}>
               <table class="table is-striped is-hoverable">
@@ -290,7 +349,7 @@
                   <td>{course.level}</td>
                 </tr>
                 <tr>
-                  <td>Course ID:</td>
+                  <td>Couse ID:</td>
                   <td>{course.courseID}</td>
                 </tr>
                 <tr>
@@ -326,6 +385,24 @@
               </footer>
             </Card>
           </div>
+        {:else}
+          <p class="subtitle is-5 $subtitle-color: $red"> 
+              {#if searchString.trim().length> 0}
+                <div> 
+                  No Courses for the search query {searchString}.  
+                              <a
+                              href="javascript:;"
+                              on:click={resetSearch} 
+                              class="button is-success">
+                              Reset Search
+                            </a>
+
+                </div>
+               {:else}
+               <p>No courses for selected year {selectedYear.text}</p> 
+              {/if}           
+            
+          </p>  
         {/each}
 
       </div>

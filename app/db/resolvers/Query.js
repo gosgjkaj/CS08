@@ -9,11 +9,6 @@ async function checkPermission(parent, args, context) {
 	return user == null ? null : user.role
 }
 
-async function coursesFromYear(root, args, context) {
-	let courseRuns = await context.prisma.courseRuns({ where: {year: args.year} }).course()
-	courseRuns = courseRuns.map(item => item.course)
-	return courseRuns
-}
 async function gradeFromCourseID(root, args, context) {
 	let courseGradeStudent = await context.prisma.studentCourseGrades({where: {course: { id: args.id }}})
 	return courseGradeStudent
@@ -41,6 +36,18 @@ async function getCoursesFromYear(root, args, context) {
 	return await context.prisma.courses({where: {year:args.year}});
 }
 
+async function coursesSearch(root, args, context) {
+	if (args.searchString.trim().length > 0) {
+		let searchStringArg = args.searchString.toLowerCase();
+		let allCourses = await context.prisma.courses();		
+		return allCourses.filter( (course) => course.name.toLowerCase().includes(searchStringArg) ||
+		course.courseID.toLowerCase().includes(searchStringArg));
+	}
+	
+	let coursesYear = await context.prisma.courses({ where: {year: args.year} })
+	return coursesYear
+}
+
 async function getUsers(root, args,context) {
 	return await context.prisma.users()
 }
@@ -49,12 +56,12 @@ async function getUsers(root, args,context) {
 
 module.exports = {
 	userPosts,
-	coursesFromYear,
 	checkPermission,
 	gradeFromCourseID,
 	getGradeByID,
 	getOverallGrade,
 	getCourses, 
 	getCoursesFromYear,
-	getUsers
+	getUsers,
+	coursesSearch
 }
