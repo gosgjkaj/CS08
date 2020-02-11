@@ -254,8 +254,8 @@ async function uploadGrades(){
      })
          failed = failedGrades.data.addGrade.failed
          console.log(failed)
-         if(failed.length!=0){
-            warning = true
+         if(failed.length != 0){
+            warning2 = true
         }
         goNext()
 }
@@ -478,15 +478,17 @@ function clearAll(){
     {/if}
 
     {#if componentsActive[3]}
-        <div>Upload completed. No issues found.</div>
-        {#if warning }
-        <div class="box has-background-danger"> 
+        
+        {#if warning2 }
+        <div class="box has-background-danger has-text-white"> 
         Warning! An error occured when uploading grades.
-        Please check if the following students have grades in the database for the current course.
+        Please check if the following students have grades in the database for the current course and year.
         {#each failed as failedStudent}
-        <p>Student id: {failedStudent}</p>
+        <p class="has-text-weight-bold">Student id: {failedStudent}</p>
         {/each}
         </div>
+        {:else}
+        <div>Upload completed. No issues found.</div>
         {/if}
     {/if}
    
