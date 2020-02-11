@@ -35,9 +35,26 @@ async function getOverallGrade(root, args, context) {
 async function getCourses(root, args, context) {
 	return await context.prisma.courses()
 }
-async function getUsers(root, args,context) {
+async function getUsers(root, args, context) {
 	return await context.prisma.users()
 }
+
+async function getDegrees(root, args, context) {
+	return await context.prisma.degrees()
+}
+async function getWeight(root, args, context) {
+	return await context.prisma.courseDegreeWeights( {
+		where: {
+			degree: {
+				id: args.degree
+			},
+			course: {
+				id: args.course
+			}
+		}
+	})
+}
+
 
 
 module.exports = {
@@ -48,5 +65,8 @@ module.exports = {
 	getGradeByID,
 	getOverallGrade,
 	getCourses,
-	getUsers
+	getUsers,
+	getDegrees,
+	getWeight
+	
 }

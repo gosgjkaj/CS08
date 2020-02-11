@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { APP_SECRET, getUserId, getUser } = require('../utils')
+const { convert } = require('../convertGrades')
 
 function createPost(root, args, context) {
 	return context.prisma.createPost({
@@ -70,10 +71,112 @@ async function updateUserRole(root, args, context) {
   })
 }
 
+
+async function checkStudentNames(root, args, context) {
+  return await context.prisma.$exists.student(
+    {
+     guid: args.guid,
+    },
+  )
+}
+
+async function createStudent( root, args, context) {
+  return await context.prisma.createStudent({
+      firstname: args.firstname,
+      surname: args.surname,
+      guid: args.guid,
+      degreeID: {connect: {id: args.degree}},
+      year: args.year 
+     })
+}
+
+async  function checkGrade(root, args, context) {
+  let grade= await context.prisma.$exists.studentCourseGrade({
+    AND: [
+      {
+      student: {
+        guid: args.guid
+        }
+     },
+     {
+       date: args.year
+     },
+     {
+       course: {
+         id: args.course
+       }
+     }
+    ]}
+  )
+  
+  return grade
+}
+async function addGrade(root, args, context) {
+  let studentlist = JSON.parse(JSON.stringify(args.studentlist))
+  let weights = JSON.parse(JSON.stringify(args.weights))
+  //let studentlist = args.studentlist
+  console.log(studentlist)
+  //let weights = args.weights
+  let year = args.year
+  let course = args.course
+  let results = {failed:[]}
+  for(let i = 0; i < studentlist.length; i++) {
+    let gradeexists = await context.prisma.$exists.studentCourseGrade({
+      AND: [
+        {
+        student: {
+          guid: studentlist[i]["EMPLID"]
+          }
+      },
+      {
+        date: args.year
+      },
+      {
+        course: {
+          id: args.course
+        }
+      }
+      ]}
+    )
+    console.log(studentlist[i]["EMPLID"])
+    let student = await context.prisma.student({guid:studentlist[i]["EMPLID"]})
+    let studentDegree = await context.prisma.student({guid:studentlist[i]["EMPLID"]}).degreeID()
+    let weight
+    
+  
+    for(let j = 0; j < weights.length; j++){
+      if(weights[j].degree == studentDegree.id){
+        console.log( weights[j])
+        weight = weights[j].weight
+      }
+   
+    }
+   
+    if (!gradeexists){
+      let addagrade = await context.prisma.createStudentCourseGrade({
+        course: {connect: {id: args.course}},
+        student: {connect: {id: student.id}},
+        weight: weight,
+        grade: convert(studentlist[i]["Grade"]),
+        date: args.year,
+      }
+
+      )
+  }else{
+    results.failed.push(student.guid)
+  }
+  
+}
+ return results
+}
 module.exports = {
 	signup, login,
   createPost,
   changeGradeWeight,
   deleteUser,
-  updateUserRole
+  updateUserRole,
+  checkStudentNames,
+  createStudent,
+  checkGrade,
+  addGrade
 }

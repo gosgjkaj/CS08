@@ -48,7 +48,7 @@ type StudentCourseGrade {
   student: Student! @relation(link: INLINE)
   weight: Float!
   grade: Float!
-  createdAt: DateTime! @createdAt
+  date: Int!
 
 }
 
@@ -56,7 +56,7 @@ type Student {
   id: ID! @id
   firstname: String!
   surname: String!
-  guid: String!
+  guid: String! @unique
   degreeID: Degree! @relation(link: INLINE)
   year: Year!
    
@@ -68,12 +68,7 @@ type Student {
    info: String! @default(value: "")
 
  }
-type CourseDegreeWeight {
-  id: ID! @id
-  course: Course! @relation(link: INLINE)
-  degree: Degree! @relation(link: INLINE)
-  weight: Float!
-}
+
 type OverallGrade {
   id: ID! @id
   student: Student! @relation(link: INLINE)
@@ -81,3 +76,11 @@ type OverallGrade {
   studentLevel: Year!
   grade: Float!
 }
+
+type CourseDegreeWeight {
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  degree: Degree! @relation(link: INLINE)
+  weight: Float!
+}
+

@@ -24,15 +24,31 @@ let gradesdict = {
     "G2":1,
     "H":0
 }
+var invert = function (obj) {
 
-export function convert( grade ) {
+    var new_obj = {};
+  
+    for (var prop in obj) {
+      if(obj.hasOwnProperty(prop)) {
+        new_obj[obj[prop]] = prop;
+      }
+    }
+  
+    return new_obj;
+  };
+
+function convert( grade ) {
     if(!(grade in gradesdict)) {
         //check if it is a float
         roundedgrade = Math.round(grade)
-         return (_.invert(gradedict))[roundedgrade]
+         return invert(gradesdict)[roundedgrade]
 
     }else{
         return gradesdict[grade]
     }
 
+}
+
+module.exports ={
+    convert
 }

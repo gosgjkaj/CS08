@@ -45,7 +45,7 @@
         <div class="buttons">
           {#if $session.user != null}
           
-          
+          <Upload/>
           <button on:click={logout} class="button is-danger">
             Log out
           </button>

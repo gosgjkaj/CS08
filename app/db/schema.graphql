@@ -9,6 +9,9 @@ type Query {
   getOverallGrade(year: Int!, id: ID!, level: Year!): OverallGrade!
   getCourses: [Course!]!
   getUsers: [User!]!
+  getDegrees: [Degree!]!
+  getWeight(degree: ID!, course: ID!): [CourseDegreeWeight!]!
+  
   }
 
 type Mutation {
@@ -18,7 +21,27 @@ type Mutation {
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
   deleteUser(id: ID!): User!
   updateUserRole(id: ID!, role: Role!): User!
+  checkStudentNames(guid: String!): Boolean!
+  createStudent(firstname: String!, surname: String!, guid: String!, degree: ID!, year: Year!): Student!
+  checkGrade(guid: String!, year: Int!, course: ID!): String!
+  addGrade(studentlist: [StudentListInput!]!, course: ID!, year: Int!, weights: [DegreeCourseWeightInput!]!): AddGradeResult!
+
 }
+
+input StudentListInput {
+  EMPLID: String
+  Name: String
+  Grade: String
+}
+
+type AddGradeResult {
+  failed: [String]
+}
+input DegreeCourseWeightInput {
+  degree: ID!
+  weight: Float!
+}
+
 
 type AuthPayload {
   token: String
@@ -48,3 +71,4 @@ type CourseDegreeWeight {
   degree: Degree!
   weight: Float!
 }
+
