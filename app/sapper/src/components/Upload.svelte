@@ -4,7 +4,6 @@
   import { client } from "../gqlClient";
   import { query, mutate } from "svelte-apollo";
   import { gql } from "apollo-boost";
-  import { ExcelToJSON } from './fileread.js'
   import  Papa  from 'papaparse'
 
 
