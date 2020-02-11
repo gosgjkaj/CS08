@@ -10,8 +10,8 @@
 		query($year: Int!){
 			coursesFromYear(year: $year){
 				courseID
-				
 				id
+
 			}
 		}`,
 		variables: { year }

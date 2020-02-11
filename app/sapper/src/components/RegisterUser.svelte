@@ -49,7 +49,7 @@
 </script>
 
 <div class="container">
-	<h1 class="title is-1">Register</h1>
+	
 
 
 	<div class="field is-horizontal">
