@@ -9,5 +9,4 @@ function student(root, args, context) {
 module.exports = {
     course,
     student,
-
 }

@@ -2,7 +2,7 @@
 	import { checkPermission } from '../utils.js'
   import { stores } from '@sapper/app'
   const { session } = stores()
-  import Upload from '../components/Upload.svelte'
+ 
 
   export let segment
 
@@ -51,7 +51,8 @@
           </button>
 
           {:else}
-         
+          <a href='/signup' class='button is light'>
+          register</a>
           <a href="/login" class="button is-light">
             Log in
           </a>

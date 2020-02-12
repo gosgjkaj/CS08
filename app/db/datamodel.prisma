@@ -58,8 +58,7 @@ type Student {
   surname: String!
   guid: String!
   degreeID: Degree! @relation(link: INLINE)
-  year: Year!
-   
+  level: Year!
 }
  type Degree {
    id: ID! @id

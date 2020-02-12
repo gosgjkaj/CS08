@@ -21,10 +21,28 @@
 			
 			
 		}
+	
+	function gotoDegree(iddegree) {
+		goto(`/degrees/${iddegree}`)
+
+	}
+
 
 	let yearRuns =[
 		{id:2019, text: "year 2019-2020"},
 		{id:2020, text: "year 2020-2021"}]
+
+	let degrees = query(client(), {query: gql`
+		query{
+			getDegrees{
+				degreeCode
+				id
+			}
+		}`,
+	
+	
+	})
+
 
 </script>
 
@@ -64,5 +82,26 @@
 	{/await}
 	</div>
 
+{:else}
+	<div>
+		<div class="box has-background-info">
+			<p class="title has-text-white"> Degrees (Click button to check the courses in the degree)</p>
+		</div>
+
+		{#await $degrees}
+			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
+		{:then result}
+
+		<div class="box buttons">
+			{#each result.data.getDegrees as degree}
+				<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined">{degree.degreeCode} </button>
+			{/each}
+		</div>
+
+		{:catch}
+				<p class="content has-background-danger ">failed to load degrees</p>
+		{/await}
+
+	</div>
 	
 {/if}
