@@ -14,6 +14,11 @@ async function getCoursesByDegree(root, args, context) {
 	return coursesByDegree
 }
 
+async function getYear(root, args, context) {
+	let year = await context.prisma.courseRuns({where: {course: {id: args.id }}})
+	return year
+}
+
 async function coursesFromYear(root, args, context) {
 	let courseRuns = await context.prisma.courseRuns({ where: {year: args.year} }).course()
 	courseRuns = courseRuns.map(item => item.course)
@@ -53,6 +58,7 @@ module.exports = {
 	coursesFromYear,
 	checkPermission,
 	getCoursesByDegree,
+	getYear,
 	gradeFromCourseID,
 	getGradeByID,
 	getOverallGrade,

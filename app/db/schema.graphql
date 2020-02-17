@@ -5,6 +5,7 @@ type Query {
 	coursesFromYear(year: Int!): [Course!]!
 	checkPermission: String
   getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
+  getYear(id: ID!): [CourseRun!]!
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
   getOverallGrade(year: Int!, id: ID!, level: Year!): OverallGrade!

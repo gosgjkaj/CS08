@@ -11,7 +11,7 @@
 	import { query } from 'svelte-apollo'
     import { gql } from 'apollo-boost'
     
-    let courseid = query(client(), {query: gql`
+    let coursesByDegree = query(client(), {query: gql`
             query{
                 getCoursesByDegree(id: "${ id }"){
                     id
@@ -25,28 +25,36 @@
                 }
             }`
         })
+
+    let courseid = "5e35e9c724aa9a0007e681e0"
+    let yearFromCourseRun = query(client(), {query: gql`
+            query($courseid: ID!){
+                getYear(id: $courseid){
+                    id
+                    course{
+                        id
+                        courseID
+                    }
+                    year
+                }
+            }`,
+            variables: {courseid} 
+        })
+
+    function setCourse(courseSpecificId){
+        courseid = courseSpecificId
+    }
     
-    let level =[
-		{id:2018,text: "2018-2019"},
-        {id:2019,text: "2019-2020"},
-        {id:2020,text: "2020-2021"},
-        {id:2021,text: "2021-2022"},
-        {id:2022,text: "20222-2023"}]
-
 </script>
-
-
-    {#await $courseid}
+    {#await $coursesByDegree}
 	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-	{:then result}
-
+	{:then result}  
 	<div class="box has-background-info">
 	<p class="title has-text-white">Courses in degree: (Click button to check course detail)</p>
 	</div>
         <div class="box buttons">
-		{#each result.data.getCoursesByDegree as courses}
-
-		<button class="button is-large is-info is-outlined">{courses.course.courseID} </button>
+		{#each result.data.getCoursesByDegree as coursesFromDegree}
+            <button class="button is-large is-info is-outlined">{coursesFromDegree.course.courseID} </button>
 		{/each}
 		</div>
 		
