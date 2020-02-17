@@ -40,6 +40,16 @@
       {/if}
     </div>
 
+     <div class="navbar-menu">
+      <div class="navbar">
+        <div class="buttons">
+          <a href='/search' class='button is light'>
+          search</a>
+        </div>
+      </div>
+    </div>
+
+
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
