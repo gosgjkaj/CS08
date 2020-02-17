@@ -3,12 +3,13 @@
 type Query {
 	userPosts(userID: ID!): [Post!]!
 	checkPermission: String
-  coursesFromYear(year: Int!): [Course!]!
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
   getOverallGrade(year: Int!, id: ID!, level: Level!): OverallGrade!
   getCourses: [Course!]!
   getCoursesFromYear(year: Year, searchString: String): [Course!]!
+  getStudents(searchString: String): [Student!]
+  getDegrees(searchString: String): [Degree!]!
   coursesSearch(year: Year, searchString: String) : [Course!]!
   getUsers: [User!]!
 } 
@@ -18,11 +19,23 @@ type Mutation {
 	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
-  addCourse(courseID: String!, level: Level, year: Year, name: String, info: String): Course!
+  createCourse(courseID: String!, level: Level, year: Year, name: String, info: String): Course!
   updateCourse(id: ID!, data: updateCourseInput!): Course!
-  deleteCourse(id: ID!): Course!
+  deleteCourse(id: ID!): Course!  
   deleteUser(id: ID!): User!
   updateUserRole(id: ID!, role: Role!): User!
+  createDegree(data: degreeInput!): Degree!
+  updateDegree(id: ID!, data: degreeInput!): Degree!
+  deleteDegree(id: ID!): Degree!
+  createStudent(data: studentInput!): Student!
+  updateStudent(id: ID!, data: studentInput!): Student!
+  deleteStudent(id: ID!): Student!
+  createStudentGrade(data: StudentCourseGradeInput!) : StudentCourseGrade!
+  updateStudentGrade(id: ID!, data: StudentCourseGradeInput!) : StudentCourseGrade!
+  deleteStudentGrade(id: ID!) : StudentCourseGrade!
+  createOverallGrade(data: OverallGradeInput!) : OverallGrade!
+  updateOverallGrade(id: ID!, data: OverallGradeInput!) : OverallGrade!
+  deleteOverallGrade(id: ID!) : OverallGrade!
 }
 
 type Course {
@@ -31,7 +44,33 @@ type Course {
   year: Year
   courseID: String!
   name: String
-  info: String 
+  info: String
+}
+
+type Degree {
+  id: ID!
+  degreeCode: String!
+  name: String!
+  info: String!
+}
+
+type Student {
+  id: ID!
+  firstname: String!
+  surname: String!
+  guid: String!
+  degree: Degree!
+  level: Level!
+  mygrades: [StudentCourseGrade!]
+  myoverallgrade: OverallGrade
+}
+
+input studentInput { 
+  firstname: String!
+  surname: String!
+  guid: String!
+  degree: ID!
+  level: Level!
 }
 
 input updateCourseInput {
@@ -40,6 +79,7 @@ input updateCourseInput {
   courseID: String
   name: String
   info: String
+  degrees: [ID!]
 }
 
 type AuthPayload {
@@ -54,7 +94,15 @@ type StudentCourseGrade {
   student: Student!
   weight: Float!
   grade: Float!
-  createdAt: DateTime!
+  #updatedAt: DateTime!
+  #createdAt: DateTime!
+}
+
+input StudentCourseGradeInput {
+  student: ID!
+  course: ID!
+  weight: Float!
+  grade: Float!
 }
 
 type OverallGrade {
@@ -63,6 +111,21 @@ type OverallGrade {
   year: Int!
   studentLevel: Level!
   grade: Float!
+  #updatedAt: DateTime!
+  #createdAt: DateTime!
+}
+
+input OverallGradeInput {
+  student: ID!
+  year: Year!
+  studentLevel: Level!
+  grade: Float!
+}
+
+input degreeInput {
+  degreeCode: String!
+  name: String!
+  info: String!
 }
 
 type CourseDegreeWeight {

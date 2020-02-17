@@ -54,7 +54,7 @@
 
 <nav class="navbar is-link" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">
-    <a href="home">
+    <a href="/">
       <img
         src="https://www.gla.ac.uk/3t4/img/university-of-glasgow-min.png"
         width="295"

@@ -7,8 +7,8 @@
     {id: "Fourth", level: "Fourth"},
     {id: "Fifth", level: "Fifth"}
   ];
-  export let selected;
-
+  export let selected="First",selectedOvSGLevel="First";
+//   console.log("Level Selection values: selected=", selected, ", selectedOvSGLevel=",selectedOvSGLevel);
  
 </script>
 
@@ -17,6 +17,7 @@
     <progress class="progress is-small is-primary" max="100">15%</progress>
   {:then list}
     <select bind:value={selected}>
+          <option value="" disabled>-- Select--</option>
       {#each list as item}
         <option value={item.id}>{item.level}</option>
       {/each}

@@ -54,7 +54,7 @@ async function changeGradeWeight(parent,args,context, info){
   return newgrade
 }
 
-async function addCourse(parent, args, context, info) {
+async function createCourse(parent, args, context, info) {
   let newCourse = await context.prisma.createCourse({
       courseID: args.courseID,
       name: args.name,
@@ -84,6 +84,118 @@ async function deleteCourse(parent, args, context, info) {
     return deletedcourse
 }
 
+async function createDegree(parent, args, context, info) {
+  let newDegree = await context.prisma.createDegree({
+      degreeCode: args.data.degreeCode,
+      name: args.data.name,
+      info: args.data.info,
+})
+    return newDegree
+}
+
+async function updateDegree(parent, args, context, info) {
+  let updatedDegree = await context.prisma.updateDegree({
+    where: {id: args.id},
+    data: {
+      degreeCode: args.data.degreeCode,
+      name: args.data.name,
+      info: args.data.info,
+    }
+});
+    return updatedDegree
+}
+
+async function deleteDegree(parent, args, context, info) {
+  let deletedDegree = await context.prisma.deleteDegree({ id: args.id })
+    return deletedDegree
+}
+
+async function createStudent(parent, args, context, info) {
+  let newStudent = await context.prisma.createStudent({
+      firstname: args.data.firstname,
+      surname: args.data.surname,
+      guid: args.data.guid,
+      degree: args.data.degree,
+      level: args.data.level
+})
+    return newStudent
+}
+
+async function updateStudent(parent, args, context, info) {
+  let updatedStudent = await context.prisma.updateStudent({
+    where: {id: args.id},
+    data: {
+      firstname: args.data.firstname,
+      surname: args.data.surname,
+      guid: args.data.guid,
+      degree: args.data.degree,
+      level: args.data.level
+    }
+});
+    return updatedStudent
+}
+
+async function deleteStudent(parent, args, context, info) {
+  let deletedStudent = await context.prisma.deleteStudent({ id: args.id })
+    return deletedStudent
+}
+
+async function createStudentGrade(parent, args, context, info) {
+  let newStudentGrade = await context.prisma.createStudentGrade({
+    student: args.data.student,
+    course: args.data.course,
+    weight: args.data.weight,
+    grade: args.data.grade,
+})
+    return newStudentGrade
+}
+
+async function updateStudentGrade(parent, args, context, info) {
+  let updatedStudentGrade = await context.prisma.updateStudentGrade({
+    where: {id: args.id},
+    data: {
+      student: args.data.student,
+      course: args.data.course,
+      weight: args.data.weight,
+      grade: args.data.grade,
+    }
+});
+    return updatedStudentGrade
+}
+
+async function deleteStudentGrade(parent, args, context, info) {
+  let deletedStudentGrade = await context.prisma.deleteStudentGrade({ id: args.id })
+    return deletedStudentGrade
+}
+
+async function createOverallGrade(parent, args, context, info) {
+  let newOverallGrade = await context.prisma.createOverallGrade({
+    student: args.data.student,
+    year: args.data.year,
+    studentLevel: args.data.studentLevel,
+    grade: args.data.grade,
+})
+    return newOverallGrade
+}
+
+async function updateOverallGrade(parent, args, context, info) {
+  let updatedOverallGrade = await context.prisma.updateOverallGrade({
+    where: {id: args.id},
+    data: {
+      student: args.data.student,
+      year: args.data.year,
+      studentLevel: args.data.studentLevel,
+      grade: args.data.grade,
+    }
+});
+    return updatedOverallGrade
+}
+
+async function deleteOverallGrade(parent, args, context, info) {
+  let deletedOverallGrade = await context.prisma.deleteOverallGrade({ id: args.id })
+    return deletedOverallGrade
+}
+
 async function deleteUser(root, args, context ) { 
   let deleteduser = await context.prisma.deleteUser({ id: args.id })
     return deleteduser
@@ -105,9 +217,21 @@ module.exports = {
 	signup, login,
   createPost,
   changeGradeWeight,
-  addCourse, 
+  createCourse, 
   deleteCourse,
   updateCourse,
   deleteUser,
-  updateUserRole
+  updateUserRole,
+  createDegree,
+  updateDegree,
+  deleteDegree,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  createStudentGrade,
+  updateStudentGrade,
+  deleteStudentGrade,
+  createOverallGrade,
+  updateOverallGrade,
+  deleteOverallGrade
 }

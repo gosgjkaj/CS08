@@ -36,6 +36,26 @@ async function getCoursesFromYear(root, args, context) {
 	return await context.prisma.courses({where: {year:args.year}});
 }
 
+async function getStudents(root, args, context) {
+	if (args.searchString.trim().length > 0) {
+		let searchStringArg = args.searchString.toLowerCase();
+		let allStudents = await context.prisma.students();
+		return allCourses.filter( (student) => student.surname.toLowerCase().includes(searchStringArg) ||
+		student.firstname.toLowerCase().includes(searchStringArg));
+	}
+	return await context.prisma.students();
+}
+
+async function getDegrees(root, args, context) {
+	if (args.searchString.trim().length > 0) {
+		let searchStringArg = args.searchString.toLowerCase();
+		let allDegrees = await context.prisma.degrees();
+		return allDegrees.filter((degree) => degree.degreeCode.toLowerCase().includes(searchStringArg) ||
+		degree.name.toLowerCase().includes(searchStringArg));
+	}
+	return await context.prisma.degrees();
+}
+
 async function coursesSearch(root, args, context) {
 	if (args.searchString.trim().length > 0) {
 		let searchStringArg = args.searchString.toLowerCase();
@@ -63,5 +83,7 @@ module.exports = {
 	getCourses, 
 	getCoursesFromYear,
 	getUsers,
-	coursesSearch
+	coursesSearch,
+	getStudents,
+	getDegrees
 }

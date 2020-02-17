@@ -2,28 +2,23 @@
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
   import { client } from '../gqlClient';
-  import yearRuns from '../utils/js/YearRuns';
   import { session } from '../stores';
 
-
   import {
-    GET_ALL_COURSES_GQL,
-    GET_YEAR_COURSES_GQL,
-    DELETE_COURSE_GQL,
-    ADD_COURSE_GQL,
-    EDIT_COURSE_GQL
+    GET_DEGREES_GQL,
+    ADD_DEGREE_GQL,
+    EDIT_DEGREE_GQL,
+    DELETE_DEGREE_GQL
   } from "../utils/gql/gqloperations";
   import Card from "../components/Card.svelte";
   import LevelSelection from "../components/LevelSelection.svelte";
-  import YearSelection from "../components/YearSelection.svelte";
+  import DegreeSelection from "../components/DegreeSelection.svelte";
 
-  let currentCourseObject = {};
+  let degree = {};
   let isDataInvalid = false;
   let deleteCourse = {};
-
-  let selectedYear = yearRuns[0];
-
-  let searchString = "";
+  let searchString = "",
+    DeleteError = "";
 
   let buttonSaveIsLoading = false;
   $: buttonSaveClass =
@@ -45,34 +40,33 @@
     modalDeleteIsVisible === true ? "modal is-active" : "modal";
 
   //============Validation etc =======================
-
-  //Search String change
-
-  function  resetSearch() {
-    searchString="";
-    GET_COURSES_LIST.refetch({ searchString  });
+  function resetSearch() {
+    searchString = "";
+    GET_DEGREES_LIST.refetch({ searchString });
   }
 
   function SearchEvent(e) {
-    console.log("e.target.value=", e.target.value, ", searchString=", searchString);
-    GET_COURSES_LIST.refetch({ searchString  });
+    console.log(
+      "e.target.value=",
+      e.target.value,
+      ", searchString=",
+      searchString
+    );
+    GET_DEGREES_LIST.refetch({ searchString });
   }
-
-  function OnYearDropDownChange() {
-    //console.log("OnYearDropDownChange called");
-    RefreshYearData();
+  function TitleBarChangeEvent() {
+    //console.log("TitleBarChangeEvent called");
   }
-  function onNewCourseClick() {
+  function TitleBarclickEvent() {
     //console.log("TitleBarclickEvent called");
-    initNewCourseItem();
+    onNewClick();
   }
 
-  function validateCourse() {
-    console.log("validateCourse:: currentCourseObject=", currentCourseObject);
+  function validateDegree(degree) {
     if (
-      currentCourseObject.courseID.length < 1 ||
-      !currentCourseObject.name ||
-      !currentCourseObject.info 
+      degree.degreeCode.length < 1 ||
+      degree.name.length < 1 ||
+      degree.info.length < 1
     ) {
       isDataInvalid = true;
       return false;
@@ -85,129 +79,101 @@
   //=== end of Validation etc =========================
 
   //=============  APOLLO cLIENT cALLS ====================
-  function EditCourse() {
-    if (validateCourse(course)) {
+  function EditDegree() {
+    if (validateDegree(degree)) {
       const EditObject = {
-        id: currentCourseObject.id,
+        id: degree.id,
         data: {
-          level: currentCourseObject.level,
-          year: currentCourseObject.year,
-          courseID: currentCourseObject.courseID,
-          name: currentCourseObject.name,
-          info: currentCourseObject.info
+          degreeCode: degree.degreeCode,
+          name: degree.name,
+          info: degree.info
         }
       };
       console.log("EditObject=", EditObject);
 
       const courseEdit = mutate(client(), {
-        mutation: EDIT_COURSE_GQL,
+        mutation: EDIT_DEGREE_GQL,
         variables: EditObject
       })
         .then(data => {
-          ResetCourseObject();
-          GET_COURSES_LIST.refetch();
+          degree = {};
+          GET_DEGREES_LIST.refetch();
+          closeModal();
         })
         .catch(e => {
-          console.error("Error during Edit Course : ", e);
+          console.error("Error during Edit Degree : ", e);
         });
-      closeModal();
     }
   }
 
   function deleteRecord() {
-    const courseDelete = mutate(client(), {
-      mutation: DELETE_COURSE_GQL,
-      variables: { id: `${currentCourseObject.id}` }
+    const degreeDelete = mutate(client(), {
+      mutation: DELETE_DEGREE_GQL,
+      variables: { id: `${degree.id}` }
     })
       .then(data => {
-        ResetCourseObject();
-        GET_COURSES_LIST.refetch();
+        degree = {};
+        GET_DEGREES_LIST.refetch();
+        closeDeleteModal();
       })
       .catch(e => {
         console.error("Error during Delete : ", e);
+        DeleteError = e;
       });
-    closeDeleteModal();
   }
 
-  function CreateCourse() {
-    if (validateCourse(course)) {
+  function CreateDegree() {
+    if (validateDegree(degree)) {
       const InsertObject = {
-          level: currentCourseObject.level,
-          year: currentCourseObject.year,
-          courseID: currentCourseObject.courseID,
-          name: currentCourseObject.name,
-          info: currentCourseObject.info
+        data: {
+          degreeCode: degree.degreeCode,
+          name: degree.name,
+          info: degree.info
+        }
       };
-      console.log("InsertObject=", InsertObject);
+      console.log("Degree InsertObject=", InsertObject);
 
-      const courseCreate = mutate(client(), {
-        mutation: ADD_COURSE_GQL,
+      const degreeCreate = mutate(client(), {
+        mutation: ADD_DEGREE_GQL,
         variables: InsertObject
       })
         .then(data => {
-          ResetCourseObject();
-          GET_COURSES_LIST.refetch();
+          degree = {};
+          GET_DEGREES_LIST.refetch();
+          closeModal();
         })
         .catch(e => {
-          console.error("Error during Insert Course : ", e);
+          console.error("Error during Insert Degree : ", e);
         });
-      closeModal();
     }
   }
   //End of APOLLO cLIENT cALLS
   //========================================
 
-  let GET_COURSES_LIST = query(client(), {
-    query: GET_YEAR_COURSES_GQL,
-    variables: { year: selectedYear.id, searchString }
+  let GET_DEGREES_LIST = query(client(), {
+    query: GET_DEGREES_GQL,
+    variables: { searchString }
   });
 
   function ReloadCourses() {
-    GET_COURSES_LIST.refetch({ year: selectedYear.id });
+    GET_DEGREES_LIST.refetch();
   }
   //
-  function RefreshYearData() {
-    ReloadCourses();
-  }
 
   //==========Model Functions ===========
 
-    function onEditCourseClick(EditItemObject) {
-    ResetCourseObject();
-    //console.log("onEditCourseClick:: currentCourseObject object after reset init:", currentCourseObject);
-    //currentCourseObject.degreeIDs.length = 0
-    //console.log("onEditCourseClick:: currentCourseObject object after array init:", currentCourseObject);
-    let coursetemp = {};
-    //console.log("onEditCourseClick:: currentCourseObject object init:", currentCourseObject);
-    //currentCourseObject = EditItemObject;
-    coursetemp = {
-      id: EditItemObject.id,
-      level: EditItemObject.level,
-      year: EditItemObject.year,
-      courseID: EditItemObject.courseID,
-      name: EditItemObject.name,
-      info: EditItemObject.info
-    };
-    console.log(
-      "onEditCourseClick:: currentCourseObject object temp:",
-      coursetemp
-    );
-    //console.log("onEditCourseClick:: currentCourseObject object :", currentCourseObject);
-    currentCourseObject = coursetemp;
-    console.log(
-      "onEditCourseClick:: currentCourseObject object:",
-      currentCourseObject
-    );
+  function onItemClick(item) {
+    degree = item;
     openModal();
   }
+
   async function onDeleteClick(item) {
-    currentCourseObject = item;
+    degree = item;
     openDeleteModal();
   }
 
   function closeModal() {
     modalIsVisible = false;
-    ResetCourseObject();
   }
 
   function closeDeleteModal() {
@@ -220,43 +186,27 @@
   }
 
   function openDeleteModal() {
+    DeleteError = "";
     modalDeleteIsVisible = true;
   }
 
-  function initNewCourseItem() {
-    ResetCourseObject();
-    console.log(
-      "initNewCourseItem:: currentCourseObject object=",
-      currentCourseObject
-    );
+  function onNewClick() {
+    degree = {
+      name: "",
+      info: "",
+      degreeCode: ""
+    };
     openModal();
   }
 
-  function ResetCourseObject() {
-    currentCourseObject = {};
-    currentCourseObject = {
-      name: "",
-      year: "",
-      info: "",
-      courseID: "",
-      level: "",
-      degreeIDs: []
-    };
-  }
-
-  async function onSaveCourseClick() {
+  async function save() {
     try {
       buttonSaveIsLoading = true;
       //logic here
-
-      console.log(
-        "onSaveCourseClick:: currentCourseObject object::",
-        currentCourseObject
-      );
-      if (currentCourseObject.id) {
-        EditCourse();
+      if (degree.id) {
+        EditDegree();
       } else {
-        CreateCourse();
+        CreateDegree();
       }
     } catch (error) {
       console.log(error);
@@ -269,7 +219,7 @@
 </script>
 
 <svelte:head>
-  <title>Courses for Year {selectedYear.text}</title>
+  <title>List of Degrees</title>
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" /> 
   -->
   <style>
@@ -289,6 +239,7 @@
 </svelte:head>
 
 {#if $session.user}
+
 <!-- Title Bar -->
 <div class="container is-fullhd ">
   <div class="notification">
@@ -298,8 +249,9 @@
       <div class="level-left">
         <div class="level-item">
           <p class="subtitle is-5">
-          <!-- Search String change -->
-            <strong>Courses for {searchString.trim().length > 0 ? "search query " + searchString : " Year " + selectedYear.text}</strong>
+            <strong>
+              List of Degrees {searchString.trim().length > 0 ? 'for search query ' + searchString : ''}
+            </strong>
           </p>
         </div>
       </div>
@@ -315,13 +267,22 @@
                 bind:value={searchString}
                 class="input is-rounded"
                 type="text"
-                placeholder="Search Course" />
+                placeholder="Search Degree" />
               <span class="icon is-small is-right">
                 <i class="fas fa-search" />
               </span>
             </p>
 
           </div>
+
+          <p class="level-item">
+            <a
+              href="javascript:;"
+              on:click={TitleBarclickEvent}
+              class="button is-success">
+              Add New Degree
+            </a>
+          </p>
 
         </div>
         {#if searchString.trim().length > 0}
@@ -338,37 +299,12 @@
 
       <!-- End of Search -->
 
-      <!-- Right side -->
-      <div class="level-right">
-        <div class="level-item">
-          <!-- Dropdown items here -->
-          <div class="select">
-          <select bind:value={selectedYear} on:change={OnYearDropDownChange}>
-              }}>
-              {#each yearRuns as yearlevel}
-                <option value={yearlevel}>{yearlevel.text}</option>
-              {/each}
-            </select>
-            <div class="select__arrow" />
-          </div>
-          <!-- End of DD items -->
-
-        </div>
-        <p class="level-item">
-          <a
-            href="javascript:;"
-            on:click={onNewCourseClick}
-            class="button is-success">
-            Add New Course
-          </a>
-        </p>
-      </div>
     </nav>
   </div>
 </div>
 
 <!-- Start of Iteration Courses -->
-{#await $GET_COURSES_LIST}
+{#await $GET_DEGREES_LIST}
   <progress class="progress is-small is-primary" max="100">15%</progress>
 {:then data}
 
@@ -376,25 +312,22 @@
     <div class="container">
       <div class="columns is-multiline">
 
-        {#each data.data['coursesSearch'] as currentCourseObject, i}
+        {#each data.data['getDegrees'] as degree, i}
           <div class="column img1 toaster is-quarter">
-            <Card title={currentCourseObject.name}>
+            <Card title={degree.name}>
               <table class="table is-striped is-hoverable">
                 <tr>
-                  <td>Year</td>
-                  <td>{currentCourseObject.year}</td>
+                  <td>Name</td>
+                  <td>{degree.name}</td>
                 </tr>
+
                 <tr>
-                  <td>Level</td>
-                  <td>{currentCourseObject.level}</td>
-                </tr>
-                <tr>
-                  <td>Course ID:</td>
-                  <td>{currentCourseObject.courseID}</td>
+                  <td>Degree Code</td>
+                  <td>{degree.degreeCode}</td>
                 </tr>
                 <tr>
                   <td>Details:</td>
-                  <td>{currentCourseObject.info}</td>
+                  <td>{degree.info}</td>
                 </tr>
               </table>
               <footer class="card-footer">
@@ -403,7 +336,7 @@
                     <a
                       class="button is-success"
                       href="javascript:;"
-                      on:click={() => onEditCourseClick(currentCourseObject)}>
+                      on:click={() => onItemClick(degree)}>
                       <span class="icon is-small">
                         <i class="fas fa-edit" />
                       </span>
@@ -414,7 +347,7 @@
                     <a
                       class="button is-danger"
                       href="javascript:;"
-                      on:click={() => onDeleteClick(currentCourseObject)}>
+                      on:click={() => onDeleteClick(degree)}>
                       <span class="icon is-small">
                         <i class="fas fa-trash" />
                       </span>
@@ -426,17 +359,17 @@
             </Card>
           </div>
         {:else}
-          <p class="subtitle is-5 $subtitle-color: $red"> 
-              {#if searchString.trim().length> 0}
-                <div> 
-                  No Courses for the search query {searchString}.  
+          <p class="subtitle is-5 $subtitle-color: $red">
+            {#if searchString.trim().length > 0}
+              <div>
+                No degrees found for the search query {searchString}.
 
-                </div>
-               {:else}
-               <p>No courses for selected year {selectedYear.text}</p> 
-              {/if}           
-            
-          </p>  
+              </div>
+            {:else}
+              <p>No degrees listed yet.</p>
+            {/if}
+
+          </p>
         {/each}
 
       </div>
@@ -453,7 +386,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">
-        {currentCourseObject.name ? currentCourseObject.name : 'Add New Course'}
+        {degree.name ? degree.name : 'Add New Degree'}
       </p>
       <button class="delete" aria-label="close" on:click={closeModal} />
     </header>
@@ -461,61 +394,50 @@
 
       <div class="columns is-desktop">
         <div class="column field">
-          <label class="label">Course ID*</label>
+          <label class="label">Degree Code*</label>
+          <div class="control">
+            <input
+              class="input"
+              type="text"
+              placeholder="Degree Code"
+              bind:value={degree.degreeCode} />
+          </div>
+        </div>
+
+        <div class="column field">
+          <label class="label">Degree Name*</label>
           <div class="control">
             <input
               class="input"
               type="text"
               placeholder=""
-              bind:value={currentCourseObject.courseID} />
+              bind:value={degree.name} />
           </div>
         </div>
+      </div>
+
+      <div class="columns is-desktop">
         <div class="column field">
-          <label class="label">Year</label>
+          <label class="label">Details</label>
           <div class="control">
-            <YearSelection bind:selected={currentCourseObject.year} />
+            <input
+              class="input"
+              type="text"
+              placeholder=""
+              bind:value={degree.info} />
           </div>
         </div>
-
-        <div class="column field">
-          <label class="label">Level</label>
-          <div class="control">
-            <LevelSelection bind:selected={currentCourseObject.level} />
-          </div>
-        </div>
-
       </div>
 
-      <div class="field">
-        <label class="label">Course Name*</label>
-        <div class="control">
-          <input
-            class="input"
-            type="text"
-            placeholder="Course Name (Required)"
-            bind:value={currentCourseObject.name} />
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Course Details *</label>
-        <div class="control">
-          <input
-            class="input"
-            type="text"
-            placeholder="e.g Taught by:"
-            bind:value={currentCourseObject.info} />
-        </div>
-      </div>
       <div>
         {#if isDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
+          <p class="help is-danger">Please enter all required fields!</p>
         {/if}
       </div>
 
     </section>
     <footer class="modal-card-foot">
-      <button class={buttonSaveClass} on:click={onSaveCourseClick}>Save changes</button>
+      <button class={buttonSaveClass} on:click={save}>Save changes</button>
       <button class="button" on:click={closeModal}>Cancel</button>
     </footer>
   </div>
@@ -528,12 +450,17 @@
   <div class="modal-background" />
   <div class="modal-card">
     <header class="modal-card-head">
-      <p class="modal-card-title is-danger">Delete this course?</p>
+      <p class="modal-card-title is-danger">Delete this degree?</p>
       <button class="delete" aria-label="close" on:click={closeDeleteModal} />
     </header>
     <section class="modal-card-body">
       <div class="field">
-        <label class="label is-danger">Are you sure you would like to delete the course named "{currentCourseObject.name}"?</label>
+        <label class="label is-danger">Are you sure you would like to delete the degree named "{degree.name}" ?</label>
+      </div>
+      <div>
+        {#if DeleteError}
+          <p class="help is-danger">{DeleteError}}</p>
+        {/if}
       </div>
     </section>
 
@@ -548,4 +475,3 @@
 {:else}
 Please log in to access this part of the database.
 {/if}
-

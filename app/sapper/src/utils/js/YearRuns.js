@@ -6,12 +6,11 @@
 	
 	for(let i = 0; i < 6; i++) {
 		 yearObj = {
-			id: "Y" +  (''+currentYear).substr(2,2) + "" + (''+nextYear).substr(2,2), 
+			id: "Y" +  (''+currentYear) + "_" + (''+nextYear).substr(2,2), 
 			text: currentYear + "-" + nextYear
 		 }
 		 currentYear=nextYear;
 		 nextYear++;
-		 
 		 years.push(yearObj);
 		}
 
