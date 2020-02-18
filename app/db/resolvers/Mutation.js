@@ -236,7 +236,6 @@ async function createCourseDegreeWeight(parent, args, context, info) {
     degree: args.data.degree,
     weight: args.data.weight
 })
-  console.log(newCourseDegreeWeight)
   return newCourseDegreeWeight
 }
 

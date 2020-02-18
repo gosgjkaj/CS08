@@ -576,6 +576,8 @@
   </style>
 </svelte:head>
 
+{#if $session.user}
+
 <!-- Title Bar -->
 <div class="container is-fullhd ">
   <div class="notification">
@@ -1075,3 +1077,7 @@
   </div>
 </div>
 <!-- End of Delete Modal -->
+
+{:else}
+Please log in to access this part of the database.
+{/if}
