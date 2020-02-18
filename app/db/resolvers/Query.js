@@ -37,7 +37,7 @@ async function getCoursesFromYear(root, args, context) {
 }
 
 async function getStudents(root, args, context) {
-	if (args.searchString.trim().length > 0) {
+	if (args.searchString && args.searchString.trim().length > 0) {
 		let searchStringArg = args.searchString.toLowerCase();
 		let allStudents = await context.prisma.students();
 		return allCourses.filter( (student) => student.surname.toLowerCase().includes(searchStringArg) ||
@@ -47,7 +47,7 @@ async function getStudents(root, args, context) {
 }
 
 async function getDegrees(root, args, context) {
-	if (args.searchString.trim().length > 0) {
+	if (args.searchString) {
 		let searchStringArg = args.searchString.toLowerCase();
 		let allDegrees = await context.prisma.degrees();
 		return allDegrees.filter((degree) => degree.degreeCode.toLowerCase().includes(searchStringArg) ||
@@ -57,15 +57,21 @@ async function getDegrees(root, args, context) {
 }
 
 async function coursesSearch(root, args, context) {
-	if (args.searchString.trim().length > 0) {
+	if (args.searchString && args.searchString.trim().length > 0) {
 		let searchStringArg = args.searchString.toLowerCase();
-		let allCourses = await context.prisma.courses();		
-		return allCourses.filter( (course) => course.name.toLowerCase().includes(searchStringArg) ||
+		let allCourses = await context.prisma.courses();
+		return allCourses.filter((course) => course.name.toLowerCase().includes(searchStringArg) ||
 		course.courseID.toLowerCase().includes(searchStringArg));
 	}
-	
-	let coursesYear = await context.prisma.courses({ where: {year: args.year} })
-	return coursesYear
+	return await context.prisma.courses({where: {year:args.year}});
+}
+
+async function getcourseDegreeWeight(root, args, context) {
+	return await context.prisma.courseDegreeWeight({where: {id:args.id}});
+}
+
+async function getcourseDegreeWeights(root, args, context) {
+	return await context.prisma.courseDegreeWeight({where: {degree:args.degree}});
 }
 
 async function getUsers(root, args,context) {
@@ -85,5 +91,7 @@ module.exports = {
 	getUsers,
 	coursesSearch,
 	getStudents,
-	getDegrees
+	getDegrees,
+	getcourseDegreeWeight,
+	getcourseDegreeWeights
 }

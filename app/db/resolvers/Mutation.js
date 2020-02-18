@@ -56,13 +56,13 @@ async function changeGradeWeight(parent,args,context, info){
 
 async function createCourse(parent, args, context, info) {
   let newCourse = await context.prisma.createCourse({
-      courseID: args.courseID,
-      name: args.name,
-      year: args.year,
-      info: args.info,
-      level: args.level,
+    courseID: args.courseID,
+    name: args.name,
+    year: args.year,
+    info: args.info,
+    level: args.level,
 })
-    return newCourse
+  return newCourse
 }
 
 async function updateCourse(parent, args, context, info) {
@@ -85,28 +85,46 @@ async function deleteCourse(parent, args, context, info) {
 }
 
 async function createDegree(parent, args, context, info) {
-  let newDegree = await context.prisma.createDegree({
+    let DegreeObject = {
       degreeCode: args.data.degreeCode,
       name: args.data.name,
-      info: args.data.info,
-})
+      info: args.data.info, 
+  };
+  let newDegree = await context.prisma.createDegree(DegreeObject);
     return newDegree
 }
 
 async function updateDegree(parent, args, context, info) {
-  let updatedDegree = await context.prisma.updateDegree({
-    where: {id: args.id},
-    data: {
+    let DegreeObject = {
       degreeCode: args.data.degreeCode,
       name: args.data.name,
-      info: args.data.info,
-    }
-});
-    return updatedDegree
+      info: args.data.info, 
+  };
+
+  if (args.data.courses && args.data.courses.length > 0)
+	{
+			let CourseIdArray = args.data.courses.split(data.courses);
+			const IDObjectArray = [];
+			let IDObject={};
+
+			CourseIdArray.forEach(element => 
+				 {	
+						   IDObject.id = element;
+						   IDObjectArray.push(IDObject);
+				 })
+			
+			DegreeObject.courses =  { connect: IDObjectArray }
+  }
+  
+	let updatedDegree = await context.prisma.updateDegree({
+    where: {id: args.id},
+    data: DegreeObject
+  });
+  return updatedDegree
 }
 
 async function deleteDegree(parent, args, context, info) {
-  let deletedDegree = await context.prisma.deleteDegree({ id: args.id })
+  let deletedDegree = await context.prisma.deleteDegree({id: args.id})
     return deletedDegree
 }
 
@@ -115,7 +133,7 @@ async function createStudent(parent, args, context, info) {
       firstname: args.data.firstname,
       surname: args.data.surname,
       guid: args.data.guid,
-      degree: args.data.degree,
+      degreeID: {connect: {id: args.data.degree}},
       level: args.data.level
 })
     return newStudent
@@ -128,7 +146,7 @@ async function updateStudent(parent, args, context, info) {
       firstname: args.data.firstname,
       surname: args.data.surname,
       guid: args.data.guid,
-      degree: args.data.degree,
+      degreeID: {connect: {id: args.data.degree}},
       level: args.data.level
     }
 });
@@ -212,6 +230,16 @@ async function updateUserRole(root, args, context) {
   })
 }
 
+async function createCourseDegreeWeight(parent, args, context, info) {
+  let newCourseDegreeWeight = await context.prisma.createCourseDegreeWeight({
+    course: args.data.courseid,
+    degree: args.data.degree,
+    weight: args.data.weight
+})
+  console.log(newCourseDegreeWeight)
+  return newCourseDegreeWeight
+}
+
 
 module.exports = {
 	signup, login,
@@ -233,5 +261,6 @@ module.exports = {
   deleteStudentGrade,
   createOverallGrade,
   updateOverallGrade,
-  deleteOverallGrade
+  deleteOverallGrade,
+  createCourseDegreeWeight
 }

@@ -49,13 +49,18 @@
   //Search String change
 
   function  resetSearch() {
-    searchString="";
-    GET_COURSES_LIST.refetch({ searchString  });
+    searchString = "";
+    GET_COURSES_LIST.refetch({ searchString });
   }
 
   function SearchEvent(e) {
-    console.log("e.target.value=", e.target.value, ", searchString=", searchString);
-    GET_COURSES_LIST.refetch({ searchString  });
+    console.log(
+      "e.target.value=",
+      e.target.value,
+      ", searchString=",
+      searchString
+    );
+    GET_COURSES_LIST.refetch({ searchString });
   }
 
   function OnYearDropDownChange() {
@@ -70,6 +75,8 @@
   function validateCourse() {
     console.log("validateCourse:: currentCourseObject=", currentCourseObject);
     if (
+      !currentCourseObject.year ||
+      !currentCourseObject.level || 
       currentCourseObject.courseID.length < 1 ||
       !currentCourseObject.name ||
       !currentCourseObject.info 
@@ -86,7 +93,7 @@
 
   //=============  APOLLO cLIENT cALLS ====================
   function EditCourse() {
-    if (validateCourse(course)) {
+    if (validateCourse()) {
       const EditObject = {
         id: currentCourseObject.id,
         data: {
@@ -130,7 +137,7 @@
   }
 
   function CreateCourse() {
-    if (validateCourse(course)) {
+    if (validateCourse()) {
       const InsertObject = {
           level: currentCourseObject.level,
           year: currentCourseObject.year,
@@ -240,7 +247,6 @@
       info: "",
       courseID: "",
       level: "",
-      degreeIDs: []
     };
   }
 
@@ -344,7 +350,6 @@
           <!-- Dropdown items here -->
           <div class="select">
           <select bind:value={selectedYear} on:change={OnYearDropDownChange}>
-              }}>
               {#each yearRuns as yearlevel}
                 <option value={yearlevel}>{yearlevel.text}</option>
               {/each}
@@ -458,6 +463,9 @@
       <button class="delete" aria-label="close" on:click={closeModal} />
     </header>
     <section class="modal-card-body">
+      {#if isDataInvalid}
+        <p class="help is-danger">Please enter all required fields!</p>
+      {/if}
 
       <div class="columns is-desktop">
         <div class="column field">
@@ -471,56 +479,59 @@
           </div>
         </div>
         <div class="column field">
-          <label class="label">Year</label>
-          <div class="control">
-            <YearSelection bind:selected={currentCourseObject.year} />
-          </div>
-        </div>
-
-        <div class="column field">
           <label class="label">Level</label>
           <div class="control">
             <LevelSelection bind:selected={currentCourseObject.level} />
           </div>
         </div>
-
+        <div class="column field">
+          <label class="label">Year</label>
+          <div class="control">
+            <YearSelection bind:selected={currentCourseObject.year} />
+          </div>
+        </div>
       </div>
+      <div class="columns is-desktop">
+        <div class="column field">
 
-      <div class="field">
-        <label class="label">Course Name*</label>
-        <div class="control">
-          <input
-            class="input"
-            type="text"
-            placeholder="Course Name (Required)"
-            bind:value={currentCourseObject.name} />
+          <div class="field">
+            <label class="label">Course Name*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder="Course Name(Required)"
+                bind:value={currentCourseObject.name} />
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="field">
-        <label class="label">Course Details *</label>
-        <div class="control">
-          <input
-            class="input"
-            type="text"
-            placeholder="e.g Taught by:"
-            bind:value={currentCourseObject.info} />
+      <div class="columns is-desktop">
+        <div class="column field">
+          <div class="field">
+            <label class="label">Course Details *</label>
+            <div class="control">
+              <textarea class="textarea" placeholder="Course Details" 
+              bind:value={currentCourseObject.info}
+              />
+            </div>
+          </div>
         </div>
       </div>
-      <div>
-        {#if isDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
-        {/if}
-      </div>
+
+      <div />
 
     </section>
     <footer class="modal-card-foot">
-      <button class={buttonSaveClass} on:click={onSaveCourseClick}>Save changes</button>
+      <button class={buttonSaveClass} on:click={onSaveCourseClick}>
+        Save changes
+      </button>
       <button class="button" on:click={closeModal}>Cancel</button>
     </footer>
   </div>
 </div>
-
 <!-- End of Modals -->
 
 <!-- Delete Modal  -->

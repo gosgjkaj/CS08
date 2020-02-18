@@ -2,7 +2,6 @@
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
   import { client } from '../gqlClient';
-  import { session } from '../stores';
 
   import {
     GET_STUDENTS_GQL,
@@ -22,6 +21,7 @@
   import YearSelection from "../components/YearSelection.svelte";
   import DegreeSelection from "../components/DegreeSelection.svelte";
   import CourseSelection from "../components/CourseSelection.svelte";
+  
 
   let deleteContext = "",
     DeleteSubTitle = "";
@@ -411,7 +411,7 @@
       const EditObject = {
         id: studentObject.id,
         data: {
-          degree: studentObject.degreeID,
+          degreeID: studentObject.degreeID,
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
@@ -455,7 +455,7 @@
     if (validateStudent(studentObject)) {
       const InsertObject = {
         data: {
-          degree: studentObject.degreeID,
+          degreeID: studentObject.degreeID,
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
@@ -575,8 +575,6 @@
         border-top-color $color--grey;
   </style>
 </svelte:head>
-
-{#if $session.user}
 
 <!-- Title Bar -->
 <div class="container is-fullhd ">
@@ -815,7 +813,13 @@
           <p class="subtitle is-5 $subtitle-color: $red">
             {#if searchString.trim().length > 0}
               <div>
-                No students found for the search query {searchString}.
+                No Students for the search query {searchString}.
+                <a
+                  href="javascript:;"
+                  on:click={resetSearch}
+                  class="button is-success">
+                  Reset Search
+                </a>
 
               </div>
             {:else}
@@ -849,23 +853,23 @@
 
       <div class="columns is-desktop">
         <div class="column field">
-          <label class="label">First Name*</label>
+          <label class="label">Firstname*</label>
           <div class="control">
             <input
               class="input"
               type="text"
-              placeholder="First Name"
+              placeholder="Firstname"
               bind:value={studentObject.firstname} />
           </div>
         </div>
 
         <div class="column field">
-          <label class="label">Last Name*</label>
+          <label class="label">Lastname*</label>
           <div class="control">
             <input
               class="input"
               type="text"
-              placeholder="Last Name"
+              placeholder="Lastname"
               bind:value={studentObject.surname} />
           </div>
         </div>
@@ -878,7 +882,7 @@
             <input
               class="input"
               type="text"
-              placeholder="231405H"
+              placeholder=""
               bind:value={studentObject.guid} />
           </div>
         </div>
@@ -904,7 +908,7 @@
 
       <div>
         {#if isDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
+          <p class="help is-danger">Please enter all required fields!</p>
         {/if}
       </div>
 
@@ -934,7 +938,7 @@
           <label class="label">Course*</label>
           <div class="control">
             <CourseSelection
-              degreeIDPassed={GradeObject.degreeID}
+              degreeID={GradeObject.degreeID}
               bind:selectedCourse={GradeObject.courseID} />
           </div>
         </div>
@@ -1024,7 +1028,7 @@
 
       <div>
         {#if isOvsGDataInvalid}
-          <p class="help is-danger">Please enter all required fields!</p>
+          <p class="help is-danger">Please enter all the required fields!</p>
         {/if}
       </div>
 
@@ -1051,8 +1055,12 @@
     </header>
     <section class="modal-card-body">
       <div class="field">
-        <label class="label is-danger">Are you sure you would like to delete the student named "{studentObject.firstname}"?</label>
+        <label class="label is-danger">DELETE {DeleteSubTitle} Record?</label>
       </div>
+      <div class="field">
+        <label class="label has-text-danger">Are you sure you would like to delete the student "{studentObject.name}"?</label>
+      </div>
+
       <div>
         {#if DeleteError}
           <p class="help is-danger">{DeleteError}}</p>
@@ -1067,7 +1075,3 @@
   </div>
 </div>
 <!-- End of Delete Modal -->
-
-{:else}
-Please log in to access this part of the database.
-{/if}

@@ -2,6 +2,46 @@ import { gql } from 'apollo-boost'
 
 //---------- GQLs start -------------
 
+const GET_CourseDegreeWeight_GQL = gql `
+  query getcourseDegreeWeights($where: MyCourseDegreeWeightWhereInput!) {
+		getcourseDegreeWeights(where:$where) {
+			id
+			weight
+			degree {
+			  id
+			}
+			course {
+			 id 
+			}
+		  }
+    }
+  `;
+
+const ADD_CDWEIGHT_GQL = gql `
+mutation($data: MyCourseDegreeWeightInput!) {
+  createCourseDegreeWeight(data: $data) {
+  id
+  weight
+  }
+}
+`;
+
+const EDIT_CDWEIGHT_GQL = gql `
+    mutation($data: MyCourseDegreeWeightInput!, $where:CourseDegreeWeightWhereUniqueInput!) {
+      updateCourseDegreeWeight(data: $data, where:$where) {
+        id
+       }
+    }
+  `;
+
+const  DELETE_CDWEIGHT_GQL = gql`
+mutation($where: CourseDegreeWeightWhereUniqueInput!){
+	deleteCourseDegreeWeight(where: $where) {
+			id					
+	}
+}
+`;
+
 const GET_ALL_COURSES_GQL = gql `
     {      
       getCourses {
@@ -68,7 +108,7 @@ const EDIT_COURSE_GQL = gql `
 
 const GET_DEGREES_LOOKUP_GQL = gql `
       {      
-          degrees {
+          getDegrees {
             id
             degreeCode 
             name
@@ -86,41 +126,58 @@ const GET_DEGREES_GQL = gql `
 		  degreeCode 
 		  name 
 		  info 
+      courses {
+          id
+          name
+        }
+          CourseDegreeWeights{
+            id
+            degree {
+                id
+            }
+            course
+            {
+                id
+                name
+            }
+            weight
+          
+          }
       }
     }
   `;
 
-const ADD_DEGREE_GQL = gql `
-mutation($data: degreeInput!) {
-  createDegree(data: $data) {
-   id 
-   degreeCode 
-   name 
-   info 
+  const ADD_DEGREE_GQL = gql `
+  mutation($data: DegreeCreateInput!) {
+    createDegree(data: $data) {
+     id 
+     degreeCode 
+     name 
+     info 
+    }
   }
-}
-`;
-
-const DELETE_DEGREE_GQL = gql `
-    mutation($id: ID!) {
-      deleteDegree(id: $id) {
-		   id 
-		   degreeCode 
-		   name 
-		   info 
-      }
-    }
   `;
-
-const EDIT_DEGREE_GQL = gql`
-mutation($id: ID!, $data:degreeInput!) {
-		updateDegree(id: $id, data:$data) {
-			id
-			name
-			degreeCode
-		} 
-}
-`;
+  
+  const DELETE_DEGREE_GQL = gql `
+      mutation($id: ID!) {
+        deleteDegree(id: $id) {
+         id 
+         degreeCode 
+         name 
+         info 
+        }
+      }
+    `;
+  
+  const EDIT_DEGREE_GQL = gql`
+  mutation($id: ID!, $data: DegreeUpdateInput!) {
+      updateDegree(id: $id, data: $data) {
+        id
+        name
+        degreeCode
+      } 
+  }
+  `;
 //------------End of Degrees GQL ----------
 
 //===== Students GQLS starts ======
@@ -277,4 +334,6 @@ export {
   GET_STUDENTS_GQL, ADD_STUDENT_GQL, EDIT_STUDENT_GQL,DELETE_STUDENT_GQL,
   ADD_STUDENT_GRADE_GQL,  EDIT_STUDENT_GRADE_GQL , DELETE_STUDENT_GRADE_GQL  ,
   ADD_S_OVERALL_GRADE_GQL,EDIT_S_OVERALL_GRADE_GQL, DELETE_OVS_GRADE_GQL,
+  ADD_CDWEIGHT_GQL, DELETE_CDWEIGHT_GQL, EDIT_CDWEIGHT_GQL,
+   GET_CourseDegreeWeight_GQL
 }

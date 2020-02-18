@@ -12,6 +12,8 @@ type Query {
   getDegrees(searchString: String): [Degree!]!
   coursesSearch(year: Year, searchString: String) : [Course!]!
   getUsers: [User!]!
+  getcourseDegreeWeight(where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
+  getcourseDegreeWeights(where: MyCourseDegreeWeightWhereInput!): [CourseDegreeWeight]!
 } 
 
 type Mutation {
@@ -24,9 +26,9 @@ type Mutation {
   deleteCourse(id: ID!): Course!  
   deleteUser(id: ID!): User!
   updateUserRole(id: ID!, role: Role!): User!
-  createDegree(data: degreeInput!): Degree!
-  updateDegree(id: ID!, data: degreeInput!): Degree!
-  deleteDegree(id: ID!): Degree!
+  createDegree(data: DegreeCreateInput!): Degree!
+  updateDegree(id: ID!, data: DegreeUpdateInput!): Degree!
+  deleteDegree(id: ID!): Degree
   createStudent(data: studentInput!): Student!
   updateStudent(id: ID!, data: studentInput!): Student!
   deleteStudent(id: ID!): Student!
@@ -36,6 +38,9 @@ type Mutation {
   createOverallGrade(data: OverallGradeInput!) : OverallGrade!
   updateOverallGrade(id: ID!, data: OverallGradeInput!) : OverallGrade!
   deleteOverallGrade(id: ID!) : OverallGrade!
+  createCourseDegreeWeight(data: MyCourseDegreeWeightInput!): CourseDegreeWeight!
+  deleteCourseDegreeWeight(where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
+	updateCourseDegreeWeight(data: MyCourseDegreeWeightInput!, where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
 }
 
 type Course {
@@ -45,6 +50,7 @@ type Course {
   courseID: String!
   name: String
   info: String
+  #degrees: [Degree!]
 }
 
 type Degree {
@@ -52,6 +58,8 @@ type Degree {
   degreeCode: String!
   name: String!
   info: String!
+  courses: [Course!]
+  CourseDegreeWeights: [CourseDegreeWeight!]
 }
 
 type Student {
@@ -133,4 +141,42 @@ type CourseDegreeWeight {
   course: Course!
   degree: Degree!
   weight: Float!
+}
+
+input MyCourseDegreeWeightInput {
+	  id: ID
+	  course: ID!
+	  degree: ID!
+	  #course: { connect:{ id: 'id1' } }
+	  #degree:  { connect:{ id: 'id1' } }
+	  weight: Float!
+}
+
+input CourseDegreeWeightWhereUniqueInput {
+  id: ID
+}
+
+input MyCourseDegreeWeightWhereInput {
+  degree: ID!
+}
+
+input DegreeUpdateInput {
+  degreeCode: String
+  name: String
+  info: String
+  courses: [ID!]
+  #connect: [CourseWhereUniqueInput!]
+  #courses: { connect: [{ id: 'id1' }, {id: 'id2'}] }
+}
+
+input DegreeWhereUniqueInput {
+  id: ID!
+}
+
+input DegreeCreateInput {
+  id: ID
+  degreeCode: String!
+  name: String!
+  info: String
+  #courses: CourseCreateManyInput
 }

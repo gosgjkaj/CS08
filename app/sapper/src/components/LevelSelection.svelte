@@ -1,5 +1,4 @@
-<script> 
-  
+<script>
   let levels = [ 
     {id: "First", level: "First"},
     {id: "Second", level: "Second"},
@@ -7,9 +6,8 @@
     {id: "Fourth", level: "Fourth"},
     {id: "Fifth", level: "Fifth"}
   ];
-  export let selected="First",selectedOvSGLevel="First";
+  export let selected="First", selectedOvSGLevel="First";
 //   console.log("Level Selection values: selected=", selected, ", selectedOvSGLevel=",selectedOvSGLevel);
- 
 </script>
 
 <div class="select">

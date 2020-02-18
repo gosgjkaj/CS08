@@ -17,14 +17,14 @@
     {#if multiSelect}
       <select bind:value={selectedDegrees} multiple>
             <option value="" disabled>-- Select--</option>
-        {#each result.data.degrees as degree,i}
+        {#each result.data.getDegrees as degree,i}
           <option value={degree.id}>{degree.name}</option>
         {/each}
       </select>
     {:else}
       <select bind:value={selectedDegrees}>
             <option value="" disabled>-- Select--</option>
-        {#each result.data.degrees as degree}
+        {#each result.data.getDegrees as degree}
           <option value={degree.id}>{degree.name}</option>
         {/each}
       </select>
