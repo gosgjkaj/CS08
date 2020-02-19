@@ -81,13 +81,31 @@ async function checkStudentNames(root, args, context) {
 }
 
 async function createStudent( root, args, context) {
-  return await context.prisma.createStudent({
-      firstname: args.firstname,
-      surname: args.surname,
-      guid: args.guid,
-      degreeID: {connect: {id: args.degree}},
-      year: args.year 
+  let students= JSON.parse(JSON.stringify(args.students))
+try{
+  for(let i = 0; i < students.length; i++) {
+    let year
+    if(students[i].level =="Third"){
+      year = args.entryYear -3
+    }else if(students[i].level == "Fourth"){
+      year = args.entryYear -4
+    }else{
+      year = args.entryYear -5
+    }
+     await context.prisma.createStudent({
+      firstname: students[i].firstname,
+      surname: students[i].surname,
+      guid: students[i].EMPLID,
+      degreeID: {connect: {id: students[i].degree}},
+      year: students[i].level,
+      entryYear: year
+
      })
+}
+}catch(e){
+  return ["Students failed to be created. Please check the formatting in the file."]
+}
+return []
 }
 
 async  function checkGrade(root, args, context) {
@@ -115,7 +133,6 @@ async function addGrade(root, args, context) {
   let studentlist = JSON.parse(JSON.stringify(args.studentlist))
   let weights = JSON.parse(JSON.stringify(args.weights))
   //let studentlist = args.studentlist
-  console.log(studentlist)
   //let weights = args.weights
   let year = args.year
   let course = args.course
@@ -138,7 +155,7 @@ async function addGrade(root, args, context) {
       }
       ]}
     )
-    console.log(studentlist[i]["EMPLID"])
+
     let student = await context.prisma.student({guid:studentlist[i]["EMPLID"]})
     let studentDegree = await context.prisma.student({guid:studentlist[i]["EMPLID"]}).degreeID()
     let weight
@@ -146,7 +163,7 @@ async function addGrade(root, args, context) {
   
     for(let j = 0; j < weights.length; j++){
       if(weights[j].degree == studentDegree.id){
-        console.log( weights[j])
+  
         weight = weights[j].weight
       }
    

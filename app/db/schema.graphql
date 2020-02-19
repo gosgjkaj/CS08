@@ -22,7 +22,7 @@ type Mutation {
   deleteUser(id: ID!): User!
   updateUserRole(id: ID!, role: Role!): User!
   checkStudentNames(guid: String!): Boolean!
-  createStudent(firstname: String!, surname: String!, guid: String!, degree: ID!, year: Year!): Student!
+  createStudent(students: [StudentInput!]!, entryYear: Int!): AddGradeResult!
   checkGrade(guid: String!, year: Int!, course: ID!): String!
   addGrade(studentlist: [StudentListInput!]!, course: ID!, year: Int!, weights: [DegreeCourseWeightInput!]!): AddGradeResult!
 
@@ -32,6 +32,14 @@ input StudentListInput {
   EMPLID: String
   Name: String
   Grade: String
+}
+
+input StudentInput {
+  EMPLID: String!
+  firstname: String!
+  surname: String!
+  degree: ID!
+  level: Year!
 }
 
 type AddGradeResult {
@@ -55,7 +63,7 @@ type StudentCourseGrade {
   student: Student!
   weight: Float!
   grade: Float!
-  createdAt: DateTime!
+  date: Int!
 }
 
 type OverallGrade {

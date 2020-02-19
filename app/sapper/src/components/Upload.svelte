@@ -48,7 +48,6 @@
         header: true,
         complete: function(results){
            uploadResults = results.data
-           console.log(uploadResults)
         }
       })
       }
@@ -65,10 +64,10 @@ async function checkGuids() {
      warning = true
      return 0
    }
-  console.log(uploadResults)
+  
   for(i; i<uploadResults.length; i++) {
     let guid = uploadResults[i].EMPLID
-    console.log(guid)
+   
     
     if(guid =="") {
       i++
@@ -83,7 +82,6 @@ async function checkGuids() {
     if (!checkNames.data.checkStudentNames){
       let studentObj = uploadResults[i]
        studentObj["degree"] = null
-       studentObj["count"] = review.length
        studentObj["level"] = null
 
       review.push(studentObj)
@@ -121,9 +119,6 @@ async function checkGuids() {
    })
   
  }
-$: files, readFile(files[0])
-$: degreelist, console.log(degreelist)
-$: review, console.log(review)
 
 let warning  = false 
 let warning2 = false
@@ -140,25 +135,34 @@ function saveChanges() {
 }
 
 async function createStudents() {
-  let i = 0
-  for(i; i<(review).length; i++) {
-    let names = review[i]['Name'].split(",")
 
-   await mutate(client(),{mutation: gql`
+if(review.length!=0){
+ let studentinput = "["
+    review.forEach(w => { 
+    let names = w['Name'].split(",")
+    studentinput += `{ EMPLID: "${w['EMPLID']}",
+                      firstname: "${names[0]}",
+                      surname: "${names[1]}",
+                      degree: "${w['degree']}",
+                      level: ${w['level']}
+                      },`
+     })
+    studentinput = studentinput.substring(0, studentinput.length-1) // removes the last comma
+    studentinput += "]"
+
+    let created = await mutate(client(),{mutation: gql`
       mutation {
         createStudent(
-          firstname: "${names[0]}"
-          surname: "${names[1]}"
-          guid: "${review[i]['EMPLID']}"
-          degree: "${review[i]['degree']}"
-          year: ${review[i]['level']}
+          students: ${studentinput}
+          entryYear: ${year}
         ){
-          firstname
-          surname
-          }
+          failed
+        }
+        
       }`
     })
-
+  console.log(created.data.createStudent.failed )
+ 
 }
 }
 
@@ -176,15 +180,12 @@ async function goNext(){
       for(let y=0; y<degreelist.length; y++){
         let weightpromise = await getWeights(degreelist[y].id,course.id)
         weightpromise.result().then(res=>{
-        console.log(res.data.getWeight.length)
           if(res.data.getWeight.length==0){
             warning2 = true
-            console.log("there is no relationship for this course")
           }else{
             let id = degreelist[y]['id']
             let course_weight =  res.data.getWeight[0].weight
             weights.push({degree: id, weight: course_weight})
-            console.log(weights)
         }
       })
     }
@@ -207,7 +208,8 @@ async function goNext(){
   }
 }
 }
-async function getWeights(degreeid,courseid){
+$:weights, console.log(weights)
+async function getWeights(degreeid, courseid){
   return await query(client(), {
     query: gql`
       query {
@@ -235,10 +237,8 @@ async function uploadGrades(){
     studentsInput = studentsInput.substring(0, studentsInput.length-1) // removes the last comma
     studentsInput += "]"
     
-
-     console.log(studentsInput)
-     console.log(weightsInput)
-     console.log(course.id)
+    console.log(weights)
+     
      let failedGrades = await mutate(client(),{mutation: gql`
        mutation {
          addGrade(
@@ -253,7 +253,7 @@ async function uploadGrades(){
        
      })
          failed = failedGrades.data.addGrade.failed
-         console.log(failed)
+        console.log(failed)
          if(failed.length != 0){
             warning2 = true
         }
@@ -292,6 +292,8 @@ function clearAll(){
   failed = []
   
 }
+
+
 </script>
 
 <div>
@@ -509,7 +511,7 @@ function clearAll(){
      
     {/if}
     {#if componentsActive[3]}
-    <button class="button is-success" on:click={() => clearAll()}>Finish</button>
+    <button class="button is-success" on:click={()=>clearAll()}>Finish</button>
   
     {/if}
     

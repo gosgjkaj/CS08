@@ -49,6 +49,7 @@ type StudentCourseGrade {
   weight: Float!
   grade: Float!
   date: Int!
+  
 
 }
 
@@ -59,6 +60,7 @@ type Student {
   guid: String! @unique
   degreeID: Degree! @relation(link: INLINE)
   year: Year!
+  entryYear: Int!
    
 }
  type Degree {
