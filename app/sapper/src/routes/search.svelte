@@ -7,6 +7,25 @@
     
 
 
+    let searchInput = ""
 
-    
+    let search = false
+
+    function searching(){
+        search = true
+    }
+
+    function resetSearch(){
+        search = false
+    }
 </script>
+
+<input type="text" placeholder="Enter GUID here" bind:value={searchInput} name="searchBar">
+<button on:click={searching}><i class="fa fa-search">Search student</i></button>
+
+
+{#if search}
+searching 
+{searchInput}!
+
+{/if}

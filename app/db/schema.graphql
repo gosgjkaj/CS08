@@ -12,6 +12,7 @@ type Query {
   getCourses: [Course!]!
   getUsers: [User!]!
   getDegrees:[Degree!]!
+  getStudents:[Student!]!
   }
 
 type Mutation {

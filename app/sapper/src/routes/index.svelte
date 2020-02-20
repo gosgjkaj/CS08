@@ -4,6 +4,7 @@
 	import { query } from 'svelte-apollo'
 	import { gql } from 'apollo-boost'
 	import { goto } from '@sapper/app'
+	import CourseRow from '../components/CourseRow.svelte'
 
 	let year = 2019
 	let courses = query(client(), {query: gql`
@@ -37,6 +38,8 @@
 			getDegrees{
 				degreeCode
 				id
+				info
+				name
 			}
 		}`,
 	
@@ -85,16 +88,23 @@
 {:else}
 	<div>
 		<div class="box has-background-info">
-			<p class="title has-text-white"> Degrees (Click button to check the courses in the degree)</p>
+			<p class="title has-text-white"> Degrees (Click degree name to check the details)</p>
 		</div>
 
 		{#await $degrees}
 			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 		{:then result}
 
-		<div class="box buttons">
+		<div class="has-background-info">
 			{#each result.data.getDegrees as degree}
-				<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined">{degree.degreeCode} </button>
+				<div class="box buttons">
+					<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined ">{degree.degreeCode} </button>
+					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p>
+						<div class="box buttons">
+							<p>Courses in this degree: <br></p>
+							<CourseRow degree={degree} class="content"/>
+						</div>
+				</div>		
 			{/each}
 		</div>
 
