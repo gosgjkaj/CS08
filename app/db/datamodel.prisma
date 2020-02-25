@@ -12,20 +12,6 @@ enum Level {
   Fifth
 }
 
-enum Year {
-    Y2019_20
-    Y2020_21
-    Y2021_22
-    Y2022_23
-    Y2023_24
-    Y2024_25
-    Y2025_26
-    Y2026_27
-    Y2027_28
-    Y2028_29
-    Y2029_30
-}
-
 type User {
   id: ID! @id
   name: String!
@@ -45,10 +31,15 @@ type Post {
 type Course {
   id: ID! @id
   level: Level
-  year: Year
   courseID: String!
   name: String
   info: String @default(value: "")
+}
+
+type CourseRun { 
+  id: ID! @id
+  course: Course! @relation(link: INLINE)
+  year: Int!
 }
 
 type CourseDegreeWeight {
@@ -64,7 +55,7 @@ type StudentCourseGrade {
   student: Student! @relation(link: INLINE)
   weight: Float!
   grade: Float!
-  createdAt: DateTime! @createdAt
+  date: Int!
 }
 
 type Student {
@@ -72,8 +63,9 @@ type Student {
   firstname: String!
   surname: String!
   guid: String!
-  degreeID: Degree! @relation(link: INLINE)
+  degree: Degree! @relation(link: INLINE)
   level: Level!
+  entryYear: Int!
 }
 
  type Degree {
@@ -82,6 +74,7 @@ type Student {
    name: String!
    info: String! @default(value: "")
    courses: [Course!]! @relation(link: INLINE, name: "DegreeCourseRelation")
+   courseDegreeWeights: [CourseDegreeWeight!]!
  }
 
 type OverallGrade {

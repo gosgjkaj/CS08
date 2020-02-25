@@ -1,6 +1,6 @@
 <script>
   import { query } from "svelte-apollo";
-  import { GET_YEAR_COURSES_GQL } from "../utils/gql/gqloperations";
+  import { GET_COURSES_GQL } from "../utils/gql/gqloperations";
   import { client } from '../gqlClient';
 
   export let selectedCourse="", 
@@ -8,8 +8,7 @@
 
   console.log("degreeID=", degreeID);
   const courses = query(client(), {
-    query: GET_YEAR_COURSES_GQL,
-    variables: { degreeID }
+    query: GET_COURSES_GQL 
   });
 </script>
 
@@ -19,7 +18,7 @@
   {:then result}
       <select bind:value={selectedCourse}>
       <option value="" disabled>-- Select--</option>
-        {#each result.data.coursesSearch as course}
+        {#each result.data.getCourses as course}
           <option value={course.id}>{course.name} </option>
         {/each}
       </select>

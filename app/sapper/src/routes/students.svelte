@@ -2,6 +2,7 @@
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
   import { client } from '../gqlClient';
+  import { session } from '../stores';
 
   import {
     GET_STUDENTS_GQL,
@@ -20,7 +21,7 @@
   import LevelSelection from "../components/LevelSelection.svelte";
   import YearSelection from "../components/YearSelection.svelte";
   import DegreeSelection from "../components/DegreeSelection.svelte";
-  import CourseSelection from "../components/CourseSelection.svelte";
+  import CourseSelection from "../components/CourseDegreeWtSelection.svelte";
   
 
   let deleteContext = "",
@@ -63,7 +64,7 @@
 
   //=======Student Overall Grade functions etc =======
   //  let selected ,selectedOvSGLevel ;
-  let OvSCRUDObject = { grade: 0, studentLevel: "First", year: "Y1920" };
+  let OvSCRUDObject = { grade: 0, studentLevel: "First", year: "" };
   let isOvsGDataInvalid = false;
   let buttonOvSGSaveIsLoading = false;
   $: buttonOvSGSaveClass =
@@ -79,7 +80,7 @@
     modalOvSGIsVisible = true;
   }
   function closeOvSGModal() {
-    OvSCRUDObject = { grade: 0, studentLevel: "First", year: "Y1920" };
+    OvSCRUDObject = { grade: 0, studentLevel: "First", year: "" };
     modalOvSGIsVisible = false;
   }
 
@@ -154,11 +155,11 @@
 
   function AddOvSGrade(degreeid, studentid) {
     console.log("In AddOvSGrade:: degreeid=", degreeid);
-    OvSCRUDObject = { grade: 0, studentLevel: "First", year: "Y1920" };
+    OvSCRUDObject = { grade: 0, studentLevel: "First", year: "" };
     OvSCRUDObject = {
       student: studentid,
       studentLevel: "First",
-      year: "Y1920",
+      year: "",
       grade: 0
     };
     console.log("In AddOvSGrade:: OvSCRUDObject=", OvSCRUDObject);
@@ -244,6 +245,7 @@
       courseID: "",
       weight: 0,
       grade: 0,
+      date: 0,
       degreeID
     };
     openGradeModal();
@@ -257,6 +259,7 @@
       courseID: sgrade.course.id,
       weight: sgrade.weight,
       grade: sgrade.grade,
+      date: sgrade.date,
       degreeID
     };
     console.log("GradeObject=", GradeObject);
@@ -301,7 +304,8 @@
           student: GradeObject.student,
           course: GradeObject.courseID,
           weight: GradeObject.weight,
-          grade: GradeObject.grade
+          grade: GradeObject.grade, 
+          date: GradeObject.date
         }
       };
 
@@ -346,7 +350,8 @@
     if (
       gradeObject.courseID.length < 1 ||
       !gradeObject.weight  ||
-      !gradeObject.grade   
+      !gradeObject.grade ||
+      !gradeObject.date 
     ) {
       isGradeDataInvalid = true;
       return false;
@@ -390,6 +395,7 @@
     if (
       studentObject.degreeID.length < 1 ||
       studentObject.level.length < 1 ||
+      studentObject.entryYear.length < 1 ||
       !studentObject.firstname  ||
       !studentObject.surname  ||
       !studentObject.guid 
@@ -411,11 +417,12 @@
       const EditObject = {
         id: studentObject.id,
         data: {
-          degreeID: studentObject.degreeID,
+          degree: studentObject.degreeID,
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
-          level: studentObject.level
+          level: studentObject.level, 
+          entryYear: studentObject.entryYear
         }
       };
       console.log("EditObject=", EditObject);
@@ -455,11 +462,12 @@
     if (validateStudent(studentObject)) {
       const InsertObject = {
         data: {
-          degreeID: studentObject.degreeID,
+          degree: studentObject.degreeID,
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
-          level: studentObject.level
+          level: studentObject.level, 
+          entryYear: studentObject.entryYear
         }
       };
       console.log("Student InsertObject=", InsertObject);
@@ -532,7 +540,8 @@
       guid: "",
       level: "First",
       studentID: "",
-      degreeID: ""
+      degreeID: "",
+      entryYear: ""
     };
     openModal();
   }
@@ -652,16 +661,17 @@
 
         {#each data.data['getStudents'] as student, i}
           <div class="column">
-            <Card title={student.firstname}>
+            <Card title={student.firstname + ' ' + student.surname}>
               <table
                 class="table is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                   <tr>
-                    <th>First Name</th>
+                    <th>Firstname</th>
                     <th>Surname</th>
                     <th>Degree</th>
                     <th>Level</th>
                     <th>GUID</th>
+                    <th>Entry Year</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -671,6 +681,7 @@
                     <td>{student.degree.name}</td>
                     <td>{student.level}</td>
                     <td>{student.guid}</td>
+                    <td>{student.entryYear}</td>
                   </tr>
                 </tbody>
               </table>
@@ -700,14 +711,19 @@
                   </a>
                 </div>
 
-                <div class="column">
-                  <a
-                    href="javascript:;"
-                    on:click={() => AddGrade(student.id, student.degree.id)}
-                    class="button is-success">
-                    Add Grade
-                  </a>
-                </div>
+                {#if student['mygrades'].length <= 0}
+                  <div class="column">
+                    <a
+                      href="javascript:;"
+                      on:click={() => AddGrade(student.id, student.degree.id)}
+                      class="button is-success is-rounded">
+                      <span class="icon">
+                        <i class="fas fa-plus" />
+                      </span>
+                      &nbsp;&nbsp;Add Grade
+                    </a>
+                  </div>
+                {/if}
               </div>
               <hr />
               <!-- End of Student Buttons -->
@@ -716,41 +732,57 @@
               {#if student['mygrades'].length > 0}
                 <p>
                   <span class="tag is-primary is-large">Grades</span>
+                  <a
+                    href="javascript:;"
+                    on:click={() => AddGrade(student.id, student.degree.id)}
+                    class="button is-success is-rounded">
+                    <span class="icon">
+                      <i class="fas fa-plus" />
+                    </span>
+                  </a>
                 </p>
                 <div class="columns">
-                  <div class="column is-one-fifth">
+                  <div class="column is-one-sixth">
                     <strong>Course</strong>
                   </div>
-                  <div class="column is-one-fifth">
+                  <div class="column is-one-sixth">
                     <strong>Weight</strong>
                   </div>
-                  <div class="column is-one-fifth">
+                  <div class="column is-one-sixth">
                     <strong>Grade</strong>
                   </div>
-                  <div class="column is-one-fifth" />
-                  <div class="column is-one-fifth" />
+                  <div class="column is-one-sixth">
+                    <strong>Date</strong>
+                  </div>
+                  <div class="column is-one-sixth" />
+                  <div class="column is-one-sixth" />
                 </div>
               {/if}
 
               {#each student['mygrades'] as sgrade, i}
                 <div class="columns">
-                  <div class="column is-one-fifth">{sgrade.course.name}</div>
-                  <div class="column is-one-fifth">{sgrade.weight}</div>
-                  <div class="column is-one-fifth">{sgrade.grade}</div>
-                  <div class="column is-one-fifth">
+                  <div class="column is-one-sixth">{sgrade.course.name}</div>
+                  <div class="column is-one-sixth">{sgrade.weight}</div>
+                  <div class="column is-one-sixth">{sgrade.grade}</div>
+                  <div class="column is-one-sixth">{sgrade.date}</div>
+                  <div class="column is-one-sixth">
                     <a
+                      class="button is-success"
                       href="javascript:;"
-                      on:click={() => EditGrade(sgrade, student.id,sgrade.student.degree.id)}
-                      class="button is-success">
-                      Edit
+                      on:click={() => EditGrade(sgrade, student.id, sgrade.student.degree.id)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-edit" />
+                      </span>
                     </a>
                   </div>
-                  <div class="column is-one-fifth">
+                  <div class="column is-one-sixth">
                     <a
+                      class="button is-danger"
                       href="javascript:;"
-                      on:click={() => DeleteGrade(sgrade)}
-                      class="button is-danger">
-                      Delete
+                      on:click={() => DeleteGrade(sgrade)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-trash" />
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -759,53 +791,79 @@
               <!-- End of Student Grades -->
 
               <!-- Student Overall Grade starts here -->
-              {#if student.myoverallgrade}
-                <span class="tag is-primary is-large">Overall Grade</span>
-                <table
-                  class="table is-striped is-narrow is-hoverable is-fullwidth">
-                  <thead>
-                    <tr>
-                      <th>Level</th>
-                      <th>Year</th>
-                      <th>Grade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{student.myoverallgrade.studentLevel}</td>
-                      <td>{student.myoverallgrade.year}</td>
-                      <td>{student.myoverallgrade.grade}</td>
-                      <td>
-                        <a
-                          href="javascript:;"
-                          on:click={() => EditOvSGrade(student.myoverallgrade, student.degree.id, student.id)}
-                          class="button is-success">
-                          Edit
-                        </a>
-                      </td>
-
-                      <td>
-                        <a
-                          href="javascript:;"
-                          on:click={() => DeleteOvSGrade(student.myoverallgrade)}
-                          class="button is-danger">
-                          Delete
-                        </a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              {/if}
-              {#if student['mygrades'].length > 0 && !student.myoverallgrade}
+              {#if student['mygrades'].length > 0 && student['myoverallgrades'].length <= 0}
                 <p>
                   <a
                     href="javascript:;"
                     on:click={() => AddOvSGrade(student.degree.id, student.id)}
-                    class="button is-success">
-                    Add Overall Grade
+                    class="button is-success is-rounded">
+                    <span class="icon">
+                      <i class="fas fa-plus" />
+                    </span>
+                    &nbsp;&nbsp; Add Overall Grade
                   </a>
                 </p>
               {/if}
+
+              {#if student['myoverallgrades'].length > 0}
+                <p>
+                  <span class="tag is-primary is-large">Overall Grades</span>
+                  <a
+                    href="javascript:;"
+                    on:click={() => AddOvSGrade(student.degree.id, student.id)}
+                    class="button is-success is-rounded">
+                    <span class="icon">
+                      <i class="fas fa-plus" />
+                    </span>
+                  </a>
+                </p>
+                <div class="columns">
+                  <div class="column is-one-fifth">
+                    <strong>Level</strong>
+                  </div>
+                  <div class="column is-one-fifth">
+                    <strong>Year</strong>
+                  </div>
+                  <div class="column is-one-fifth">
+                    <strong>Grade</strong>
+                  </div>
+                  <div class="column is-one-fifth" />
+                  <div class="column is-one-fifth" />
+                </div>
+              {/if}
+              {#each student['myoverallgrades'] as overallGradeReadObject, i}
+                <div class="columns">
+                  <div class="column is-one-fifth">
+                    {overallGradeReadObject.studentLevel}
+                  </div>
+                  <div class="column is-one-fifth">
+                    {overallGradeReadObject.year}
+                  </div>
+                  <div class="column is-one-fifth">
+                    {overallGradeReadObject.grade}
+                  </div>
+                  <div class="column is-one-fifth">
+                    <a
+                      class="button is-success"
+                      href="javascript:;"
+                      on:click={() => EditOvSGrade(overallGradeReadObject, student.degree.id, student.id)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-edit" />
+                      </span>
+                    </a>
+                  </div>
+                  <div class="column is-one-fifth">
+                    <a
+                      class="button is-danger"
+                      href="javascript:;"
+                      on:click={() => DeleteOvSGrade(overallGradeReadObject)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-trash" />
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              {/each}
 
               <!-- Student Overall Grade ends  here -->
 
@@ -847,7 +905,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">
-        {studentObject.firstname ? 'Edit Record for:' + studentObject.firstname : 'Add New Student'}
+        {studentObject.firstname ? 'Edit student: ' + studentObject.firstname : 'Add New Student'}
       </p>
       <button class="delete" aria-label="close" on:click={closeModal} />
     </header>
@@ -866,12 +924,12 @@
         </div>
 
         <div class="column field">
-          <label class="label">Lastname*</label>
+          <label class="label">Surname*</label>
           <div class="control">
             <input
               class="input"
               type="text"
-              placeholder="Lastname"
+              placeholder="Surname"
               bind:value={studentObject.surname} />
           </div>
         </div>
@@ -884,7 +942,7 @@
             <input
               class="input"
               type="text"
-              placeholder=""
+              placeholder="e.g 232144H"
               bind:value={studentObject.guid} />
           </div>
         </div>
@@ -906,11 +964,17 @@
             <LevelSelection bind:selected={studentObject.level} />
           </div>
         </div>
+        <div class="column field">
+          <label class="label">Entry Year</label>
+          <div class="control">
+            <YearSelection bind:selected={studentObject.entryYear} />
+          </div>
+        </div>
       </div>
 
       <div>
         {#if isDataInvalid}
-          <p class="help is-danger">Please enter all required fields!</p>
+          <p class="help is-danger">Please enter all the required fields!</p>
         {/if}
       </div>
 
@@ -940,6 +1004,7 @@
           <label class="label">Course*</label>
           <div class="control">
             <CourseSelection
+              bind:gradevalue={GradeObject.weight}
               degreeID={GradeObject.degreeID}
               bind:selectedCourse={GradeObject.courseID} />
           </div>
@@ -968,7 +1033,18 @@
               bind:value={GradeObject.grade} />
           </div>
         </div>
+        <div class="column field">
+          <label class="label">Date*</label>
+          <div class="control">
+            <input
+              class="input"
+              type="number"
+              placeholder="GrDateade"
+              bind:value={GradeObject.date} />
+          </div>
+        </div>
       </div>
+
 
       <div>
         {#if isGradeDataInvalid}
@@ -1057,10 +1133,7 @@
     </header>
     <section class="modal-card-body">
       <div class="field">
-        <label class="label is-danger">DELETE {DeleteSubTitle} Record?</label>
-      </div>
-      <div class="field">
-        <label class="label has-text-danger">Are you sure you would like to delete the student "{studentObject.name}"?</label>
+        <label class="label has-text-danger">Are you sure you would like to delete the student "{studentObject.firstname}"?</label>
       </div>
 
       <div>

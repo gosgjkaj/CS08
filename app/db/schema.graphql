@@ -6,11 +6,10 @@ type Query {
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
   getOverallGrade(year: Int!, id: ID!, level: Level!): OverallGrade!
-  getCourses: [Course!]!
-  getCoursesFromYear(year: Year, searchString: String): [Course!]!
+  getCourses(searchString: String): [Course!]!
+  getCourseRuns(searchString: String): [CourseRun!]!
   getStudents(searchString: String): [Student!]
   getDegrees(searchString: String): [Degree!]!
-  coursesSearch(year: Year, searchString: String) : [Course!]!
   getUsers: [User!]!
   getcourseDegreeWeight(where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
   getcourseDegreeWeights(where: MyCourseDegreeWeightWhereInput!): [CourseDegreeWeight]!
@@ -21,15 +20,17 @@ type Mutation {
 	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
-  createCourse(courseID: String!, level: Level, year: Year, name: String, info: String): Course!
-  updateCourse(id: ID!, data: updateCourseInput!): Course!
-  deleteCourse(id: ID!): Course!  
+  deleteCourse(id: ID!): Course! 
+  createCourseRun(data: CourseRunInput!): CourseRun!
+  updateCourseRun(id: ID!, data: CourseRunInput!): CourseRun!
+  deleteCourseRun(id: ID!, courseid:ID!): CourseRun
   deleteUser(id: ID!): User!
   updateUserRole(id: ID!, role: Role!): User!
   createDegree(data: DegreeCreateInput!): Degree!
   updateDegree(id: ID!, data: DegreeUpdateInput!): Degree!
   deleteDegree(id: ID!): Degree
   createStudent(data: studentInput!): Student!
+  createStudentByUpload(data: studentInput!): Student!
   updateStudent(id: ID!, data: studentInput!): Student!
   deleteStudent(id: ID!): Student!
   createStudentGrade(data: StudentCourseGradeInput!) : StudentCourseGrade!
@@ -39,18 +40,31 @@ type Mutation {
   updateOverallGrade(id: ID!, data: OverallGradeInput!) : OverallGrade!
   deleteOverallGrade(id: ID!) : OverallGrade!
   createCourseDegreeWeight(data: MyCourseDegreeWeightInput!): CourseDegreeWeight!
-  deleteCourseDegreeWeight(where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
+  deleteCourseDegreeWeight(id: ID!): CourseDegreeWeight
 	updateCourseDegreeWeight(data: MyCourseDegreeWeightInput!, where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
 }
 
 type Course {
   id: ID!
   level: Level
-  year: Year
   courseID: String!
   name: String
   info: String
-  #degrees: [Degree!]
+}
+
+type CourseRun {
+  id: ID!
+  course: Course!
+  year: Int!
+}
+
+input CourseRunInput {
+  id: ID
+  level: Level
+  courseID: String!
+  name: String
+  info: String
+  year: Int!
 }
 
 type Degree {
@@ -59,7 +73,7 @@ type Degree {
   name: String!
   info: String!
   courses: [Course!]
-  CourseDegreeWeights: [CourseDegreeWeight!]
+  courseDegreeWeights: [CourseDegreeWeight!]
 }
 
 type Student {
@@ -68,9 +82,10 @@ type Student {
   surname: String!
   guid: String!
   degree: Degree!
-  level: Level!
+  level: Level!  
+  entryYear: Int!
   mygrades: [StudentCourseGrade!]
-  myoverallgrade: OverallGrade
+  myoverallgrades: [OverallGrade!]
 }
 
 input studentInput { 
@@ -79,11 +94,12 @@ input studentInput {
   guid: String!
   degree: ID!
   level: Level!
+  entryYear: Int!
 }
 
 input updateCourseInput {
   level: Level
-  year: Year
+  year: Int
   courseID: String
   name: String
   info: String
@@ -102,6 +118,7 @@ type StudentCourseGrade {
   student: Student!
   weight: Float!
   grade: Float!
+  date: Int!
   #updatedAt: DateTime!
   #createdAt: DateTime!
 }
@@ -111,6 +128,7 @@ input StudentCourseGradeInput {
   course: ID!
   weight: Float!
   grade: Float!
+  date: Int!
 }
 
 type OverallGrade {
@@ -125,7 +143,7 @@ type OverallGrade {
 
 input OverallGradeInput {
   student: ID!
-  year: Year!
+  year: Int!
   studentLevel: Level!
   grade: Float!
 }
@@ -143,40 +161,12 @@ type CourseDegreeWeight {
   weight: Float!
 }
 
-input MyCourseDegreeWeightInput {
-	  id: ID
-	  course: ID!
-	  degree: ID!
-	  #course: { connect:{ id: 'id1' } }
-	  #degree:  { connect:{ id: 'id1' } }
-	  weight: Float!
-}
-
-input CourseDegreeWeightWhereUniqueInput {
-  id: ID
-}
-
 input MyCourseDegreeWeightWhereInput {
   degree: ID!
 }
 
-input DegreeUpdateInput {
-  degreeCode: String
-  name: String
-  info: String
-  courses: [ID!]
-  #connect: [CourseWhereUniqueInput!]
-  #courses: { connect: [{ id: 'id1' }, {id: 'id2'}] }
-}
-
-input DegreeWhereUniqueInput {
-  id: ID!
-}
-
-input DegreeCreateInput {
-  id: ID
-  degreeCode: String!
-  name: String!
-  info: String
-  #courses: CourseCreateManyInput
+input MyCourseDegreeWeightInput {
+  course: ID!
+  degree: ID!
+  weight: Float!
 }

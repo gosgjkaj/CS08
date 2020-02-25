@@ -6,7 +6,6 @@
 
   import {
     GET_DEGREES_GQL,
-    GET_DEGREES_LOOKUP_GQL,
     ADD_DEGREE_GQL,
     EDIT_DEGREE_GQL,
     DELETE_DEGREE_GQL,
@@ -15,8 +14,6 @@
     EDIT_CDWEIGHT_GQL
   } from "../utils/gql/gqloperations";
   import Card from "../components/Card.svelte";
-  import LevelSelection from "../components/LevelSelection.svelte";
-  import DegreeSelection from "../components/DegreeSelection.svelte";
   import CourseSelection from "../components/CourseSelection.svelte";
 
   let degree = {};
@@ -149,10 +146,11 @@
   function CreateCDWeightRecord() {
     if (validateSDWeight()) {
       const InsertObject = {
+        data: {
           course: SDWeightEditObject.courseid,
           degree: SDWeightEditObject.degree,
           weight: SDWeightEditObject.weight
-      };
+      }};
       console.log("CDWeight InsertObject=", InsertObject);
 
       const SDWeightCreate = mutate(client(), {
@@ -171,9 +169,12 @@
   }
 
   function deleteSDWeightRecord() {
+    let deleteArguments =  { id: `${SDWeightEditObject.id}`  };
+    console.log("deleteSDWeightRecord:: delete arguments=", deleteArguments );
+
     const degreeSDWtDelete = mutate(client(), {
       mutation: DELETE_CDWEIGHT_GQL,
-      variables: { where: { id: `${SDWeightEditObject.id}` } }
+      variables: {id: `${SDWeightEditObject.id}`}
     })
       .then(data => {
         SDWeightEditObject = {};
@@ -534,7 +535,7 @@
               <!-- End of Degree Action buttons -->
 
               <!-- Courses Start here -->
-              {#if degree['CourseDegreeWeights'] && degree['CourseDegreeWeights'].length > 0}
+              {#if degree['courseDegreeWeights'].length > 0}
                 <p>
                   <span class="tag is-primary is-large">Courses Offered:</span>
                 </p>
@@ -550,18 +551,18 @@
                 </div>
 
 
-              {#each degree['CourseDegreeWeights'] as CourseDegreeWeightsdetails, i}
+              {#each degree['courseDegreeWeights'] as courseDegreeWeightsdetails, i}
                 <div class="columns">
                   <div class="column is-one-fourth">
-                    {CourseDegreeWeightsdetails.course.name}
+                    {courseDegreeWeightsdetails.course.name}
                   </div>
                   <div class="column is-one-fourth">
-                    {CourseDegreeWeightsdetails.weight}
+                    {courseDegreeWeightsdetails.weight}
                   </div>
                   <div class="column is-one-fourth">
                     <a
                       href="javascript:;"
-                      on:click={() => EditCDWeightClick(CourseDegreeWeightsdetails)}
+                      on:click={() => EditCDWeightClick(courseDegreeWeightsdetails)}
                       class="button is-success">
                       Edit
                     </a>
@@ -569,7 +570,7 @@
                   <div class="column is-one-fourth">
                     <a
                       href="javascript:;"
-                      on:click={() => DeleteCDWeightClick(CourseDegreeWeightsdetails)}
+                      on:click={() => DeleteCDWeightClick(courseDegreeWeightsdetails)}
                       class="button is-danger">
                       Delete
                     </a>

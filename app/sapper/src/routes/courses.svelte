@@ -2,18 +2,17 @@
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
   import { client } from '../gqlClient';
-  import yearRuns from '../utils/js/YearRuns';
+  import yearRuns from "../utils/js/YearRuns";
   import { session } from '../stores';
 
-
   import {
-    GET_ALL_COURSES_GQL,
-    GET_YEAR_COURSES_GQL,
-    DELETE_COURSE_GQL,
-    ADD_COURSE_GQL,
-    EDIT_COURSE_GQL
+    GET_COURSERUNS_GQL,
+    ADD_COURSERUN_GQL,
+    EDIT_COURSERUN_GQL,
+    DELETE_COURSERUN_GQL
   } from "../utils/gql/gqloperations";
   import Card from "../components/Card.svelte";
+  //import TitleBar from '../components/TitleBar.svelte'
   import LevelSelection from "../components/LevelSelection.svelte";
   import YearSelection from "../components/YearSelection.svelte";
 
@@ -22,7 +21,6 @@
   let deleteCourse = {};
 
   let selectedYear = yearRuns[0];
-
   let searchString = "";
 
   let buttonSaveIsLoading = false;
@@ -45,12 +43,9 @@
     modalDeleteIsVisible === true ? "modal is-active" : "modal";
 
   //============Validation etc =======================
-
-  //Search String change
-
-  function  resetSearch() {
+  function resetSearch() {
     searchString = "";
-    GET_COURSES_LIST.refetch({ searchString });
+    GET_COURSERUNS_LIST.refetch({ searchString });
   }
 
   function SearchEvent(e) {
@@ -60,9 +55,8 @@
       ", searchString=",
       searchString
     );
-    GET_COURSES_LIST.refetch({ searchString });
+    GET_COURSERUNS_LIST.refetch({ searchString });
   }
-
   function OnYearDropDownChange() {
     //console.log("OnYearDropDownChange called");
     RefreshYearData();
@@ -76,10 +70,10 @@
     console.log("validateCourse:: currentCourseObject=", currentCourseObject);
     if (
       !currentCourseObject.year ||
-      !currentCourseObject.level || 
+      !currentCourseObject.level ||
       currentCourseObject.courseID.length < 1 ||
       !currentCourseObject.name ||
-      !currentCourseObject.info 
+      !currentCourseObject.info
     ) {
       isDataInvalid = true;
       return false;
@@ -97,8 +91,8 @@
       const EditObject = {
         id: currentCourseObject.id,
         data: {
-          level: currentCourseObject.level,
           year: currentCourseObject.year,
+          level: currentCourseObject.level,
           courseID: currentCourseObject.courseID,
           name: currentCourseObject.name,
           info: currentCourseObject.info
@@ -107,12 +101,12 @@
       console.log("EditObject=", EditObject);
 
       const courseEdit = mutate(client(), {
-        mutation: EDIT_COURSE_GQL,
+        mutation: EDIT_COURSERUN_GQL,
         variables: EditObject
       })
         .then(data => {
           ResetCourseObject();
-          GET_COURSES_LIST.refetch();
+          GET_COURSERUNS_LIST.refetch();
         })
         .catch(e => {
           console.error("Error during Edit Course : ", e);
@@ -122,13 +116,14 @@
   }
 
   function deleteRecord() {
+    console.log("deleteRecord::currentCourseObject=", currentCourseObject);
     const courseDelete = mutate(client(), {
-      mutation: DELETE_COURSE_GQL,
-      variables: { id: `${currentCourseObject.id}` }
+      mutation: DELETE_COURSERUN_GQL,
+      variables: { id: `${currentCourseObject.id}`, courseid: `${currentCourseObject.course.id}` }
     })
       .then(data => {
         ResetCourseObject();
-        GET_COURSES_LIST.refetch();
+        GET_COURSERUNS_LIST.refetch();
       })
       .catch(e => {
         console.error("Error during Delete : ", e);
@@ -139,21 +134,23 @@
   function CreateCourse() {
     if (validateCourse()) {
       const InsertObject = {
-          level: currentCourseObject.level,
+        data: {
           year: currentCourseObject.year,
+          level: currentCourseObject.level,
           courseID: currentCourseObject.courseID,
           name: currentCourseObject.name,
           info: currentCourseObject.info
+        }
       };
-      console.log("InsertObject=", InsertObject);
+      //console.log("InsertObject=", InsertObject);
 
       const courseCreate = mutate(client(), {
-        mutation: ADD_COURSE_GQL,
+        mutation: ADD_COURSERUN_GQL,
         variables: InsertObject
       })
         .then(data => {
           ResetCourseObject();
-          GET_COURSES_LIST.refetch();
+          GET_COURSERUNS_LIST.refetch();
         })
         .catch(e => {
           console.error("Error during Insert Course : ", e);
@@ -164,51 +161,53 @@
   //End of APOLLO cLIENT cALLS
   //========================================
 
-  let GET_COURSES_LIST = query(client(), {
-    query: GET_YEAR_COURSES_GQL,
-    variables: { year: selectedYear.id, searchString }
+  let GET_COURSERUNS_LIST = query(client(), {
+    query: GET_COURSERUNS_GQL,
+    variables: { searchString }
   });
 
   function ReloadCourses() {
-    GET_COURSES_LIST.refetch({ year: selectedYear.id });
+    GET_COURSERUNS_LIST.refetch();
+    //GET_COURSERUNS_LIST.refetch({ year });
   }
   //
   function RefreshYearData() {
+    //    alert(`Year: ${selectedYear.id}  `);
+    console.log("RefreshYearData called", `Year: ${selectedYear.text}  `);
+    //console.log("RefreshYearData called");
     ReloadCourses();
   }
 
   //==========Model Functions ===========
 
-    function onEditCourseClick(EditItemObject) {
+  function onEditCourseClick(EditItemObject) {
     ResetCourseObject();
-    //console.log("onEditCourseClick:: currentCourseObject object after reset init:", currentCourseObject);
-    //currentCourseObject.degreeIDs.length = 0
-    //console.log("onEditCourseClick:: currentCourseObject object after array init:", currentCourseObject);
     let coursetemp = {};
-    //console.log("onEditCourseClick:: currentCourseObject object init:", currentCourseObject);
-    //currentCourseObject = EditItemObject;
     coursetemp = {
       id: EditItemObject.id,
-      level: EditItemObject.level,
+      year: EditItemObject.course.year,
+      level: EditItemObject.course.level,
       year: EditItemObject.year,
-      courseID: EditItemObject.courseID,
-      name: EditItemObject.name,
-      info: EditItemObject.info
+      courseID: EditItemObject.course.courseID,
+      name: EditItemObject.course.name,
+      info: EditItemObject.course.info
     };
     console.log(
       "onEditCourseClick:: currentCourseObject object temp:",
       coursetemp
     );
-    //console.log("onEditCourseClick:: currentCourseObject object :", currentCourseObject);
+
     currentCourseObject = coursetemp;
     console.log(
       "onEditCourseClick:: currentCourseObject object:",
       currentCourseObject
     );
+
     openModal();
   }
   async function onDeleteClick(item) {
     currentCourseObject = item;
+    console.log("onDeleteClick::currentCourseObject=", currentCourseObject);
     openDeleteModal();
   }
 
@@ -242,11 +241,12 @@
   function ResetCourseObject() {
     currentCourseObject = {};
     currentCourseObject = {
+      year:"",
       name: "",
       year: "",
       info: "",
       courseID: "",
-      level: "",
+      level: ""
     };
   }
 
@@ -275,7 +275,7 @@
 </script>
 
 <svelte:head>
-  <title>Courses for Year {selectedYear.text}</title>
+  <title>Courses</title>
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" /> 
   -->
   <style>
@@ -295,6 +295,7 @@
 </svelte:head>
 
 {#if $session.user}
+
 <!-- Title Bar -->
 <div class="container is-fullhd ">
   <div class="notification">
@@ -304,14 +305,15 @@
       <div class="level-left">
         <div class="level-item">
           <p class="subtitle is-5">
-          <!-- Search String change -->
-            <strong>Courses for {searchString.trim().length > 0 ? "search query " + searchString : " Year " + selectedYear.text}</strong>
+            <strong>
+              Courses {searchString.trim().length > 0 ? ' for search query ' + searchString : ''}
+            </strong>
           </p>
         </div>
       </div>
 
       <!-- Search  -->
-      <div class="level-right">
+      <div class="level-left">
         <div class="level-item">
           <div class="field">
             <p class="control has-icons-right">
@@ -326,54 +328,39 @@
                 <i class="fas fa-search" />
               </span>
             </p>
-
           </div>
 
-        </div>
-        {#if searchString.trim().length > 0}
-          <p class="level-item">
+          {#if searchString.trim().length > 0}
+            <p>
+              <a
+                href="javascript:;"
+                on:click={resetSearch}
+                class="button is-success">
+                Reset Search
+              </a>
+              &nbsp;
+            </p>
+          {/if}
+
+          <p>
             <a
               href="javascript:;"
-              on:click={resetSearch}
-              class="button is-success">
-              Reset Search
+              on:click={onNewCourseClick}
+              class="button is-success">  Add Course 
             </a>
           </p>
-        {/if}
+
+        </div>
       </div>
 
       <!-- End of Search -->
 
-      <!-- Right side -->
-      <div class="level-right">
-        <div class="level-item">
-          <!-- Dropdown items here -->
-          <div class="select">
-          <select bind:value={selectedYear} on:change={OnYearDropDownChange}>
-              {#each yearRuns as yearlevel}
-                <option value={yearlevel}>{yearlevel.text}</option>
-              {/each}
-            </select>
-            <div class="select__arrow" />
-          </div>
-          <!-- End of DD items -->
-
-        </div>
-        <p class="level-item">
-          <a
-            href="javascript:;"
-            on:click={onNewCourseClick}
-            class="button is-success">
-            Add New Course
-          </a>
-        </p>
-      </div>
     </nav>
   </div>
 </div>
 
 <!-- Start of Iteration Courses -->
-{#await $GET_COURSES_LIST}
+{#await $GET_COURSERUNS_LIST}
   <progress class="progress is-small is-primary" max="100">15%</progress>
 {:then data}
 
@@ -381,25 +368,26 @@
     <div class="container">
       <div class="columns is-multiline">
 
-        {#each data.data['coursesSearch'] as currentCourseObject, i}
+        {#each data.data['getCourseRuns'] as currentCourseObject, i}
           <div class="column img1 toaster is-quarter">
-            <Card title={currentCourseObject.name}>
+            <Card title={currentCourseObject.course.name}>
               <table class="table is-striped is-hoverable">
+
+                <tr>
+                  <td>Level</td>
+                  <td>{currentCourseObject.course.level}</td>
+                </tr>
                 <tr>
                   <td>Year</td>
                   <td>{currentCourseObject.year}</td>
                 </tr>
                 <tr>
-                  <td>Level</td>
-                  <td>{currentCourseObject.level}</td>
-                </tr>
-                <tr>
                   <td>Course ID:</td>
-                  <td>{currentCourseObject.courseID}</td>
+                  <td>{currentCourseObject.course.courseID}</td>
                 </tr>
                 <tr>
                   <td>Details:</td>
-                  <td>{currentCourseObject.info}</td>
+                  <td>{currentCourseObject.course.info}</td>
                 </tr>
               </table>
               <footer class="card-footer">
@@ -431,17 +419,23 @@
             </Card>
           </div>
         {:else}
-          <p class="subtitle is-5 $subtitle-color: $red"> 
-              {#if searchString.trim().length> 0}
-                <div> 
-                  No Courses for the search query {searchString}.  
+          <p class="subtitle is-5 $subtitle-color: $red">
+            {#if searchString.trim().length > 0}
+              <div>
+                No Courses for the search query {searchString}.
+                <a
+                  href="javascript:;"
+                  on:click={resetSearch}
+                  class="button is-success">
+                  Reset Search
+                </a>
 
-                </div>
-               {:else}
-               <p>No courses for selected year {selectedYear.text}</p> 
-              {/if}           
-            
-          </p>  
+              </div>
+            {:else}
+              <p>No courses</p>
+            {/if}
+
+          </p>
         {/each}
 
       </div>
@@ -491,6 +485,7 @@
           </div>
         </div>
       </div>
+
       <div class="columns is-desktop">
         <div class="column field">
 
@@ -513,9 +508,10 @@
           <div class="field">
             <label class="label">Course Details *</label>
             <div class="control">
-              <textarea class="textarea" placeholder="Course Details" 
-              bind:value={currentCourseObject.info}
-              />
+              <textarea
+                class="textarea"
+                placeholder="Course Details"
+                bind:value={currentCourseObject.info} />
             </div>
           </div>
         </div>
@@ -532,6 +528,7 @@
     </footer>
   </div>
 </div>
+
 <!-- End of Modals -->
 
 <!-- Delete Modal  -->
@@ -544,7 +541,7 @@
     </header>
     <section class="modal-card-body">
       <div class="field">
-        <label class="label is-danger">Are you sure you would like to delete the course named "{currentCourseObject.name}"?</label>
+        <label class="label has-text-danger">Please confirm you would like to delete this course?</label>
       </div>
     </section>
 
@@ -559,4 +556,3 @@
 {:else}
 Please log in to access this part of the database.
 {/if}
-

@@ -53,37 +53,6 @@ async function changeGradeWeight(parent,args,context, info){
   }, info)
   return newgrade
 }
-
-async function createCourse(parent, args, context, info) {
-  let newCourse = await context.prisma.createCourse({
-    courseID: args.courseID,
-    name: args.name,
-    year: args.year,
-    info: args.info,
-    level: args.level,
-})
-  return newCourse
-}
-
-async function updateCourse(parent, args, context, info) {
-  let updatedCourse = await context.prisma.updateCourse({
-    where: {id: args.id},
-    data: {
-      courseID: args.data.courseID,
-      name: args.data.name,
-      year: args.data.year,
-      info: args.data.info,
-      level: args.data.level
-    }
-});
-    return updatedCourse
-}
-
-async function deleteCourse(parent, args, context, info) {
-  let deletedcourse = await context.prisma.deleteCourse({ id: args.id })
-    return deletedcourse
-}
-
 async function createDegree(parent, args, context, info) {
     let DegreeObject = {
       degreeCode: args.data.degreeCode,
@@ -128,16 +97,52 @@ async function deleteDegree(parent, args, context, info) {
     return deletedDegree
 }
 
-async function createStudent(parent, args, context, info) {
-  let newStudent = await context.prisma.createStudent({
+async function createStudentByUpload(parent, args, context, info) {
+  let students= JSON.parse(JSON.stringify(args.students))
+  console.log(students)
+  try {
+    for (let i = 0; i < students.length; i++) {
+      let year
+      if (students[i].level =="Third") {
+        year = args.entryYear -3
+      } else if (students[i].level == "Fourth") {
+        year = args.entryYear -4
+      } else {
+        year = args.entryYear -5
+      }
+      await context.prisma.createStudent({
+        firstname: students[i].firstname,
+        surname: students[i].surname,
+        guid: students[i].EMPLID,
+        degreeID: {connect: {id: students[i].degree}},
+        level: students[i].level,
+        entryYear: year
+      })
+  }
+  } catch(e) {
+    return ["Students failed to be created. Please check the formatting in the file."]
+  }
+  return []
+  }
+
+  async function createStudent(parent, args, context, info) {
+    //console.log("createStudent:: args=", args);
+    let newStudent =   await context.prisma.createStudent({
       firstname: args.data.firstname,
       surname: args.data.surname,
       guid: args.data.guid,
-      degreeID: {connect: {id: args.data.degree}},
-      level: args.data.level
-})
-    return newStudent
-}
+      level: args.data.level,
+      entryYear: args.data.entryYear,
+      degree: {
+        connect: {
+          id: args.data.degree
+        }
+      },
+  
+    })
+  
+    return newStudent;
+  }
 
 async function updateStudent(parent, args, context, info) {
   let updatedStudent = await context.prisma.updateStudent({
@@ -147,7 +152,8 @@ async function updateStudent(parent, args, context, info) {
       surname: args.data.surname,
       guid: args.data.guid,
       degreeID: {connect: {id: args.data.degree}},
-      level: args.data.level
+      level: args.data.level, 
+      entryYear: args.data.entryYear
     }
 });
     return updatedStudent
@@ -159,31 +165,40 @@ async function deleteStudent(parent, args, context, info) {
 }
 
 async function createStudentGrade(parent, args, context, info) {
-  let newStudentGrade = await context.prisma.createStudentGrade({
-    student: args.data.student,
-    course: args.data.course,
+  console.log("createStudentGrade::args=", args);
+  let newStudentGrade = await context.prisma.createStudentCourseGrade({
+    student: {connect: {id: args.data.student}},
+    course: {connect: {id: args.data.course}},
     weight: args.data.weight,
     grade: args.data.grade,
-})
-    return newStudentGrade
+    date: args.data.date
+  })
+  return newStudentGrade
 }
 
 async function updateStudentGrade(parent, args, context, info) {
-  let updatedStudentGrade = await context.prisma.updateStudentGrade({
-    where: {id: args.id},
+  console.log("updateStudentGrade::args=", args);
+  let updatedStudentGrade = await context.prisma.updateStudentCourseGrade({
+    where: {
+      id: args.id
+    },
     data: {
-      student: args.data.student,
-      course: args.data.course,
+      student: {connect: {id: args.data.student}},
+      course: {connect: {id: args.data.course}},
       weight: args.data.weight,
       grade: args.data.grade,
+      date: args.data.date
     }
-});
-    return updatedStudentGrade
+  });
+  return updatedStudentGrade
 }
 
 async function deleteStudentGrade(parent, args, context, info) {
-  let deletedStudentGrade = await context.prisma.deleteStudentGrade({ id: args.id })
-    return deletedStudentGrade
+  console.log("deleteStudentGrade::args=", args);
+  let deletedStudentGrade = await context.prisma.deleteStudentCourseGrade({
+    id: args.id
+  })
+  return deletedStudentGrade
 }
 
 async function createOverallGrade(parent, args, context, info) {
@@ -231,28 +246,135 @@ async function updateUserRole(root, args, context) {
 }
 
 async function createCourseDegreeWeight(parent, args, context, info) {
-  let newCourseDegreeWeight = await context.prisma.createCourseDegreeWeight({
-    course: args.data.courseid,
-    degree: args.data.degree,
+
+  let CDWtObject = {
+    course: {
+      connect: {
+        id: args.data.course
+      }
+    },
+    degree: {
+      connect: {
+        id: args.data.degree
+      }
+    },
     weight: args.data.weight
-})
+  }
+
+  console.log("createCourseDegreeWeight::CDWtObject=", CDWtObject);
+
+  let newCourseDegreeWeight = await context.prisma.createCourseDegreeWeight(CDWtObject)
   return newCourseDegreeWeight
 }
 
+async function updateCourseDegreeWeight(parent, args, context, info) {
+  console.log("updateCourseDegreeWeight:: args=", args);
+  let CDWtObject = {
+    data: {
+      course: {
+        connect: {
+          id: args.data.course
+        }
+      },
+      degree: {
+        connect: {
+          id: args.data.degree
+        }
+      },
+      weight: args.data.weight
+    },
+    where: {
+      id: args.where.id
+    }
+  };
+  let whereClause = {
+    where: {
+      id: args.where.id
+    }
+  };
+
+  console.log("updateCourseDegreeWeight::CDWtObject=", CDWtObject, ", whereClause=", args.where.id);
+
+  let updatedCourseDegreeWeight = await context.prisma.
+  updateCourseDegreeWeight(CDWtObject);
+  return updatedCourseDegreeWeight
+}
+
+async function deleteCourseDegreeWeight(parent, args, context, info) {
+  console.log("deleteCourseDegreeWeight::args=", args)
+  let deletedCourseDegreeWeight = await context.prisma.deleteCourseDegreeWeight({
+    id: args.id
+  })
+  return deletedCourseDegreeWeight
+}
+async function createCourseRun(parent, args, context, info) {
+  let dataObject = {
+    year: args.data.year,
+    course: {
+      create: {
+        level: args.data.level,
+        courseID: args.data.courseID,
+        name: args.data.name,
+        info: args.data.info
+      }
+    }
+  };
+
+  console.log("createCourseRun::dataObject=", dataObject);
+  let newCourseRun = await context.prisma.createCourseRun(dataObject)
+  return newCourseRun
+}
+
+async function updateCourseRun(parent, args, context, info) {
+  let dataObject = {
+    data: {
+      year: args.data.year,
+      course: {
+        update: {
+          level: args.data.level,
+          courseID: args.data.courseID,
+          name: args.data.name,
+          info: args.data.info
+        }
+      }
+    },
+    where: {
+      id: args.id
+    }
+  };
+  console.log("updateCourseRun::dataObject=", dataObject);
+  let updatedCourseRun = await context.prisma.updateCourseRun(dataObject)
+  return updatedCourseRun
+}
+
+async function deleteCourseRun(parent, args, context, info) {
+  console.log("deleteCourseRun::args=", args);
+
+   let deletedCourseRun = await context.prisma.deleteCourseRun({
+    id: args.id
+  })
+
+  let deletedcourse = await context.prisma.deleteCourse({
+    id: args.courseid
+  })
+  
+  return deletedCourseRun
+}
 
 module.exports = {
 	signup, login,
   createPost,
   changeGradeWeight,
-  createCourse, 
-  deleteCourse,
-  updateCourse,
+  createCourseRun, 
+  deleteCourseRun,
+  updateCourseRun,
   deleteUser,
   updateUserRole,
   createDegree,
   updateDegree,
   deleteDegree,
   createStudent,
+  createStudentByUpload,
   updateStudent,
   deleteStudent,
   createStudentGrade,
@@ -261,5 +383,7 @@ module.exports = {
   createOverallGrade,
   updateOverallGrade,
   deleteOverallGrade,
-  createCourseDegreeWeight
+  createCourseDegreeWeight,
+  deleteCourseDegreeWeight,
+  updateCourseDegreeWeight
 }

@@ -8,10 +8,12 @@ const GET_CourseDegreeWeight_GQL = gql `
 			id
 			weight
 			degree {
-			  id
+        id
+        name
 			}
 			course {
-			 id 
+       id 
+       name
 			}
 		  }
     }
@@ -35,32 +37,18 @@ const EDIT_CDWEIGHT_GQL = gql `
   `;
 
 const  DELETE_CDWEIGHT_GQL = gql`
-mutation($where: CourseDegreeWeightWhereUniqueInput!){
-	deleteCourseDegreeWeight(where: $where) {
+mutation($id: ID!){
+	deleteCourseDegreeWeight(id: $id) {
 			id					
 	}
 }
 `;
 
-const GET_ALL_COURSES_GQL = gql `
-    {      
-      getCourses {
+const GET_COURSES_GQL = gql `
+  query getCourses($searchString: String) {
+    getCourses(searchString: $searchString) {  
         id
-        level
-        year
-        courseID
-        name
-        info
-      }
-    }
-  `;
-
-const GET_YEAR_COURSES_GQL = gql `
-  query coursesSearch($year: Year, $searchString: String) {
-    coursesSearch(year: $year, searchString: $searchString) {  
-        id
-        level
-        year
+        level        
         courseID
         name
         info
@@ -73,7 +61,6 @@ const DELETE_COURSE_GQL = gql `
       deleteCourse(id: $id) {
         id
         level
-        year
         courseID
         name
         info
@@ -81,11 +68,11 @@ const DELETE_COURSE_GQL = gql `
     }
   `;
 
-const ADD_COURSE_GQL = gql `
-    mutation($courseID: String!, $level: Level, $year: Year, $name: String, $info: String) {
-      createCourse(courseID: $courseID, level: $level, year: $year, name: $name, info: $info) {
-        level
-        year
+  const ADD_COURSE_GQL = gql `
+    mutation($data: CourseCreateInput!) {
+      createCourse(data: $data) {
+        id
+        level        
         courseID
         name
         info
@@ -106,9 +93,9 @@ const EDIT_COURSE_GQL = gql `
     }
   `;
 
-const GET_DEGREES_LOOKUP_GQL = gql `
+  const GET_DEGREES_LOOKUP_GQL = gql `
       {      
-          getDegrees {
+        getDegrees {
             id
             degreeCode 
             name
@@ -130,7 +117,7 @@ const GET_DEGREES_GQL = gql `
           id
           name
         }
-          CourseDegreeWeights{
+          courseDegreeWeights {
             id
             degree {
                 id
@@ -141,7 +128,6 @@ const GET_DEGREES_GQL = gql `
                 name
             }
             weight
-          
           }
       }
     }
@@ -189,6 +175,7 @@ query($searchString: String){
 		surname
 		guid	
     level	
+    entryYear
     degree {
         id
         name
@@ -197,7 +184,7 @@ query($searchString: String){
       id
       weight
       grade
-      
+      date 
       course {
         id
         name
@@ -209,7 +196,7 @@ query($searchString: String){
       } 
       
 	}
-  myoverallgrade{
+  myoverallgrades{
         id 
         student {
             degree {
@@ -319,6 +306,50 @@ mutation($id:ID!){
 }
 `;
 
+//============ CourseRuns GQLs=============
+
+const  GET_COURSERUNS_GQL = gql`
+query($searchString: String){
+	getCourseRuns(searchString: $searchString) {
+		   id
+			year
+			course {
+			  id
+			  name
+			  info
+			  courseID
+			  level      
+			}
+        
+  }
+
+}
+`;
+
+const ADD_COURSERUN_GQL = gql`
+mutation($data:CourseRunInput!){
+	createCourseRun(data: $data) {
+			id			
+	}
+}
+`;
+
+const EDIT_COURSERUN_GQL = gql`
+mutation($id:ID!, $data:CourseRunInput!){
+	updateCourseRun(id: $id, data: $data) {
+			id					
+	}
+}
+`;
+
+const DELETE_COURSERUN_GQL = gql `
+    mutation($id: ID!, $courseid: ID!) {
+      deleteCourseRun(id: $id, courseid: $courseid) {
+		   id  
+      }
+    }
+  `;
+
 //========== End of Student Overall Grades GQL  ============
 
 // =============End of Student Grades GQL ===============
@@ -328,12 +359,13 @@ mutation($id:ID!){
 
 
 export {
-  GET_ALL_COURSES_GQL,  GET_YEAR_COURSES_GQL,  DELETE_COURSE_GQL,  ADD_COURSE_GQL,
+  GET_COURSES_GQL, DELETE_COURSE_GQL,  ADD_COURSE_GQL,
   EDIT_COURSE_GQL,
   GET_DEGREES_GQL,  GET_DEGREES_LOOKUP_GQL,   ADD_DEGREE_GQL, EDIT_DEGREE_GQL, DELETE_DEGREE_GQL,
   GET_STUDENTS_GQL, ADD_STUDENT_GQL, EDIT_STUDENT_GQL,DELETE_STUDENT_GQL,
   ADD_STUDENT_GRADE_GQL,  EDIT_STUDENT_GRADE_GQL , DELETE_STUDENT_GRADE_GQL  ,
   ADD_S_OVERALL_GRADE_GQL,EDIT_S_OVERALL_GRADE_GQL, DELETE_OVS_GRADE_GQL,
   ADD_CDWEIGHT_GQL, DELETE_CDWEIGHT_GQL, EDIT_CDWEIGHT_GQL,
-   GET_CourseDegreeWeight_GQL
+  GET_CourseDegreeWeight_GQL, GET_COURSERUNS_GQL,
+  ADD_COURSERUN_GQL, EDIT_COURSERUN_GQL, DELETE_COURSERUN_GQL
 }

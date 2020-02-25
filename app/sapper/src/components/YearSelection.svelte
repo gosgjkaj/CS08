@@ -1,6 +1,6 @@
 <script> 
   import years from '../utils/js/YearRuns';
-  export let selected;
+  export let selected="";
 </script>
 
 <div class="select">
