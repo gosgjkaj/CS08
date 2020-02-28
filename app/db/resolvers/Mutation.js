@@ -151,7 +151,7 @@ async function updateStudent(parent, args, context, info) {
       firstname: args.data.firstname,
       surname: args.data.surname,
       guid: args.data.guid,
-      degreeID: {connect: {id: args.data.degree}},
+      degree: {connect: {id: args.data.degree}},
       level: args.data.level, 
       entryYear: args.data.entryYear
     }
@@ -160,6 +160,17 @@ async function updateStudent(parent, args, context, info) {
 }
 
 async function deleteStudent(parent, args, context, info) {
+
+  console.log("deleteStudent:: args=", args);
+
+  let deleteManyStudentCourseGrades = await context.prisma.
+  deleteManyStudentCourseGrades({
+    student: {
+      id: args.id
+    }
+  });
+
+  console.log("deleteStudent:: After deleteManyStudentCourseGrades");
   let deletedStudent = await context.prisma.deleteStudent({ id: args.id })
     return deletedStudent
 }
@@ -309,7 +320,7 @@ async function deleteCourseDegreeWeight(parent, args, context, info) {
 }
 async function createCourseRun(parent, args, context, info) {
   let dataObject = {
-    year: args.data.year,
+    year: {set:  args.data.year },
     course: {
       create: {
         level: args.data.level,
@@ -328,7 +339,7 @@ async function createCourseRun(parent, args, context, info) {
 async function updateCourseRun(parent, args, context, info) {
   let dataObject = {
     data: {
-      year: args.data.year,
+      year: {set:  args.data.year },
       course: {
         update: {
           level: args.data.level,

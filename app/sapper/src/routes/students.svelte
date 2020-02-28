@@ -1,8 +1,8 @@
 <script>
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
-  import { client } from '../gqlClient';
-  import { session } from '../stores';
+  import { client } from "../gqlClient";
+  import { session } from "../stores";
 
   import {
     GET_STUDENTS_GQL,
@@ -22,7 +22,6 @@
   import YearSelection from "../components/YearSelection.svelte";
   import DegreeSelection from "../components/DegreeSelection.svelte";
   import CourseSelection from "../components/CourseDegreeWtSelection.svelte";
-  
 
   let deleteContext = "",
     DeleteSubTitle = "";
@@ -57,6 +56,35 @@
     }
     if (deleteContext === "OVSGrade") {
       deleteOVSGRecord();
+    }
+  }
+
+  //Hide /Show
+  const GradesDiv = "GradesDiv",
+    ShowBtnText = "Show All Grades",
+    HideBtnText = "Collapse";
+
+  function ShowOrHideGrades(e) {
+    e.preventDefault();
+    const ButtonID = e.target.id;
+    var TargetElementsClass = "." + GradesDiv + ButtonID;
+    var BtnText = document.getElementById(ButtonID).textContent.toLowerCase();
+
+    if (BtnText.includes(ShowBtnText.toLowerCase())) {
+      document.getElementById(ButtonID).textContent = HideBtnText;
+      document.querySelectorAll(TargetElementsClass).forEach(function(el) {
+        console.log("element type=", el.tagName);
+        el.style.display = "block";
+        //el.setAttribute("hidden", "true")
+        //el.hidden = false;
+      });
+    } else {
+      document.getElementById(ButtonID).textContent = ShowBtnText;
+      document.querySelectorAll(TargetElementsClass).forEach(function(el) {
+        el.style.display = "none";
+        //el.removeAttribute("hidden")
+        //el.hidden = true;
+      });
     }
   }
 
@@ -143,8 +171,8 @@
     if (
       OvSCRUDObject.studentLevel.length < 1 ||
       OvSCRUDObject.year.length < 1 ||
-      !OvSCRUDObject.grade 
-      ) {
+      !OvSCRUDObject.grade
+    ) {
       isOvsGDataInvalid = true;
       return false;
     } else {
@@ -304,7 +332,7 @@
           student: GradeObject.student,
           course: GradeObject.courseID,
           weight: GradeObject.weight,
-          grade: GradeObject.grade, 
+          grade: GradeObject.grade,
           date: GradeObject.date
         }
       };
@@ -349,9 +377,9 @@
     console.log("In validateGrade:: gradeObject=", gradeObject);
     if (
       gradeObject.courseID.length < 1 ||
-      !gradeObject.weight  ||
+      !gradeObject.weight ||
       !gradeObject.grade ||
-      !gradeObject.date 
+      !gradeObject.date
     ) {
       isGradeDataInvalid = true;
       return false;
@@ -374,6 +402,8 @@
   }
 
   function SearchEvent(e) {
+    let TargetValue = e.target.value;
+    searchString = TargetValue;
     console.log(
       "e.target.value=",
       e.target.value,
@@ -396,9 +426,9 @@
       studentObject.degreeID.length < 1 ||
       studentObject.level.length < 1 ||
       studentObject.entryYear.length < 1 ||
-      !studentObject.firstname  ||
-      !studentObject.surname  ||
-      !studentObject.guid 
+      !studentObject.firstname ||
+      !studentObject.surname ||
+      !studentObject.guid
     ) {
       isDataInvalid = true;
       return false;
@@ -421,7 +451,7 @@
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
-          level: studentObject.level, 
+          level: studentObject.level,
           entryYear: studentObject.entryYear
         }
       };
@@ -466,7 +496,7 @@
           firstname: studentObject.firstname,
           surname: studentObject.surname,
           guid: studentObject.guid,
-          level: studentObject.level, 
+          level: studentObject.level,
           entryYear: studentObject.entryYear
         }
       };
@@ -570,10 +600,10 @@
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" /> 
   -->
   <style>
-    .select1 position relative display inline-block margin-bottom 15px width 100%
-        select display inline-block width 100% cursor pointer padding 10px 15px
-        outline 0 border 0 border-radius 0 background $color--light-grey color
-        $color--dark-grey appearance none -webkit-appearance none -moz-appearance
+    .select1 position relative display inline-block margin-bottom 15px width
+        100% select display inline-block width 100% cursor pointer padding 10px
+        15px outline 0 border 0 border-radius 0 background $color--light-grey
+        color $color--dark-grey appearance none -webkit-appearance none -moz-appearance
         none &: : -ms-expand display none &: hover,
       &: focus color $color--black background $color--grey &: disabled opacity
         0.5 pointer-events none .select__arrow position absolute top 16px right
@@ -586,440 +616,535 @@
 </svelte:head>
 
 {#if $session.user}
+  <!-- Title Bar -->
+  <div class="container is-fullhd ">
+    <div class="notification">
 
-<!-- Title Bar -->
-<div class="container is-fullhd ">
-  <div class="notification">
-
-    <nav class="level">
-      <!-- Left side -->
-      <div class="level-left">
-        <div class="level-item">
-          <p class="subtitle is-5">
-            <strong>
-              List of Students {searchString.trim().length > 0 ? 'for search query ' + searchString : ''}
-            </strong>
-          </p>
-        </div>
-      </div>
-
-      <!-- Search  -->
-      <div class="level-right">
-        <div class="level-item">
-          <div class="field">
-            <p class="control has-icons-right">
-              <input
-                id="searchStringElement"
-                on:input={SearchEvent}
-                bind:value={searchString}
-                class="input is-rounded"
-                type="text"
-                placeholder="Search Student" />
-              <span class="icon is-small is-right">
-                <i class="fas fa-search" />
-              </span>
+      <nav class="level">
+        <!-- Left side -->
+        <div class="level-left">
+          <div class="level-item">
+            <p class="subtitle is-5">
+              <strong>
+                List of Students {searchString.trim().length > 0 ? 'for search query ' + searchString : ''}
+              </strong>
             </p>
-
           </div>
-          {#if searchString.trim().length > 0}
-            <p class="level-item">
-              <a
-                href="javascript:;"
-                on:click={resetSearch}
-                class="button is-success">
-                Reset Search
-              </a>
-            </p>
-          {/if}
-          <p class="level-item">
-            <a
-              href="javascript:;"
-              on:click={NewStudentClick}
-              class="button is-success">
-              Add New Student
-            </a>
-          </p>
-
         </div>
 
-      </div>
+        <!-- Search  -->
+        <div class="level-right">
+          <div class="level-item">
+            <div class="field">
+              <p class="control has-icons-right">
+                <input
+                  id="searchStringElement"
+                  on:input={SearchEvent}
+                  bind:value={searchString}
+                  class="input is-rounded"
+                  type="text"
+                  placeholder="Search Student" />
+                <span class="icon is-small is-right">
+                  <i class="fas fa-search" />
+                </span>
+              </p>
 
-      <!-- End of Search -->
-
-    </nav>
-  </div>
-</div>
-
-<!-- Start of Iteration Students -->
-{#await $GET_STUDENTS_LIST}
-  <progress class="progress is-small is-primary" max="100">15%</progress>
-{:then data}
-
-  <section class="section cards">
-    <div class="container">
-      <div class="columns is-multiline">
-
-        {#each data.data['getStudents'] as student, i}
-          <div class="column">
-            <Card title={student.firstname + ' ' + student.surname}>
-              <table
-                class="table is-striped is-narrow is-hoverable is-fullwidth">
-                <thead>
-                  <tr>
-                    <th>Firstname</th>
-                    <th>Surname</th>
-                    <th>Degree</th>
-                    <th>Level</th>
-                    <th>GUID</th>
-                    <th>Entry Year</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{student.firstname}</td>
-                    <td>{student.surname}</td>
-                    <td>{student.degree.name}</td>
-                    <td>{student.level}</td>
-                    <td>{student.guid}</td>
-                    <td>{student.entryYear}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <!-- Student Buttons -->
-              <div class="columns is-centered">
-                <div class="column">
-                  <a
-                    class="button is-success"
-                    href="javascript:;"
-                    on:click={() => onItemClick(student)}>
-                    <span class="icon is-small">
-                      <i class="fas fa-edit" />
-                    </span>
-                    <span>Edit Student</span>
-                  </a>
-                </div>
-                <div class="column">
-                  <a
-                    class="button is-danger"
-                    href="javascript:;"
-                    on:click={() => onDeleteClick(student)}>
-                    <span class="icon is-small">
-                      <i class="fas fa-trash" />
-                    </span>
-                    <span>Delete Student</span>
-                  </a>
-                </div>
-
-                {#if student['mygrades'].length <= 0}
-                  <div class="column">
-                    <a
-                      href="javascript:;"
-                      on:click={() => AddGrade(student.id, student.degree.id)}
-                      class="button is-success is-rounded">
-                      <span class="icon">
-                        <i class="fas fa-plus" />
-                      </span>
-                      &nbsp;&nbsp;Add Grade
-                    </a>
-                  </div>
-                {/if}
-              </div>
-              <hr />
-              <!-- End of Student Buttons -->
-
-              <!-- Grades Start here -->
-              {#if student['mygrades'].length > 0}
-                <p>
-                  <span class="tag is-primary is-large">Grades</span>
-                  <a
-                    href="javascript:;"
-                    on:click={() => AddGrade(student.id, student.degree.id)}
-                    class="button is-success is-rounded">
-                    <span class="icon">
-                      <i class="fas fa-plus" />
-                    </span>
-                  </a>
-                </p>
-                <div class="columns">
-                  <div class="column is-one-sixth">
-                    <strong>Course</strong>
-                  </div>
-                  <div class="column is-one-sixth">
-                    <strong>Weight</strong>
-                  </div>
-                  <div class="column is-one-sixth">
-                    <strong>Grade</strong>
-                  </div>
-                  <div class="column is-one-sixth">
-                    <strong>Date</strong>
-                  </div>
-                  <div class="column is-one-sixth" />
-                  <div class="column is-one-sixth" />
-                </div>
-              {/if}
-
-              {#each student['mygrades'] as sgrade, i}
-                <div class="columns">
-                  <div class="column is-one-sixth">{sgrade.course.name}</div>
-                  <div class="column is-one-sixth">{sgrade.weight}</div>
-                  <div class="column is-one-sixth">{sgrade.grade}</div>
-                  <div class="column is-one-sixth">{sgrade.date}</div>
-                  <div class="column is-one-sixth">
-                    <a
-                      class="button is-success"
-                      href="javascript:;"
-                      on:click={() => EditGrade(sgrade, student.id, sgrade.student.degree.id)}>
-                      <span class="icon is-small">
-                        <i class="fas fa-edit" />
-                      </span>
-                    </a>
-                  </div>
-                  <div class="column is-one-sixth">
-                    <a
-                      class="button is-danger"
-                      href="javascript:;"
-                      on:click={() => DeleteGrade(sgrade)}>
-                      <span class="icon is-small">
-                        <i class="fas fa-trash" />
-                      </span>
-                    </a>
-                  </div>
-                </div>
-              {/each}
-
-              <!-- End of Student Grades -->
-
-              <!-- Student Overall Grade starts here -->
-              {#if student['mygrades'].length > 0 && student['myoverallgrades'].length <= 0}
-                <p>
-                  <a
-                    href="javascript:;"
-                    on:click={() => AddOvSGrade(student.degree.id, student.id)}
-                    class="button is-success is-rounded">
-                    <span class="icon">
-                      <i class="fas fa-plus" />
-                    </span>
-                    &nbsp;&nbsp; Add Overall Grade
-                  </a>
-                </p>
-              {/if}
-
-              {#if student['myoverallgrades'].length > 0}
-                <p>
-                  <span class="tag is-primary is-large">Overall Grades</span>
-                  <a
-                    href="javascript:;"
-                    on:click={() => AddOvSGrade(student.degree.id, student.id)}
-                    class="button is-success is-rounded">
-                    <span class="icon">
-                      <i class="fas fa-plus" />
-                    </span>
-                  </a>
-                </p>
-                <div class="columns">
-                  <div class="column is-one-fifth">
-                    <strong>Level</strong>
-                  </div>
-                  <div class="column is-one-fifth">
-                    <strong>Year</strong>
-                  </div>
-                  <div class="column is-one-fifth">
-                    <strong>Grade</strong>
-                  </div>
-                  <div class="column is-one-fifth" />
-                  <div class="column is-one-fifth" />
-                </div>
-              {/if}
-              {#each student['myoverallgrades'] as overallGradeReadObject, i}
-                <div class="columns">
-                  <div class="column is-one-fifth">
-                    {overallGradeReadObject.studentLevel}
-                  </div>
-                  <div class="column is-one-fifth">
-                    {overallGradeReadObject.year}
-                  </div>
-                  <div class="column is-one-fifth">
-                    {overallGradeReadObject.grade}
-                  </div>
-                  <div class="column is-one-fifth">
-                    <a
-                      class="button is-success"
-                      href="javascript:;"
-                      on:click={() => EditOvSGrade(overallGradeReadObject, student.degree.id, student.id)}>
-                      <span class="icon is-small">
-                        <i class="fas fa-edit" />
-                      </span>
-                    </a>
-                  </div>
-                  <div class="column is-one-fifth">
-                    <a
-                      class="button is-danger"
-                      href="javascript:;"
-                      on:click={() => DeleteOvSGrade(overallGradeReadObject)}>
-                      <span class="icon is-small">
-                        <i class="fas fa-trash" />
-                      </span>
-                    </a>
-                  </div>
-                </div>
-              {/each}
-
-              <!-- Student Overall Grade ends  here -->
-
-            </Card>
-          </div>
-        {:else}
-          <p class="subtitle is-5 $subtitle-color: $red">
+            </div>
             {#if searchString.trim().length > 0}
-              <div>
-                No Students for the search query {searchString}.
+              <p class="level-item">
                 <a
                   href="javascript:;"
                   on:click={resetSearch}
                   class="button is-success">
                   Reset Search
                 </a>
-
-              </div>
-            {:else}
-              <p>No students listed yet.</p>
+              </p>
             {/if}
+            <p class="level-item">
+              <a
+                href="javascript:;"
+                on:click={NewStudentClick}
+                class="button is-success">
+                Add New Student
+              </a>
+            </p>
 
-          </p>
-        {/each}
+          </div>
 
-      </div>
+        </div>
+
+        <!-- End of Search -->
+
+      </nav>
     </div>
-  </section>
-{:catch error}
-  <p style="color: red">{error.message}</p>
-{/await}
-<!-- End of Iteration Students -->
-
-<!-- Modals -->
-
-<!-- Student Modal -->
-<div class={modalClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        {studentObject.firstname ? 'Edit student: ' + studentObject.firstname : 'Add New Student'}
-      </p>
-      <button class="delete" aria-label="close" on:click={closeModal} />
-    </header>
-    <section class="modal-card-body">
-
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Firstname*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder="Firstname"
-              bind:value={studentObject.firstname} />
-          </div>
-        </div>
-
-        <div class="column field">
-          <label class="label">Surname*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder="Surname"
-              bind:value={studentObject.surname} />
-          </div>
-        </div>
-      </div>
-
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">GUID</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder="e.g 232144H"
-              bind:value={studentObject.guid} />
-          </div>
-        </div>
-      </div>
-
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Degree</label>
-          <div class="control">
-            <DegreeSelection
-              multiSelect={false}
-              bind:selectedDegrees={studentObject.degreeID} />
-          </div>
-        </div>
-
-        <div class="column field">
-          <label class="label">Level</label>
-          <div class="control">
-            <LevelSelection bind:selected={studentObject.level} />
-          </div>
-        </div>
-        <div class="column field">
-          <label class="label">Entry Year</label>
-          <div class="control">
-            <YearSelection bind:selected={studentObject.entryYear} />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        {#if isDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
-        {/if}
-      </div>
-
-    </section>
-    <footer class="modal-card-foot">
-      <button class={buttonSaveClass} on:click={save}>Save changes</button>
-      <button class="button" on:click={closeModal}>Cancel</button>
-    </footer>
   </div>
-</div>
-<!-- End of Student Modal -->
 
-<!-- Grade Modal -->
-<div class={modalGradeClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        {GradeObject.id ? 'Edit Grade: ' : 'Add New Grade'}
-      </p>
-      <button class="delete" aria-label="close" on:click={closeGradeModal} />
-    </header>
-    <section class="modal-card-body">
+  <!-- Start of Iteration Students -->
+  {#await $GET_STUDENTS_LIST}
+    <progress class="progress is-small is-primary" max="100">15%</progress>
+  {:then data}
 
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Course*</label>
-          <div class="control">
-            <CourseSelection
-              bind:gradevalue={GradeObject.weight}
-              degreeID={GradeObject.degreeID}
-              bind:selectedCourse={GradeObject.courseID} />
-          </div>
+    <section class="section cards">
+      <div class="container">
+        <div class="columns is-multiline">
+
+          {#each data.data['getStudents'] as student, i}
+            <div class="column">
+              <Card title={student.firstname + ' ' + student.surname}>
+                <table
+                  class="table is-striped is-narrow is-hoverable is-fullwidth">
+                  <thead>
+                    <tr>
+                      <th>First Name</th>
+                      <th>Surname</th>
+                      <th>Degree</th>
+                      <th>Level</th>
+                      <th>GUID</th>
+                      <th>Entry Year</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{student.firstname}</td>
+                      <td>{student.surname}</td>
+                      <td>{student.degree.name}</td>
+                      <td>{student.level}</td>
+                      <td>{student.guid}</td>
+                      <td>{student.entryYear}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Student Buttons -->
+                <div class="columns is-centered">
+                  <div class="column">
+                    <a
+                      class="button is-success"
+                      href="javascript:;"
+                      on:click={() => onItemClick(student)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-edit" />
+                      </span>
+                      <span>Edit Student</span>
+                    </a>
+                  </div>
+                  <div class="column">
+                    <a
+                      class="button is-danger"
+                      href="javascript:;"
+                      on:click={() => onDeleteClick(student)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-trash" />
+                      </span>
+                      <span>Delete Student</span>
+                    </a>
+                  </div>
+
+                  {#if student['mygrades'].length <= 0}
+                    <div class="column">
+                      <a
+                        href="javascript:;"
+                        on:click={() => AddGrade(student.id, student.degree.id)}
+                        class="button is-success is-rounded">
+                        <span class="icon">
+                          <i class="fas fa-plus" />
+                        </span>
+                        &nbsp;&nbsp;Add Grade
+                      </a>
+                    </div>
+                  {/if}
+                </div>
+                <hr />
+                <!-- End of Student Buttons -->
+
+                <!-- Grades Start here -->
+                {#if student['mygrades'].length > 0}
+                  <div class="columns">
+                    <div class="column is-one-third">
+                      <span class="tag is-primary is-large">
+                        {student['mygrades'].length} Grades
+                      </span>
+                    </div>
+                                        <div class="column is-one-third">
+                      <button
+                        id={student.degree.id}
+                        class="button"
+                        on:click={ShowOrHideGrades}>
+                        {ShowBtnText}
+                      </button>
+                    </div>
+                    <div class="column is-one-third">
+                      <a
+                        href="javascript:;"
+                        on:click={() => AddGrade(student.id, student.degree.id)}
+                        class="button is-success is-rounded {GradesDiv}{student.degree.id}"
+                        style="display: none;">
+                        <span class="icon">
+                          <i class="fas fa-plus" />
+                        </span><span>Add Grade</span>
+                      </a>
+                    </div>
+
+
+                  </div>
+                  <div
+                    class="{GradesDiv}{student.degree.id}"
+                    style="display: none;">
+                    <div class="columns">
+                      <div class="column is-one-sixth">
+                        <strong>Course</strong>
+                      </div>
+                      <div class="column is-one-sixth">
+                        <strong>Weight</strong>
+                      </div>
+                      <div class="column is-one-sixth">
+                        <strong>Grade</strong>
+                      </div>
+                      <div class="column is-one-sixth">
+                        <strong>Date</strong>
+                      </div>
+                      <div class="column is-one-sixth" />
+                      <div class="column is-one-sixth" />
+                    </div>
+                  </div>
+                {/if}
+                <div
+                  class="{GradesDiv}{student.degree.id}"
+                  style="display: none;">
+                  {#each student['mygrades'] as sgrade, i}
+                    <div class="columns">
+                      <div class="column is-one-sixth">
+                        {sgrade.course.name}
+                      </div>
+                      <div class="column is-one-sixth">{sgrade.weight}</div>
+                      <div class="column is-one-sixth">{sgrade.grade}</div>
+                      <div class="column is-one-sixth">{sgrade.date}</div>
+                      <div class="column is-one-sixth">
+                        <a
+                          class="button is-success"
+                          href="javascript:;"
+                          on:click={() => EditGrade(sgrade, student.id, sgrade.student.degree.id)}>
+                          <span class="icon is-small">
+                            <i class="fas fa-edit" />
+                          </span>
+                        </a>
+                      </div>
+                      <div class="column is-one-sixth">
+                        <a
+                          class="button is-danger"
+                          href="javascript:;"
+                          on:click={() => DeleteGrade(sgrade)}>
+                          <span class="icon is-small">
+                            <i class="fas fa-trash" />
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  {/each}
+
+                  <!-- End of Student Grades -->
+
+                  <!-- Student Overall Grade starts here -->
+                  {#if student['mygrades'].length > 0 && student['myoverallgrades'].length <= 0}
+                    <p>
+                      <a
+                        href="javascript:;"
+                        on:click={() => AddOvSGrade(student.degree.id, student.id)}
+                        class="button is-success is-rounded">
+                        <span class="icon">
+                          <i class="fas fa-plus" />
+                        </span>
+                        &nbsp;&nbsp; Add Overall Grade
+                      </a>
+                    </p>
+                  {/if}
+
+                  {#if student['myoverallgrades'].length > 0}
+                    <p>
+                      <span class="tag is-primary is-large">
+                        Overall Grades
+                      </span>
+                      <a
+                        href="javascript:;"
+                        on:click={() => AddOvSGrade(student.degree.id, student.id)}
+                        class="button is-success is-rounded">
+                        <span class="icon">
+                          <i class="fas fa-plus" />
+                        </span>
+                      </a>
+                    </p>
+                    <div class="columns">
+                      <div class="column is-one-fifth">
+                        <strong>Level</strong>
+                      </div>
+                      <div class="column is-one-fifth">
+                        <strong>Year</strong>
+                      </div>
+                      <div class="column is-one-fifth">
+                        <strong>Grade</strong>
+                      </div>
+                      <div class="column is-one-fifth" />
+                      <div class="column is-one-fifth" />
+                    </div>
+                  {/if}
+                  {#each student['myoverallgrades'] as overallGradeReadObject, i}
+                    <div class="columns">
+                      <div class="column is-one-fifth">
+                        {overallGradeReadObject.studentLevel}
+                      </div>
+                      <div class="column is-one-fifth">
+                        {overallGradeReadObject.year}
+                      </div>
+                      <div class="column is-one-fifth">
+                        {overallGradeReadObject.grade}
+                      </div>
+                      <div class="column is-one-fifth">
+                        <a
+                          class="button is-success"
+                          href="javascript:;"
+                          on:click={() => EditOvSGrade(overallGradeReadObject, student.degree.id, student.id)}>
+                          <span class="icon is-small">
+                            <i class="fas fa-edit" />
+                          </span>
+                        </a>
+                      </div>
+                      <div class="column is-one-fifth">
+                        <a
+                          class="button is-danger"
+                          href="javascript:;"
+                          on:click={() => DeleteOvSGrade(overallGradeReadObject)}>
+                          <span class="icon is-small">
+                            <i class="fas fa-trash" />
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+                <!-- Student Overall Grade ends  here -->
+
+              </Card>
+            </div>
+          {:else}
+            <p class="subtitle is-5 $subtitle-color: $red">
+              {#if searchString.trim().length > 0}
+                <div>
+                  No Students for the search query {searchString}.
+                  <a
+                    href="javascript:;"
+                    on:click={resetSearch}
+                    class="button is-success">
+                    Reset Search
+                  </a>
+
+                </div>
+              {:else}
+                <p>No students listed yet.</p>
+              {/if}
+
+            </p>
+          {/each}
+
         </div>
       </div>
+    </section>
+  {:catch error}
+    <p style="color: red">{error.message}</p>
+  {/await}
+  <!-- End of Iteration Students -->
 
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Weight*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="number"
-              placeholder="Weight"
-              bind:value={GradeObject.weight} />
+  <!-- Modals -->
+
+  <!-- Student Modal -->
+  <div class={modalClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          {studentObject.firstname ? 'Edit Record for:' + studentObject.firstname : 'Add New Student'}
+        </p>
+        <button class="delete" aria-label="close" on:click={closeModal} />
+      </header>
+      <section class="modal-card-body">
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Firstname*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder="Firstname"
+                bind:value={studentObject.firstname} />
+            </div>
+          </div>
+
+          <div class="column field">
+            <label class="label">Surname*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder="Surname"
+                bind:value={studentObject.surname} />
+            </div>
+          </div>
+        </div>
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">GUID</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder=""
+                bind:value={studentObject.guid} />
+            </div>
+          </div>
+        </div>
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Degree</label>
+            <div class="control">
+              <DegreeSelection
+                multiSelect={false}
+                bind:selectedDegrees={studentObject.degreeID} />
+            </div>
+          </div>
+
+          <div class="column field">
+            <label class="label">Level</label>
+            <div class="control">
+              <LevelSelection bind:selected={studentObject.level} />
+            </div>
+          </div>
+          <div class="column field">
+            <label class="label">Entry Year</label>
+            <div class="control">
+              <YearSelection bind:selected={studentObject.entryYear} />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {#if isDataInvalid}
+            <p class="help is-danger">Please enter all the required fields!</p>
+          {/if}
+        </div>
+
+      </section>
+      <footer class="modal-card-foot">
+        <button class={buttonSaveClass} on:click={save}>Save changes</button>
+        <button class="button" on:click={closeModal}>Cancel</button>
+      </footer>
+    </div>
+  </div>
+  <!-- End of Student Modal -->
+
+  <!-- Grade Modal -->
+  <div class={modalGradeClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          {GradeObject.id ? 'Edit Grade: ' : 'Add New Grade'}
+        </p>
+        <button class="delete" aria-label="close" on:click={closeGradeModal} />
+      </header>
+      <section class="modal-card-body">
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Course*</label>
+            <div class="control">
+              <CourseSelection
+                bind:gradevalue={GradeObject.weight}
+                degreeID={GradeObject.degreeID}
+                bind:selectedCourse={GradeObject.courseID} />
+            </div>
+          </div>
+        </div>
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Weight*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="number"
+                placeholder="Weight"
+                bind:value={GradeObject.weight} />
+            </div>
+          </div>
+
+          <div class="column field">
+            <label class="label">Grade*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="number"
+                placeholder="Grade"
+                bind:value={GradeObject.grade} />
+            </div>
+          </div>
+          <div class="column field">
+            <label class="label">Date*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="number"
+                placeholder="GrDateade"
+                bind:value={GradeObject.date} />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {#if isGradeDataInvalid}
+            <p class="help is-danger">Please enter all the required fields!</p>
+          {/if}
+        </div>
+
+      </section>
+      <footer class="modal-card-foot">
+        <button class={buttonGradeSaveClass} on:click={saveGrade}>
+          Save changes
+        </button>
+        <button class="button" on:click={closeGradeModal}>Cancel</button>
+      </footer>
+    </div>
+  </div>
+  <!-- End of Grade Modal -->
+
+  <!-- OvSG - Overall Student Grade Modal -->
+  <div class={modaloVSGradeClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          {OvSCRUDObject.grade ? 'Edit Overall Grade:  ' : 'Add New Overall Grade'}
+        </p>
+        <button class="delete" aria-label="close" on:click={closeOvSGModal} />
+      </header>
+      <section class="modal-card-body">
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Level*</label>
+            <div class="control">
+              <LevelSelection bind:selected={OvSCRUDObject.studentLevel} />
+            </div>
+          </div>
+        </div>
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Year*</label>
+            <div class="control">
+              <YearSelection bind:selected={OvSCRUDObject.year} />
+            </div>
           </div>
         </div>
 
@@ -1030,127 +1155,58 @@
               class="input"
               type="number"
               placeholder="Grade"
-              bind:value={GradeObject.grade} />
+              bind:value={OvSCRUDObject.grade} />
           </div>
         </div>
-        <div class="column field">
-          <label class="label">Date*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="number"
-              placeholder="GrDateade"
-              bind:value={GradeObject.date} />
-          </div>
+
+        <div>
+          {#if isOvsGDataInvalid}
+            <p class="help is-danger">Please enter all the required fields!</p>
+          {/if}
         </div>
-      </div>
 
-
-      <div>
-        {#if isGradeDataInvalid}
-          <p class="help is-danger">Please enter all required fields!</p>
-        {/if}
-      </div>
-
-    </section>
-    <footer class="modal-card-foot">
-      <button class={buttonGradeSaveClass} on:click={saveGrade}>
-        Save changes
-      </button>
-      <button class="button" on:click={closeGradeModal}>Cancel</button>
-    </footer>
+      </section>
+      <footer class="modal-card-foot">
+        <button class={buttonOvSGSaveClass} on:click={saveOvSGrade}>
+          Save changes
+        </button>
+        <button class="button" on:click={closeOvSGModal}>Cancel</button>
+      </footer>
+    </div>
   </div>
-</div>
-<!-- End of Grade Modal -->
+  <!-- End of OvSG - Overall Student Grade Modal -->
 
-<!-- OvSG - Overall Student Grade Modal -->
-<div class={modaloVSGradeClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        {OvSCRUDObject.grade ? 'Edit Overall Grade:  ' : 'Add New Overall Grade'}
-      </p>
-      <button class="delete" aria-label="close" on:click={closeOvSGModal} />
-    </header>
-    <section class="modal-card-body">
+  <!-- End of Modals -->
 
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Level*</label>
-          <div class="control">
-            <LevelSelection bind:selected={OvSCRUDObject.studentLevel} />
-          </div>
+  <!-- Delete Modal  -->
+  <div class={modalDeleteClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title is-danger">Delete this student?</p>
+        <button class="delete" aria-label="close" on:click={closeDeleteModal} />
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label has-text-danger">
+            Are you sure you would like to delete the student "{studentObject.firstname}"?
+          </label>
         </div>
-      </div>
 
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Year*</label>
-          <div class="control">
-            <YearSelection bind:selected={OvSCRUDObject.year} />
-          </div>
+        <div>
+          {#if DeleteError}
+            <p class="help is-danger">{DeleteError}}</p>
+          {/if}
         </div>
-      </div>
+      </section>
 
-      <div class="column field">
-        <label class="label">Grade*</label>
-        <div class="control">
-          <input
-            class="input"
-            type="number"
-            placeholder="Grade"
-            bind:value={OvSCRUDObject.grade} />
-        </div>
-      </div>
-
-      <div>
-        {#if isOvsGDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
-        {/if}
-      </div>
-
-    </section>
-    <footer class="modal-card-foot">
-      <button class={buttonOvSGSaveClass} on:click={saveOvSGrade}>
-        Save changes
-      </button>
-      <button class="button" on:click={closeOvSGModal}>Cancel</button>
-    </footer>
+      <footer class="modal-card-foot">
+        <button class={buttonDeleteClass} on:click={deleteRecord}>
+          Delete
+        </button>
+        <button class="button" on:click={closeDeleteModal}>Cancel</button>
+      </footer>
+    </div>
   </div>
-</div>
-<!-- End of OvSG - Overall Student Grade Modal -->
-
-<!-- End of Modals -->
-
-<!-- Delete Modal  -->
-<div class={modalDeleteClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title is-danger">Delete this student?</p>
-      <button class="delete" aria-label="close" on:click={closeDeleteModal} />
-    </header>
-    <section class="modal-card-body">
-      <div class="field">
-        <label class="label has-text-danger">Are you sure you would like to delete the student "{studentObject.firstname}"?</label>
-      </div>
-
-      <div>
-        {#if DeleteError}
-          <p class="help is-danger">{DeleteError}}</p>
-        {/if}
-      </div>
-    </section>
-
-    <footer class="modal-card-foot">
-      <button class={buttonDeleteClass} on:click={deleteRecord}>Delete</button>
-      <button class="button" on:click={closeDeleteModal}>Cancel</button>
-    </footer>
-  </div>
-</div>
-<!-- End of Delete Modal -->
-
-{:else}
-Please log in to access this part of the database.
-{/if}
+  <!-- End of Delete Modal -->
+{:else}Please log in to access this part of the database.{/if}

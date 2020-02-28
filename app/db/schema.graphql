@@ -55,7 +55,7 @@ type Course {
 type CourseRun {
   id: ID!
   course: Course!
-  year: Int!
+  year: [Int!]!
 }
 
 input CourseRunInput {
@@ -64,7 +64,7 @@ input CourseRunInput {
   courseID: String!
   name: String
   info: String
-  year: Int!
+  year: [Int!]!
 }
 
 type Degree {

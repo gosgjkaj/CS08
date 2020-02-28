@@ -1,8 +1,8 @@
 <script>
   import ApolloClient from "apollo-boost";
   import { query, mutate } from "svelte-apollo";
-  import { client } from '../gqlClient';
-  import { session } from '../stores';
+  import { client } from "../gqlClient";
+  import { session } from "../stores";
 
   import {
     GET_DEGREES_GQL,
@@ -21,7 +21,7 @@
   let deleteContext = "";
   let deleteCourse = {};
   let searchString = "",
-    DeleteError = "";
+    DeleteError = "", visible=false;
 
   let buttonSaveIsLoading = false;
   $: buttonSaveClass =
@@ -41,6 +41,23 @@
   let modalDeleteIsVisible = false;
   $: modalDeleteClass =
     modalDeleteIsVisible === true ? "modal is-active" : "modal";
+
+  //Hide /Show
+  function ShowOrHideCourses(e) {
+    e.preventDefault();
+    const ButtonID = e.target.id;
+    var TargetElementID = 'CrsOffered' + ButtonID;
+//    alert(TargetElementID);
+
+    var x = document.getElementById(TargetElementID);
+    if (x.style.display === "none") {
+      x.style.display = "block";
+      document.getElementById(ButtonID).textContent = 'Collapse';
+    } else {
+      x.style.display = "none";
+            document.getElementById(ButtonID).textContent = 'See Courses';
+    }
+  }
 
   //===================SDWeight functions variables etc ==========
   let TempCourseId = "00001";
@@ -76,15 +93,17 @@
   }
   function AddCDWeightClick(degreeObject) {
     SDWeightEditObject = {};
-    SDWeightEditObject.degree=degreeObject.id;
-    SDWeightEditObject.weight=0;
-    SDWeightEditObject.courseid="";
+    SDWeightEditObject.degree = degreeObject.id;
+    SDWeightEditObject.weight = 0;
+    SDWeightEditObject.courseid = "";
 
-    console.log("EditCourseDegreeWeight::degreeObject=",degreeObject);
-    console.log("EditCourseDegreeWeight::SDWeightEditObject=",SDWeightEditObject);
+    console.log("EditCourseDegreeWeight::degreeObject=", degreeObject);
+    console.log(
+      "EditCourseDegreeWeight::SDWeightEditObject=",
+      SDWeightEditObject
+    );
     openSDWeightModal();
   }
-
 
   function EditCDWeightClick(coursedetails) {
     console.log("EditCourseDegreeWeight::coursedetails=", coursedetails);
@@ -108,7 +127,7 @@
           degree: SDWeightEditObject.degree.id,
           weight: SDWeightEditObject.weight
         },
-        where: {id:SDWeightEditObject.id}
+        where: { id: SDWeightEditObject.id }
       };
       console.log("CDWeight UpdateObject=", UpdateObject);
 
@@ -150,7 +169,8 @@
           course: SDWeightEditObject.courseid,
           degree: SDWeightEditObject.degree,
           weight: SDWeightEditObject.weight
-      }};
+        }
+      };
       console.log("CDWeight InsertObject=", InsertObject);
 
       const SDWeightCreate = mutate(client(), {
@@ -169,12 +189,12 @@
   }
 
   function deleteSDWeightRecord() {
-    let deleteArguments =  { id: `${SDWeightEditObject.id}`  };
-    console.log("deleteSDWeightRecord:: delete arguments=", deleteArguments );
+    let deleteArguments = { id: `${SDWeightEditObject.id}` };
+    console.log("deleteSDWeightRecord:: delete arguments=", deleteArguments);
 
     const degreeSDWtDelete = mutate(client(), {
       mutation: DELETE_CDWEIGHT_GQL,
-      variables: {id: `${SDWeightEditObject.id}`}
+      variables: { id: `${SDWeightEditObject.id}` }
     })
       .then(data => {
         SDWeightEditObject = {};
@@ -269,7 +289,7 @@
   function deleteDegreeRecord() {
     const degreeDelete = mutate(client(), {
       mutation: DELETE_DEGREE_GQL,
-      variables: {id: `${degree.id}`}
+      variables: { id: `${degree.id}` }
     })
       .then(data => {
         degree = {};
@@ -400,361 +420,372 @@
 </svelte:head>
 
 {#if $session.user}
+  <!-- Title Bar -->
+  <div class="container is-fullhd ">
+    <div class="notification">
 
-<!-- Title Bar -->
-<div class="container is-fullhd ">
-  <div class="notification">
-
-    <nav class="level">
-      <!-- Left side -->
-      <div class="level-left">
-        <div class="level-item">
-          <p class="subtitle is-5">
-            <strong>
-              List of Degrees {searchString.trim().length > 0 ? 'for search query ' + searchString : ''}
-            </strong>
-          </p>
-        </div>
-      </div>
-
-      <!-- Search  -->
-      <div class="level-right">
-        <div class="level-item">
-          <div class="field">
-            <p class="control has-icons-right">
-              <input
-                id="searchStringElement"
-                on:input={SearchEvent}
-                bind:value={searchString}
-                class="input is-rounded"
-                type="text"
-                placeholder="Search Degree" />
-              <span class="icon is-small is-right">
-                <i class="fas fa-search" />
-              </span>
+      <nav class="level">
+        <!-- Left side -->
+        <div class="level-left">
+          <div class="level-item">
+            <p class="subtitle is-5">
+              <strong>
+                List of Degrees {searchString.trim().length > 0 ? 'for search query ' + searchString : ''}
+              </strong>
             </p>
-
           </div>
+        </div>
 
-          <div class="level-right">
-          <p class="level-item">
-            <a
-              href="javascript:;"
-              on:click={TitleBarclickEvent}
-              class="button is-success">
-              Add New Degree
-            </a>
-          </p>
-          </div>
-          </div>
+        <!-- Search  -->
+        <div class="level-right">
+          <div class="level-item">
+            <div class="field">
+              <p class="control has-icons-right">
+                <input
+                  id="searchStringElement"
+                  on:input={SearchEvent}
+                  bind:value={searchString}
+                  class="input is-rounded"
+                  type="text"
+                  placeholder="Search Degree" />
+                <span class="icon is-small is-right">
+                  <i class="fas fa-search" />
+                </span>
+              </p>
 
-        {#if searchString.trim().length > 0}
-          <p class="level-item">
-            <a
-              href="javascript:;"
-              on:click={resetSearch}
-              class="button is-success">
-              Reset Search
-            </a>
-          </p>
-        {/if}
-      </div>
+            </div>
 
-      <!-- End of Search -->
-
-    </nav>
-  </div>
-</div>
-
-<!-- Start of Iteration Courses -->
-{#await $GET_DEGREES_LIST}
-  <progress class="progress is-small is-primary" max="100">15%</progress>
-{:then data}
-
-  <section class="section cards">
-    <div class="container">
-      <div class="columns is-multiline">
-
-        {#each data.data['getDegrees'] as degree, i}
-          <div class="column img1 toaster is-quarter">
-            <Card title={degree.name}>
-              <table class="table is-striped is-hoverable">
-                <tr>
-                  <td>Name</td>
-                  <td>{degree.name}</td>
-                </tr>
-
-                <tr>
-                  <td>Degree Code</td>
-                  <td>{degree.degreeCode}</td>
-                </tr>
-                <tr>
-                  <td>Details:</td>
-                  <td>{degree.info}</td>
-                </tr>
-              </table>
-
-              <!-- Degree Action buttons -->
-              <div class="columns is-centered">
-                <div class="column">
-                  <a
-                    class="button is-success"
-                    href="javascript:;"
-                    on:click={() => onItemClick(degree)}>
-                    <span class="icon is-small">
-                      <i class="fas fa-edit" />
-                    </span>
-                    <span>Edit Degree</span>
-                  </a>
-                </div>
-                <div class="column">
-                  <a
-                    class="button is-danger"
-                    href="javascript:;"
-                    on:click={() => onDeleteClick(degree)}>
-                    <span class="icon is-small">
-                      <i class="fas fa-trash" />
-                    </span>
-                    <span>Delete Degree</span>
-                  </a>
-                </div>
-
-                <div class="column">
-                  <a
-                    class="button is-success"
-                    href="javascript:;"
-                    on:click={() => AddCDWeightClick(degree)}>
-                    <span class="icon is-small">
-                      <i class="fas fa-plus" />
-                    </span>
-                    <span>Add Course</span>
-                  </a>
-                </div>
-              </div>
-
-              <!-- End of Degree Action buttons -->
-
-              <!-- Courses Start here -->
-              {#if degree['courseDegreeWeights'].length > 0}
-                <p>
-                  <span class="tag is-primary is-large">Courses Offered:</span>
-                </p>
-                <div class="columns">
-                  <div class="column is-one-fourth">
-                    <strong>Course</strong>
-                  </div>
-                  <div class="column is-one-fourth">
-                    <strong>Weight</strong>
-                  </div>
-                  <div class="column is-one-fourth" />
-                  <div class="column is-one-fourth" />
-                </div>
-
-
-              {#each degree['courseDegreeWeights'] as courseDegreeWeightsdetails, i}
-                <div class="columns">
-                  <div class="column is-one-fourth">
-                    {courseDegreeWeightsdetails.course.name}
-                  </div>
-                  <div class="column is-one-fourth">
-                    {courseDegreeWeightsdetails.weight}
-                  </div>
-                  <div class="column is-one-fourth">
-                    <a
-                      href="javascript:;"
-                      on:click={() => EditCDWeightClick(courseDegreeWeightsdetails)}
-                      class="button is-success">
-                      Edit
-                    </a>
-                  </div>
-                  <div class="column is-one-fourth">
-                    <a
-                      href="javascript:;"
-                      on:click={() => DeleteCDWeightClick(courseDegreeWeightsdetails)}
-                      class="button is-danger">
-                      Delete
-                    </a>
-                  </div>
-                </div>
-              {/each}
-             {/if}
-
-              <footer class="card-footer" />
-            </Card>
-          </div>
-        {:else}
-          <p class="subtitle is-5 $subtitle-color: $red">
-            {#if searchString.trim().length > 0}
-              <div>
-                No degrees found for the search query {searchString}.
+            <div class="level-right">
+              <p class="level-item">
                 <a
                   href="javascript:;"
-                  on:click={resetSearch}
+                  on:click={TitleBarclickEvent}
                   class="button is-success">
-                  Reset Search
+                  Add New Degree
                 </a>
+              </p>
+            </div>
+          </div>
 
-              </div>
-            {:else}
-              <p>No degrees listed yet.</p>
-            {/if}
+          {#if searchString.trim().length > 0}
+            <p class="level-item">
+              <a
+                href="javascript:;"
+                on:click={resetSearch}
+                class="button is-success">
+                Reset Search
+              </a>
+            </p>
+          {/if}
+        </div>
 
-          </p>
-        {/each}
+        <!-- End of Search -->
 
-      </div>
+      </nav>
     </div>
-  </section>
-{:catch error}
-  <p style="color: red">{error.message}</p>
-{/await}
-<!-- End of Iteration Courses -->
-
-<!-- Modals -->
-<div class={modalClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        {degree.name ? degree.name : 'Add New Degree'}
-      </p>
-      <button class="delete" aria-label="close" on:click={closeModal} />
-    </header>
-    <section class="modal-card-body">
-
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Degree Code*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder="Degree Code"
-              bind:value={degree.degreeCode} />
-          </div>
-        </div>
-
-        <div class="column field">
-          <label class="label">Degree Name*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder=""
-              bind:value={degree.name} />
-          </div>
-        </div>
-      </div>
-
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Details</label>
-          <div class="control">
-            <input
-              class="input"
-              type="text"
-              placeholder=""
-              bind:value={degree.info} />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        {#if isDataInvalid}
-          <p class="help is-danger">Please enter all the required fields!</p>
-        {/if}
-      </div>
-
-    </section>
-    <footer class="modal-card-foot">
-      <button class={buttonSaveClass} on:click={saveDegree}>
-        Save changes
-      </button>
-      <button class="button" on:click={closeModal}>Cancel</button>
-    </footer>
   </div>
-</div>
 
-<!-- SDWeight Modal starts here -->
-<div class={modalSDWeightClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        {SDWeightEditObject.id ? 'Edit Course Weight ' : 'Add Course Weight'}
-      </p>
-      <button class="delete" aria-label="close" on:click={closeSDWeightModal} />
-    </header>
-    <section class="modal-card-body">
+  <!-- Start of Iteration Courses -->
+  {#await $GET_DEGREES_LIST}
+    <progress class="progress is-small is-primary" max="100">15%</progress>
+  {:then data}
 
-      <div class="columns is-desktop">
-        <div class="column field">
-          <label class="label">Course*</label>
-          <div class="control">
-            <CourseSelection
-              degreeID={SDWeightEditObject.degree}
-              bind:selectedCourse={SDWeightEditObject.courseid} />
+    <section class="section cards">
+      <div class="container">
+        <div class="columns is-multiline">
+
+          {#each data.data['getDegrees'] as degree, i}
+            <div class="column img1 toaster is-quarter">
+              <Card title={degree.name}>
+                <table class="table is-striped is-hoverable">
+                  <tr>
+                    <td>Name</td>
+                    <td>{degree.name}</td>
+                  </tr>
+
+                  <tr>
+                    <td>Degree Code</td>
+                    <td>{degree.degreeCode}</td>
+                  </tr>
+                  <tr>
+                    <td>Details:</td>
+                    <td>{degree.info}</td>
+                  </tr>
+                </table>
+
+                <!-- Degree Action buttons -->
+                <div class="columns is-centered">
+                  <div class="column">
+                    <a
+                      class="button is-success"
+                      href="javascript:;"
+                      on:click={() => onItemClick(degree)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-edit" />
+                      </span>
+                      <span>Edit Degree</span>
+                    </a>
+                  </div>
+                  <div class="column">
+                    <a
+                      class="button is-danger"
+                      href="javascript:;"
+                      on:click={() => onDeleteClick(degree)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-trash" />
+                      </span>
+                      <span>Delete Degree</span>
+                    </a>
+                  </div>
+
+                  <div class="column">
+                    <a
+                      class="button is-success"
+                      href="javascript:;"
+                      on:click={() => AddCDWeightClick(degree)}>
+                      <span class="icon is-small">
+                        <i class="fas fa-plus" />
+                      </span>
+                      <span>Add Course</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- End of Degree Action buttons -->
+
+                <!-- Courses Start here -->
+                {#if degree['courseDegreeWeights'].length > 0}
+                  <p>
+                    <span class="tag is-primary is-large">
+                     {degree['courseDegreeWeights'].length} Course(s) Offered:
+                    </span>  
+                
+                    <button id={degree.id} class="button" on:click={ShowOrHideCourses} >See Courses</button>
+
+                  </p>
+
+                  <div id="CrsOffered{degree.id}" style="display: none;">
+                    <div class="columns">
+                      <div class="column is-one-fourth">
+                        <strong>Course</strong>
+                      </div>
+                      <div class="column is-one-fourth">
+                        <strong>Weight</strong>
+                      </div>
+                      <div class="column is-one-fourth" />
+                      <div class="column is-one-fourth" />
+                    </div>
+
+                    {#each degree['courseDegreeWeights'] as courseDegreeWeightsdetails, i}
+                      <div class="columns">
+                        <div class="column is-one-fourth">
+                          {courseDegreeWeightsdetails.course.name}
+                        </div>
+                        <div class="column is-one-fourth">
+                          {courseDegreeWeightsdetails.weight}
+                        </div>
+                        <div class="column is-one-fourth">
+                          <a
+                            href="javascript:;"
+                            on:click={() => EditCDWeightClick(courseDegreeWeightsdetails)}
+                            class="button is-success">
+                            Edit
+                          </a>
+                        </div>
+                        <div class="column is-one-fourth">
+                          <a
+                            href="javascript:;"
+                            on:click={() => DeleteCDWeightClick(courseDegreeWeightsdetails)}
+                            class="button is-danger">
+                            Delete
+                          </a>
+                        </div>
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+
+                <footer class="card-footer" />
+              </Card>
+            </div>
+          {:else}
+            <p class="subtitle is-5 $subtitle-color: $red">
+              {#if searchString.trim().length > 0}
+                <div>
+                  No degrees found for the search query {searchString}.
+                  <a
+                    href="javascript:;"
+                    on:click={resetSearch}
+                    class="button is-success">
+                    Reset Search
+                  </a>
+
+                </div>
+              {:else}
+                <p>No degrees listed yet.</p>
+              {/if}
+
+            </p>
+          {/each}
+
+        </div>
+      </div>
+    </section>
+  {:catch error}
+    <p style="color: red">{error.message}</p>
+  {/await}
+  <!-- End of Iteration Courses -->
+
+  <!-- Modals -->
+  <div class={modalClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          {degree.name ? degree.name : 'Add New Degree'}
+        </p>
+        <button class="delete" aria-label="close" on:click={closeModal} />
+      </header>
+      <section class="modal-card-body">
+
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Degree Code*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder="Degree Code"
+                bind:value={degree.degreeCode} />
+            </div>
+          </div>
+
+          <div class="column field">
+            <label class="label">Degree Name*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder=""
+                bind:value={degree.name} />
+            </div>
           </div>
         </div>
 
-        <div class="column field">
-          <label class="label">Weight*</label>
-          <div class="control">
-            <input
-              class="input"
-              type="number"
-              placeholder=""
-              bind:value={SDWeightEditObject.weight} />
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Details</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                placeholder=""
+                bind:value={degree.info} />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        {#if isSDWeightDataInvalid}
-          <p class="help is-danger">Please enter all required fields!</p>
-        {/if}
-      </div>
+        <div>
+          {#if isDataInvalid}
+            <p class="help is-danger">Please enter all the required fields!</p>
+          {/if}
+        </div>
 
-    </section>
-    <footer class="modal-card-foot">
-      <button class={buttonSDWeightSaveClass} on:click={saveSDWeight}>
-        Save changes
-      </button>
-      <button class="button" on:click={closeSDWeightModal}>Cancel</button>
-    </footer>
+      </section>
+      <footer class="modal-card-foot">
+        <button class={buttonSaveClass} on:click={saveDegree}>
+          Save changes
+        </button>
+        <button class="button" on:click={closeModal}>Cancel</button>
+      </footer>
+    </div>
   </div>
-</div>
 
-<!-- SDWeight Modal ends  here -->
-<!-- End of Modals -->
+  <!-- SDWeight Modal starts here -->
+  <div class={modalSDWeightClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          {SDWeightEditObject.id ? 'Edit Course Weight ' : 'Add Course Weight'}
+        </p>
+        <button
+          class="delete"
+          aria-label="close"
+          on:click={closeSDWeightModal} />
+      </header>
+      <section class="modal-card-body">
 
-<!-- Delete Modal  -->
-<div class={modalDeleteClass}>
-  <div class="modal-background" />
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title is-danger">Delete this degree?</p>
-      <button class="delete" aria-label="close" on:click={closeDeleteModal} />
-    </header>
-    <section class="modal-card-body">
-      <div class="field">
-        <label class="label is-danger">Are you sure you would like to delete the degree named "{degree.name}" ?</label>
-      </div>
-      <div>
-        {#if DeleteError}
-          <p class="help is-danger">{DeleteError}}</p>
-        {/if}
-      </div>
-    </section>
+        <div class="columns is-desktop">
+          <div class="column field">
+            <label class="label">Course*</label>
+            <div class="control">
+              <CourseSelection
+                degreeID={SDWeightEditObject.degree}
+                bind:selectedCourse={SDWeightEditObject.courseid} />
+            </div>
+          </div>
 
-    <footer class="modal-card-foot">
-      <button class={buttonDeleteClass} on:click={deleteRecord}>Delete</button>
-      <button class="button" on:click={closeDeleteModal}>Cancel</button>
-    </footer>
+          <div class="column field">
+            <label class="label">Weight*</label>
+            <div class="control">
+              <input
+                class="input"
+                type="number"
+                placeholder=""
+                bind:value={SDWeightEditObject.weight} />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {#if isSDWeightDataInvalid}
+            <p class="help is-danger">Please enter all required fields!</p>
+          {/if}
+        </div>
+
+      </section>
+      <footer class="modal-card-foot">
+        <button class={buttonSDWeightSaveClass} on:click={saveSDWeight}>
+          Save changes
+        </button>
+        <button class="button" on:click={closeSDWeightModal}>Cancel</button>
+      </footer>
+    </div>
   </div>
-</div>
-<!-- End of Delete Modal -->
 
-{:else}
-Please log in to access this part of the database.
-{/if}
+  <!-- SDWeight Modal ends  here -->
+  <!-- End of Modals -->
+
+  <!-- Delete Modal  -->
+  <div class={modalDeleteClass}>
+    <div class="modal-background" />
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title is-danger">Delete this degree?</p>
+        <button class="delete" aria-label="close" on:click={closeDeleteModal} />
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label is-danger">
+            Are you sure you would like to delete the degree named "{degree.name}"
+            ?
+          </label>
+        </div>
+        <div>
+          {#if DeleteError}
+            <p class="help is-danger">{DeleteError}}</p>
+          {/if}
+        </div>
+      </section>
+
+      <footer class="modal-card-foot">
+        <button class={buttonDeleteClass} on:click={deleteRecord}>
+          Delete
+        </button>
+        <button class="button" on:click={closeDeleteModal}>Cancel</button>
+      </footer>
+    </div>
+  </div>
+  <!-- End of Delete Modal -->
+{:else}Please log in to access this part of the database.{/if}

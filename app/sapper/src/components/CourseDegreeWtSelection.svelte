@@ -32,7 +32,7 @@
     Loading courses for degree {degreeID}
   {:then result}
     <p style="color: red">{errorMessage}</p>
-    <select name="test" bind:value={selectedCourse}  on:change="{() => setWeight(this.value)}" >
+    <select name="test" bind:value={selectedCourse}  on:change="{() => setWeight(selectedCourse)}" >
       <option value="" disabled>-- Select--</option>
       {#each result.data.getcourseDegreeWeights as CDWeight}
          { map.set(CDWeight.course.id, CDWeight.weight) } 

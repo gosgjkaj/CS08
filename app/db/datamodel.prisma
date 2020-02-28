@@ -39,7 +39,7 @@ type Course {
 type CourseRun { 
   id: ID! @id
   course: Course! @relation(link: INLINE)
-  year: Int!
+  year: [Int!]!
 }
 
 type CourseDegreeWeight {
