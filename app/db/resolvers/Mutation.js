@@ -12,7 +12,7 @@ function createPost(root, args, context) {
 
 async function signup(parent, args, context, info) {
   const password = await bcrypt.hash(args.password, 10)
-  const user = await context.prisma.createUser({ ...args, password })
+  const user = await context.prisma.createUser({ ...args, password, role: 'Admin' })
 
   const token = jwt.sign({ userId: user.id }, APP_SECRET)
 

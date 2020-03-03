@@ -3,6 +3,8 @@
 type Query {
 	userPosts(userID: ID!): [Post!]!
 	checkPermission: String
+  getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
+  getYear(id: ID!): [CourseRun!]!
   gradeFromCourseID(id: ID!): [StudentCourseGrade!]!
   getGradeByID(id: ID!): StudentCourseGrade!
   getOverallGrade(year: Int!, id: ID!, level: Level!): OverallGrade!
@@ -27,7 +29,7 @@ type Query {
 
 type Mutation {
 	createPost(text: String!, userID: ID!): Post
-	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
+	signup(email: String!, password: String!, name: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
   deleteCourse(id: ID!): Course! 

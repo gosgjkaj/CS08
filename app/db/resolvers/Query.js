@@ -9,6 +9,16 @@ async function checkPermission(parent, args, context) {
 	return user == null ? null : user.role
 }
 
+async function getCoursesByDegree(root, args, context) {
+	let coursesByDegree = await context.prisma.courseDegreeWeights({where: {degree: {id: args.id }}})
+	return coursesByDegree
+}
+
+async function getYear(root, args, context) {
+	let year = await context.prisma.courseRuns({where: {course: {id: args.id }}})
+	return year
+}
+
 async function coursesFromYear(root, args, context) {
 	let allCourseRuns = await context.prisma.courseRuns()
 	let filtered = allCourseRuns.filter(courseRun => (courseRun.year).includes(args.year))
@@ -169,6 +179,12 @@ async function getcourseDegreeWeights(root, args, context) {
 async function getUsers(root, args,context) {
 	return await context.prisma.users()
 }
+async function getDegrees(root, args, context) {
+	return await context.prisma.degrees()
+}
+async function getStudents(root, args, context) {
+	return await context.prisma.students()
+}
 
 async function getWeight(root, args, context) {
 	return await context.prisma.courseDegreeWeights( {
@@ -188,6 +204,8 @@ async function getWeight(root, args, context) {
 module.exports = {
 	userPosts,
 	checkPermission,
+	getCoursesByDegree,
+	getYear,
 	gradeFromCourseID,
 	getGradeByID,
 	getOverallGrade,

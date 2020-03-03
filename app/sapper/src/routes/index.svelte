@@ -4,7 +4,9 @@
   	import { query, mutate } from "svelte-apollo"
   	import { gql } from 'apollo-boost'
   	import { goto } from '@sapper/app'
+	import CourseRow from '../components/CourseRow.svelte'
 
+	// hardcoded data
 	let addpost = false
 	let year = 2019
 	let text
@@ -31,35 +33,27 @@
 		}`,
 		variables: { year }
 	})
-	function gotoCourse(idcourse) {
-			goto(`/courses/${idcourse}`)
-			
-			
-		}
 
+	function gotoCourse(idcourse) {
+		goto(`/courses/${idcourse}`)	
+	}
+	
 	function gotoDegree(iddegree) {
 		goto(`/degrees/${iddegree}`)
+
 	}
 
 	let yearRuns =[
 		{id:2019, text: "year 2019-2020"},
 		{id:2020, text: "year 2020-2021"}]
 
-
-	/*let degrees =[
-		{id:'5e2efc3dbe07770007e70ee4', text: "CHEM-4H"},
-		{id:'5e303c22be07770007e70eeb', text: "CMC-4H"},
-		{id:'5e35c051410df80007b8727f', text: "CHEM-5M (WP)"},
-		{id:'5e35c070410df80007b87280', text: "CHEM-5M (EP)"},
-		{id:'5e35c089410df80007b87281', text: "CMC-5M (WP)"},
-		{id:'5e35c0a3410df80007b87282', text: "CMC-5M (EP)"}]
-	*/
-
 	let degrees = query(client(), {query: gql`
 		query{
 			getDegrees{
 				degreeCode
 				id
+				info
+				name
 			}
 		}`,
 	})
@@ -72,7 +66,7 @@
 			}
 		}`,
 	})
-	
+
 </script>
 
 <svelte:head>
@@ -81,11 +75,12 @@
 
 {#if $session.user}
 
+	<!--Kieran's part-->
+
 	<p class="content">
 		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
 	</p>
 
-	
 	<div>
 		<div class="box has-background-info">
 			<p class="title has-text-white"> Degrees</p>
@@ -106,6 +101,8 @@
 		{/await}
 
 	</div>
+
+	<!--inital courses listing part-->
 
 	<div>
 		<select bind:value={year} on:change={()=>courses.refetch({year})}>
@@ -132,7 +129,36 @@
 			<p class="content has-background-danger ">failed to load courses</p>
 		{/await}
 	</div>	
-		
+	
+	<!--Leo's part-->
+	
+	<div>
+		<div class="box has-background-info">
+			<p class="title has-text-white"> Degrees (Click degree name to check the details)</p>
+		</div>
+
+		{#await $degrees}
+			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
+		{:then result}
+
+		<div class="has-background-info">
+			{#each result.data.getDegrees as degree}
+				<div class="box buttons">
+					<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined ">{degree.degreeCode} </button>
+					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p>
+						<div class="box buttons">
+							<p>Courses in this degree: <br></p>
+							<CourseRow degree={degree} class="content"/>
+						</div>
+				</div>		
+			{/each}
+		</div>
+
+		{:catch}
+				<p class="content has-background-danger ">failed to load degrees</p>
+		{/await}
+
+	</div>
 
 {/if}
 	
