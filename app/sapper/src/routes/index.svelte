@@ -24,15 +24,7 @@
 	})
 	}
 
-	let courses = query(client(), {query: gql`
-		query($year: Int!){
-			coursesFromYear(year: $year){
-				courseID
-				id
-			}
-		}`,
-		variables: { year }
-	})
+
 
 	function gotoCourse(idcourse) {
 		goto(`/courses/${idcourse}`)	
@@ -75,12 +67,8 @@
 
 {#if $session.user}
 
-	<!--Kieran's part-->
-
-	<p class="content">
-		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
-	</p>
-
+	<!--Leo's part-->
+	
 	<div>
 		<div class="box has-background-info">
 			<p class="title has-text-white"> Degrees</p>
@@ -90,62 +78,11 @@
 			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 		{:then result}
 
-		<div class="box buttons">
-			{#each result.data.getDegrees as degree}
-				<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined">{degree.degreeCode} </button>
-			{/each}
-		</div>
-
-		{:catch}
-				<p class="content has-background-danger ">failed to load degrees</p>
-		{/await}
-
-	</div>
-
-	<!--inital courses listing part-->
-
-	<div>
-		<select bind:value={year} on:change={()=>courses.refetch({year})}>
-			{#each yearRuns as yearRun}
-				<option value={yearRun.id}> {yearRun.text}</option>
-			{/each}
-		</select>
-
-
-		{#await $courses}
-		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-		{:then result}
-		<div class="box has-background-info"> 
-			<p class="title has-text-white">Courses for Year {year}-{year+1}</p>
-		</div>
-		
-		<div class="box buttons">
-			{#each result.data.coursesFromYear as course}	
-				<button on:click={gotoCourse(course.id)} class="button is-large is-info is-outlined">{course.courseID} </button>
-			{/each}
-		</div>
-	
-		{:catch}
-			<p class="content has-background-danger ">failed to load courses</p>
-		{/await}
-	</div>	
-	
-	<!--Leo's part-->
-	
-	<div>
-		<div class="box has-background-info">
-			<p class="title has-text-white"> Degrees (Click degree name to check the details)</p>
-		</div>
-
-		{#await $degrees}
-			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-		{:then result}
-
 		<div class="has-background-info">
 			{#each result.data.getDegrees as degree}
 				<div class="box buttons">
-					<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined ">{degree.degreeCode} </button>
-					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p>
+					<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined ">{degree.degreeCode} </button><br>
+					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
 						<div class="box buttons">
 							<p>Courses in this degree: <br></p>
 							<CourseRow degree={degree} class="content"/>

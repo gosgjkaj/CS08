@@ -93,8 +93,7 @@
      <div class="navbar-menu">
       <div class="navbar">
         <div class="buttons">
-          <a href='/search' class='button is light'>
-          search</a>
+        
         </div>
       </div>
     </div>

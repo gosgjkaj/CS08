@@ -20,10 +20,9 @@ type Query {
   yearfromStudentGrade(id: ID!): [OverallGrade!]!
   namefromDegreeID(id: ID!): [Degree!]!
   postfromGUID(guid: Int!): [Post!]!
-  getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
   overallGradeFromId(id: ID!): [OverallGrade!]!
   studentSearch(id: ID!, searchString: String) : [Student!]!
-  coursesFromYear(year: Int!): [Course!]!
+  coursesFromYear(year: Int!, id: ID!): [Course!]!
   getWeight(degree: ID!, course: ID!): [CourseDegreeWeight!]!
 } 
 

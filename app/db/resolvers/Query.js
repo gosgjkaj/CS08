@@ -23,16 +23,26 @@ async function coursesFromYear(root, args, context) {
 	let allCourseRuns = await context.prisma.courseRuns()
 	let filtered = allCourseRuns.filter(courseRun => (courseRun.year).includes(args.year))
 	let ids=[]
+	
 	if(filtered!=null){
 	for(let i=0; i<filtered.length; i++){
 		ids.push(filtered[i].id)
+		console.log("dfgf\n")
 	}
 	}
+	console.log(ids)
 	let courses = await context.prisma.courseRuns({where: {
 		id_in: ids
 	}}).course()
-	console.log(courses)
-	return courses.map(item => item.course)
+	
+	courses = courses.map(item => item.course.id)
+	console.log(courses, "sdfg")
+	let coursesByDegree = await context.prisma.courseDegreeWeights({where: {degree: {id: args.id }}}).course()
+	coursesByDegree = coursesByDegree.map(item => item.course)
+	console.log(coursesByDegree, "ertg\n")
+	let result = coursesByDegree.filter(course => courses.indexOf(course.id)>=0)
+	console.log(result)
+	return result
 }
 async function gradeFromCourseID(root, args, context) {
 	let courseGradeStudent = await context.prisma.studentCourseGrades({where: {course: { id: args.id }}})
@@ -67,10 +77,7 @@ async function yearfromStudentGrade(root, args, context){
 	return await context.prisma.overallGrade({where: {student: {id: args.id}}})
 }
 
-async function getCoursesByDegree(root, args, context) {
-	let coursesByDegree = await context.prisma.courseDegreeWeights({where: {degree: {id: args.id }}})
-	return coursesByDegree
-}
+
 
 async function studentSearch(root, args, context) {
 	if (args.searchString.trim().length > 0) {
@@ -221,7 +228,6 @@ module.exports = {
 	yearfromStudentGrade,
 	namefromDegreeID,
 	postfromGUID,
-	getCoursesByDegree,
 	overallGradeFromId,
 	studentSearch,
 	getWeight, 
