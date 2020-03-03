@@ -1,9 +1,7 @@
-# sapper_prisma_bulma_app
-A wrapper to quickly start a [Sapper](https://sapper.svelte.dev) web app, with a [Prisma](https://www.prisma.io) database (with a [GraphQL](https://graphql.org) API), and the [Bulma](http://bulma.io) UI framework.
+# School of Chemistry Database
 
 ## Getting started
 
-This branch has an authentication example using a [Redis server](https://redis.io) to store session information.
 
 1. Install and run a redis server:
     1. `sudo apt-get install redis-server`

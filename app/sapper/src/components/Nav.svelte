@@ -4,6 +4,7 @@
   const { session } = stores()
   import { onMount } from "svelte";
   import menu from "../menu";
+  import Upload from '../components/Upload.svelte'
 
   export let segment
 
@@ -94,6 +95,9 @@
         <div class="buttons">
           {#if $session.user != null}
           
+          <Upload>
+          </Upload>
+
           <button on:click={logout} class="button is-danger">
             Log out
           </button>

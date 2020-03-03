@@ -3,7 +3,6 @@
         const  id = page.params['ID']
         return { id }
     }
-    
 </script>
 
 <script>
@@ -15,15 +14,25 @@
     import StudentRow from '../../components/StudentRow.svelte'
     let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
-        query{
-            gradeFromCourseID(id: "${ id }"){
-                student{
-                    firstname
-                    surname
-                    guid
+            query{
+                gradeFromCourseID(id: "${ id }"){
+                    student{
+                        firstname
+                        surname
+                        guid
+                    }
+                    course{
+                        courseID
+                    }
+                    grade
+                    id
+                    weight
                 }
             }`
         })
+    
+
+
 </script>
 
 

@@ -31,7 +31,6 @@
 		}`,
 		variables: { year }
 	})
-
 	function gotoCourse(idcourse) {
 			goto(`/courses/${idcourse}`)
 			
