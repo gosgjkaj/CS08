@@ -49,6 +49,7 @@
           <button on:click={logout} class="button is-danger">
             Log out
           </button>
+          </Upload>
 
           {:else}
          
