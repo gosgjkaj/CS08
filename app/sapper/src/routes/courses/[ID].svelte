@@ -3,8 +3,10 @@
         const  id = page.params['ID']
         return { id }
     }
+    
 </script>
-<script >
+
+<script>
     export let id
     import { session } from '../../stores'
 	import { client } from '../../gqlClient'
@@ -13,25 +15,15 @@
     import StudentRow from '../../components/StudentRow.svelte'
     let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
-            query{
-                gradeFromCourseID(id: "${ id }"){
-                    student{
-                        firstname
-                        surname
-                        guid
-                    }
-                    course{
-                        courseID
-                    }
-                    grade
-                    id
-                    weight
+        query{
+            gradeFromCourseID(id: "${ id }"){
+                student{
+                    firstname
+                    surname
+                    guid
                 }
             }`
         })
-    
-
-
 </script>
 
 
@@ -44,7 +36,7 @@
 	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 	{:then result}
 	<div class="box has-background-info">
-	<p class="title has-text-white">Data for course: {result.data.gradeFromCourseID[0].course.courseID} </p>
+	<p class="title has-text-white">Data for course: </p>
 	</div>
     <div class="content">
 		<div class="box ">

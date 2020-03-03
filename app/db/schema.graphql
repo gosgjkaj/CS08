@@ -13,6 +13,14 @@ type Query {
   getUsers: [User!]!
   getcourseDegreeWeight(where: CourseDegreeWeightWhereUniqueInput!): CourseDegreeWeight
   getcourseDegreeWeights(where: MyCourseDegreeWeightWhereInput!): [CourseDegreeWeight]!
+  studentfromDegreeID(id: ID!): [Student!]!
+  gradefromStudentID(id: ID!): [StudentCourseGrade!]!
+  yearfromStudentGrade(id: ID!): [OverallGrade!]!
+  namefromDegreeID(id: ID!): [Degree!]!
+  postfromGUID(guid: Int!): [Post!]!
+  getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
+  overallGradeFromId(id: ID!): [OverallGrade!]!
+  studentSearch(id: ID!, searchString: String) : [Student!]!
 } 
 
 type Mutation {

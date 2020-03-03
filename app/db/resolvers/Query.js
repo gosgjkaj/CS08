@@ -13,6 +13,54 @@ async function gradeFromCourseID(root, args, context) {
 	let courseGradeStudent = await context.prisma.studentCourseGrades({where: {course: { id: args.id }}})
 	return courseGradeStudent
 }
+
+async function studentfromDegreeID(root, args, context){
+	let degreeStudent = await context.prisma.students({where: {degreeID: { id: args.id }}})
+	return degreeStudent
+}
+
+
+async function namefromDegreeID(root, args, context){
+	let degreeName = await context.prisma.degrees({where: { id: args.id }})
+	return degreeName
+}
+
+async function gradefromStudentID(root, args, context){
+	return await context.prisma.studentCourseGrades({where: {student: {guid: args.id}}})
+}
+
+async function postfromGUID(root, args, context){
+	return await context.prisma.posts({where: {guid: args.guid} })
+}
+
+async function overallGradeFromId(root, args, context){
+	const grade =  await context.prisma.overallGrades({where: {student: {id: args.id}}})
+	return grade
+}
+
+async function yearfromStudentGrade(root, args, context){
+	return await context.prisma.overallGrade({where: {student: {id: args.id}}})
+}
+
+async function getCoursesByDegree(root, args, context) {
+	let coursesByDegree = await context.prisma.courseDegreeWeights({where: {degree: {id: args.id }}})
+	return coursesByDegree
+}
+
+async function studentSearch(root, args, context) {
+	if (args.searchString.trim().length > 0) {
+		let searchStringArg = args.searchString.toLowerCase();
+		let allStudents = await context.prisma.students();		
+		return allStudents.filter( (student) => student.firstname.toLowerCase().includes(searchStringArg) ||
+		student.surname.toLowerCase().includes(searchStringArg));
+	}
+	
+	let degreeStudent = await context.prisma.students({where: {degreeID: { id: args.id }}})
+	return degreeStudent
+	
+}
+
+
 async function getGradeByID(root, args, context) {
 	return await context.prisma.studentCourseGrade({id:args.id})
 }
@@ -121,5 +169,13 @@ module.exports = {
 	getcourseDegreeWeight,
 	getcourseDegreeWeights,
 	getCourseRuns,
-	getCourses
+	getCourses,
+	studentfromDegreeID,
+	gradefromStudentID,
+	yearfromStudentGrade,
+	namefromDegreeID,
+	postfromGUID,
+	getCoursesByDegree,
+	overallGradeFromId,
+	studentSearch
 }
