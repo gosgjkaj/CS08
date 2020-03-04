@@ -132,6 +132,7 @@
     grades = res.data.gradefromStudentID;
   });
   $: grades, console.log(grades);
+
  let final22
  let finalALPHA
  let finalGPA
@@ -174,16 +175,16 @@
   let hasAllGrades = false;     //boolean for if a student has all it's grades
 
   let finalClass;
-
+  console.log("GRADES:" + grades)
   async function getTotal(grades) {
     let total = 0;
-    let gpa
+    
       if(grades != null || grades != undefined){
         let gradeslength = grades.length;       
         let gradenum = 0;
-
+        let gpa = 0
         if (gradeslength == totalCourses) {
-            gpa = 0
+            
             hasAllGrades = true;
             for (let i = 0; i < gradeslength; i++) {
                 gradenum += 1;
@@ -199,18 +200,22 @@
         }
 
         totalweight = total;
-        console.log(GPA)
+        console.log("WEIGHT:" + totalweight)
         GPA = parseInt(Math.round(gpa * 10.0) / 10.0);
         ALPHA = convert(gpa);
         degreeClass = degreeClassification(ALPHA);
         gradeNum = gradenum;
-        console.log("GRADE:" + totalCourses)
-  
+        console.log("GRADES:" + gradeslength)
+        console.log("COURSES:" + gradenum)
+        console.log("GPA:" + GPA)
+        console.log("gpa:" + gpa)
+      console.log("TYPE: " + typeof GPA)
+      if(typeof GPA == "number"){
         //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
         if ((gradeNum == totalCourses && level == "Fifth") || level == "Fourth") {
           if(gpas != null || gpas != undefined){
             if (gpas.length == 0) {
-
+              
                 let gpaMutation = mutate(client(), {
                     mutation: gql`
                         mutation{
@@ -223,10 +228,14 @@
             }
           }
         }
-      }
+        }
+    }
     
   }
   $: grades, getTotal(grades);
+
+  //console.log("GRADES: " + grades.length)
+  //console.log("COURSES" + totalCourses)
 
 
 
@@ -508,7 +517,7 @@
               </p>
               <hr class="dropdown-divider" />
               <p>
-                Accumulated weight:
+                Accumulated weight: <strong> {totalweight}</strong> 
                 <strong />
               </p>
             </div>
@@ -615,6 +624,14 @@
             </strong>
           {/each}
 
+          {#if allowEdits == true}
+            <button
+              class="button is-danger is-small"
+              on:click={() => openGpaModal()}>
+              Edit gpa
+            </button>
+          {/if}
+
           {#if hasEdits == 2}
             <button
               on:click={() => openEditModal()}
@@ -623,13 +640,7 @@
             </button>
           {/if}
 
-          {#if allowEdits == true}
-            <button
-              class="button is-danger is-small"
-              on:click={() => openGpaModal()}>
-              Edit gpa
-            </button>
-          {/if}
+
         </div>
       {/if}
     {/if}

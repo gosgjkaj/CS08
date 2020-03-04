@@ -144,8 +144,8 @@
     yearDifference = selectedYear - currentYear;
   }
 
-  function gotoCourse(idcourse) {
-    goto(`/courses/${idcourse}`);
+  function gotoCourse() {
+    goto(`http://localhost:3000//courses`);
   }
 
   let showAnon = false;
@@ -186,7 +186,8 @@
   });
 
   let exportList = [];
-
+  $:exportList,console.log(exportList)
+  $:displayStudents, console.log(displayStudents)
   function displayEntries() {
     if (students != null) {
       if (searchString.trim().length > 0) {
@@ -246,6 +247,7 @@
 
     let fileName = `"${anonCode}_${selectedYear}"`;
     downloadCSV(headers, exportList, fileName);
+    exportList = Array.from(displayStudents)
   }
 </script>
 
