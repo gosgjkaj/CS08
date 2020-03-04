@@ -10,7 +10,8 @@
   import GradeEditWindow from "../components/GradeEditWindow.svelte";
   import EditNotesWindow from "../components/EditNotesWindow.svelte";
   import GpaEditWindow from "../components/GpaEditWindow.svelte";
-
+    import currentYear  from '../currentYear.js'
+    let date = currentYear
   import { session } from "../stores";
   export let exportStudent;
   export let selectedYear;
@@ -43,7 +44,7 @@
   let total = 0;
   let fullAnonCode;
   let userID = $session.user.id;
-  var date = new Date().getFullYear();
+ 
   let finalGpa;
 
 
@@ -176,6 +177,7 @@
   let finalClass;
 
   async function getTotal(grades) {
+    
     let total = 0;
     let gpa
       if(grades != null || grades != undefined){
@@ -204,8 +206,9 @@
         ALPHA = convert(gpa);
         degreeClass = degreeClassification(ALPHA);
         gradeNum = gradenum;
-        console.log("GRADE:" + totalCourses)
-  
+        console.log("GRADE:" + gpa)
+        console.log(typeof GPA)
+        if(GPA != NaN && date!= NaN){
         //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
         if ((gradeNum == totalCourses && level == "Fifth") || level == "Fourth") {
           if(gpas != null || gpas != undefined){
@@ -226,7 +229,8 @@
       }
     
   }
-  $: grades, getTotal(grades);
+  }
+  $: grades,getTotal(grades)
 
 
 
