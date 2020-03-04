@@ -31,6 +31,7 @@ type Mutation {
 	signup(email: String!, password: String!, name: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
+  changeDegreeGradesWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
   deleteCourse(id: ID!): Course! 
   createCourseRun(data: CourseRunInput!): CourseRun!
   updateCourseRun(id: ID!, data: CourseRunInput!): CourseRun!

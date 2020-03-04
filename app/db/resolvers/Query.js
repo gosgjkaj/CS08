@@ -44,6 +44,7 @@ async function coursesFromYear(root, args, context) {
 	console.log(result)
 	return result
 }
+
 async function gradeFromCourseID(root, args, context) {
 	let courseGradeStudent = await context.prisma.studentCourseGrades({where: {course: { id: args.id }}})
 	return courseGradeStudent

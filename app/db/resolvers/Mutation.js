@@ -56,6 +56,20 @@ async function changeGradeWeight(parent,args,context, info){
   }, info)
   return newgrade
 }
+
+async function changeDegreeGradesWeight(parent,args,context, info){
+
+  let newgrade = await context.prisma.updateStudentCourseGrade({
+    data:{
+      grade: args.grade,
+      weight: args.weight
+    },
+    where: {
+      id: args.id
+    }
+  }, info)
+  return newgrade
+}
 async function createDegree(parent, args, context, info) {
     let DegreeObject = {
       degreeCode: args.data.degreeCode,
@@ -516,5 +530,6 @@ module.exports = {
   checkGrade,
   addGrade,
   createOverallGradeGPA,
-  changeOverallGrade
+  changeOverallGrade,
+  changeDegreeGradesWeight
 }

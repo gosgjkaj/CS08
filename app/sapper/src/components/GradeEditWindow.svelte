@@ -16,7 +16,7 @@ let editmessage
 async function updateEntry(gradeid, newgrade, weight){
         let updategrade = await mutate(client(), { mutation: gql`
             mutation{
-	            changeGradeWeight(grade: ${newgrade}, weight: ${weight}, id: "${gradeid}"){
+	            changeDegreeGradesWeight(grade: ${newgrade}, weight: ${weight}, id: "${gradeid}"){
                     grade
                     weight
                 }
@@ -26,8 +26,8 @@ async function updateEntry(gradeid, newgrade, weight){
 
     editing = false
     color = "has-text-black"
-    valueOfGrade = updategrade.data.changeGradeWeight.grade
-    weightOfGrade = updategrade.data.changeGradeWeight.weight
+    valueOfGrade = updategrade.data.changeDegreeGradesWeight.grade
+    weightOfGrade = updategrade.data.changeDegreeGradesWeight.weight
 
     }
 
