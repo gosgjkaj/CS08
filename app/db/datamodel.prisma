@@ -63,7 +63,7 @@ type Student {
   id: ID! @id
   firstname: String!
   surname: String!
-  guid: String!
+  guid: String! @unique
   degree: Degree! @relation(link: INLINE)
   level: Level!
   entryYear: Int!
