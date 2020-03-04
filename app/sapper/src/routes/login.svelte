@@ -43,8 +43,8 @@
 	}
 </script>
 
-<div class="container">
-	<h1 class="title is-1">Login</h1>
+<div class="container" style="width:35%; margin-top:5%">
+	<h1 style="font-size: 40px; font-weight: bold; text-align: center; margin:20px">Log in</h1>
 
 	<div class="field">
 		<div class="control has-icons-left has-icons-right">
@@ -64,7 +64,9 @@
 		</div>
 	</div>
 
-	<button class="button is-success" on:click={login}>Log in</button>
+	<div class="field is-horizontal" style="justify-content:center">
+		<button class="button is-success is-medium" on:click={login}>Log in</button>
+	</div>
 
 	{#if loading} 
 		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>

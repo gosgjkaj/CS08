@@ -67,43 +67,40 @@
 
 {#if $session.user}
 
-	<!--Leo's part-->
-	
-	<div>
-		<section class="hero is-info">
-			<div class="hero-body">
-				<div class="container">
-					<h1 class="title">School of Chemistry</h1>
-					<h2 class="subtitle">click a degree to enter Grade management:</h2>
-				</div>
+	<section class="hero is-info">
+		<div class="hero-body">
+			<div class="container">
+				<h1 class="title">School of Chemistry</h1>
+				<h2 class="subtitle">click a degree to enter Grade management:</h2>
 			</div>
-      	</section>
-
+		</div>
+    </section>
+	
 		{#await $degrees}
 			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 		{:then result}
 
-		<div style="display:flex; flex-wrap:wrap; margin-left:10px; margin-right:10px">
-			{#each result.data.getDegrees as degree}
-				<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; margin:10px; width:25%">
-					<div style="display:flex; justify-content:center">
-						<button on:click={gotoDegree(degree.id)} class="button is-large is-info" style="width:50%">{degree.degreeCode}</button>
-					</div>
-					<br>
-					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
-						<div class="box" style="display:flex; flex-direction:column; justify-content: space-between">
-							<p>Courses in this degree: <br></p>
-							<CourseRow degree={degree} class="content"/>
+			<div style="display:flex; flex-wrap: wrap; margin-top:2%; margin-left:2%; justify-content:space-between">
+				{#each result.data.getDegrees as degree}
+					<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; width:47%; margin-right:2%">
+						<div style="display:flex; justify-content:center">
+							<button on:click={gotoDegree(degree.id)} class="button is-large is-info" style="width:90%">{degree.degreeCode}</button>
 						</div>
-				</div>		
-			{/each}
-		</div>
+						<br>
+						<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
+							<div class="box" style="display:flex; flex-direction:column; justify-content: space-between">
+								<div style="margin-bottom:5px">
+									<p>Courses in this degree:</p>
+								</div>
+								<CourseRow degree={degree} class="content"/>
+							</div>
+					</div>		
+				{/each}
+			</div>
 
 		{:catch}
 				<p class="content has-background-danger ">failed to load degrees</p>
 		{/await}
-
-	</div>
 
 {:else}
 

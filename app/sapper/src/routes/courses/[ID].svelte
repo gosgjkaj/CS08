@@ -56,22 +56,27 @@
 
 
 {#if $session.user}
-	<p class="content">
-		You are logged in as {$session.user.name}. You have {$session.user.role} permission.
-	</p>
+
 	{#await $studentGrade}
-	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
+	    <div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 	{:then result}
+    
+    <section class="hero is-info">
+		<div class="hero-body">
+			<div class="container">
+				<h2 class="subtitle">Data for Course:</h2>
+                <h1 class="title">A</h1>
+			</div>
+		</div>
+  	</section>
+
     <div class= "box buttons">
         <button on:click={viewall} class="button is-large is-info is-outlined">All</button>
         <button on:click={sortlevel3} class="button is-large is-info is-outlined">Level3</button>
         <button on:click={sortlevel4} class="button is-large is-info is-outlined">Level4</button>
         <button on:click={sortlevel5} class="button is-large is-info is-outlined">Level5</button>
     </div>
-    
-	<div class="box has-background-info">
-	<p class="title has-text-white">Data for course: </p>
-	</div>
+
     <div class="content">
 		<div class="box ">
             <div class="columns has-text-weight-bold">
