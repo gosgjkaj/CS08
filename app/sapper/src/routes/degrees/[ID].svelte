@@ -26,18 +26,6 @@
   let allowEdits = false;
   let students;
 
-  //Leo's Query
-  let courses = query(client(), {query: gql`
-		query($year: Int!){
-			coursesFromYear(year: $year){
-				courseID
-				
-				id
-			}
-		}`,
-		variables: { year }
-  })
-
   //query for listing courses in degree
   let coursesByDegree = query(client(), {
     query: gql`
