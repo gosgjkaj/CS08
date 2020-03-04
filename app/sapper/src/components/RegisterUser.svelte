@@ -49,7 +49,7 @@
 </script>
 
 <div class="container">
-	<h1 class="title is-1">Register</h1>
+	<h1 style="font-size: 40px; font-weight: bold; text-align: center; margin:20px">Register</h1>
 
 
 	<div class="field is-horizontal">
@@ -140,7 +140,9 @@
 		</div>
 	</div>
 
-	<button class="button is-primary" on:click={register}>Register</button>
+	<div class="field is-horizontal" style="justify-content:center">
+		<button class="button is-primary is-medium" on:click={register}>Register</button>
+	</div>
 
 	{#if loading} 
 		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
