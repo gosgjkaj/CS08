@@ -9,10 +9,12 @@ let valueOfGrade = gpa.grade
 
 let editing = false
 let color = "has-text-black"
-
+let invalid = false
 let editmessage
 
 async function updateGpa(gradeid, newgrade){
+
+    if(newgrade <= 22 && newgrade>= 0){
         let updategpa = await mutate(client(), { mutation: gql`
             mutation{
 	            changeOverallGrade(grade: ${newgrade}, id: "${gradeid}"){
@@ -26,7 +28,9 @@ async function updateGpa(gradeid, newgrade){
     editing = false
     color = "has-text-black"
     valueOfGrade = updategpa.data.changeOverallGrade.grade
-  
+    }else{
+        invalid = true;
+    }
 
     }
 
@@ -55,13 +59,13 @@ async function updateGpa(gradeid, newgrade){
 
 <div class="columns">
 
-    <div class="column is-2">"Final GPA:" </div>  
+    <div class="column is-3">Final GPA: </div>  
       
 
     {#if editing}
 
         <input class="column is-1 level-1 has-text-danger" bind:value={newgrade} placeholder={valueOfGrade}/>
-
+        <div class="box">
         <div class="buttons">
         <button class="button is-success level-1 is-block " on:click={updateGpa(gradeid,newgrade)} >
             <span class="icon is-small">
@@ -75,8 +79,16 @@ async function updateGpa(gradeid, newgrade){
             <i class="fas fa-times"></i>
             </span>
         </button>
-        
+        </div>
     
+        {#if invalid == true}
+
+            <div class="notification is-danger">
+                <button class="delete" on:click={()=>invalid = false}></button>
+                <strong> Warning </strong> input must be in the valid range: 0 - 22
+            </div>
+
+        {/if}
 
         </div>
 
