@@ -28,6 +28,14 @@
   let allowEdits = false;
   let students;
 
+  function convertLevel(lev, entr){
+    let levels = ["First", "Second","Third" ,"Fourth" ,"Fifth" ];
+  if (selectedYear != year){
+     return levels [selectedYear-entr]
+  }else{
+    return lev
+  }
+  }
   function allowEditing(){
 
       if (allowEdits == false){
@@ -421,8 +429,8 @@
       </div>
       {#if displayStudents != null}
         <!-- Apply all the conditions here -->
-        {#each displayStudents as { id, firstname, surname, guid, entryYear, level }, i}
-          <StudentDegreeRow bind:exportStudent={exportList[i]} {selectedYear} {entryYear} {level} studentId={id} {firstname} {surname} {guid}
+        {#each displayStudents as { id, firstname, surname,entryYear, guid, level }, i}
+          <StudentDegreeRow bind:exportStudent={exportList[i]}  level={convertLevel(level,entryYear)} studentId={id} {firstname} {surname} {guid}
             showingLevel={''} {allowEdits} {finalizeGpa} {totalCourses} {showAnon} {showNames} {anonCode} {id} {twentyTwo} {alphanum} class="content" />
         {/each}
       {/if}

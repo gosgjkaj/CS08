@@ -57,7 +57,7 @@ type Mutation {
   checkGrade(guid: String!, year: Int!, course: ID!): String!
   addGrade(studentlist: [StudentListInput!]!, course: ID!, year: Int!, weights: [DegreeCourseWeightInput!]!): AddGradeResult!
   createStudent(data: studentInput!): Student!
-  createOverallGradeGPA(studentID: ID!, year: Int!, studentLevel: Level!, grade: Int!): OverallGrade
+  createOverallGradeGPA(studentID: ID!, year: Int!, studentLevel: Level!, grade: Float!): OverallGrade
   changeOverallGrade(grade: Float!, id: ID!): OverallGrade
 
 

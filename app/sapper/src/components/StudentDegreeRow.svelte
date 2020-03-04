@@ -10,8 +10,8 @@
   import GradeEditWindow from "../components/GradeEditWindow.svelte";
   import EditNotesWindow from "../components/EditNotesWindow.svelte";
   import GpaEditWindow from "../components/GpaEditWindow.svelte";
-    import currentYear  from '../currentYear.js'
-    let date = currentYear
+  import currentYear  from '../currentYear.js'
+  let date = currentYear
   import { session } from "../stores";
   export let exportStudent;
   export let selectedYear;
@@ -26,8 +26,8 @@
   export let totalCourses;
   export let finalizeGpa;
   export let allowEdits;
-  export let entryYear;
-  export let level;
+  export let level 
+  
   export let studentId;
 
   let editing = false;
@@ -203,22 +203,15 @@
 
         totalweight = total;
         console.log("WEIGHT:" + totalweight)
-        GPA = parseInt(Math.round(gpa * 10.0) / 10.0);
+        GPA = parseInt(Math.round(gpa * 10.0) / 10.0).toFixed(1);
         ALPHA = convert(gpa);
         degreeClass = degreeClassification(ALPHA);
         gradeNum = gradenum;
-<<<<<<< HEAD
         console.log("GRADES:" + gradeslength)
         console.log("COURSES:" + gradenum)
         console.log("GPA:" + GPA)
         console.log("gpa:" + gpa)
       console.log("TYPE: " + typeof GPA)
-      if(typeof GPA == "number"){
-=======
-        console.log("GRADE:" + gpa)
-        console.log(typeof GPA)
-        if(GPA != NaN && date!= NaN){
->>>>>>> dcb6357a74669e83d6fe8a76dc3a6381514a8295
         //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
         if ((gradeNum == totalCourses && level == "Fifth") || level == "Fourth") {
           if(gpas != null || gpas != undefined){
@@ -239,8 +232,7 @@
         }
     }
     
-  }
-  }
+
   $: grades,getTotal(grades)
 
   //console.log("GRADES: " + grades.length)
@@ -309,11 +301,9 @@
   {/if}
 
   <div class="column is-1">{guid}</div>
-  {#if showingLevel != ''}
-    <div class="column is-1">{showingLevel}</div>
-  {:else}
+
     <div class="column is-1">{level}</div>
-  {/if}
+ 
 
   {#await $studentGrades}
 
