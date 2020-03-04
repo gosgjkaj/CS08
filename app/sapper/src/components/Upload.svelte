@@ -152,7 +152,7 @@ if(review.length!=0){
 
     let created = await mutate(client(),{mutation: gql`
       mutation {
-        createStudent(
+        createStudentByUpload(
           students: ${studentinput}
           entryYear: ${year}
         ){
@@ -161,7 +161,7 @@ if(review.length!=0){
         
       }`
     })
-  console.log(created.data.createStudent.failed )
+  console.log(created.data.createStudentByUpload.failed )
  
 }
 }

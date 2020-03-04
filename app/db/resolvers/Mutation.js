@@ -42,10 +42,26 @@ async function login(parent, args, context, info) {
   }
 }
 
+
+
 async function changeGradeWeight(parent,args,context, info){
 
   let newgrade = await context.prisma.updateStudentCourseWeight({
   //let newgrade = await context.prisma.updateStudentCourseGrade({
+    data:{
+      grade: args.grade,
+      weight: args.weight
+    },
+    where: {
+      id: args.id
+    }
+  }, info)
+  return newgrade
+}
+
+async function changeDegreeGradesWeight(parent,args,context, info){
+
+  let newgrade = await context.prisma.updateStudentCourseGrade({
     data:{
       grade: args.grade,
       weight: args.weight
@@ -102,7 +118,7 @@ async function deleteDegree(parent, args, context, info) {
 
 async function createStudentByUpload(parent, args, context, info) {
   let students= JSON.parse(JSON.stringify(args.students))
-  console.log(students)
+  console.log(students,"creating students")
   try {
     for (let i = 0; i < students.length; i++) {
       let year
@@ -111,17 +127,18 @@ async function createStudentByUpload(parent, args, context, info) {
       } else if (students[i].level == "Fourth") {
         year = args.entryYear -4
       } else {
-        year = args.entryYear -5
+        year = args.entryYear
       }
-      await context.prisma.createStudent({
+      let created = await context.prisma.createStudent({
         firstname: students[i].firstname,
         surname: students[i].surname,
         guid: students[i].EMPLID,
-        degreeID: {connect: {id: students[i].degree}},
+        degree: {connect: {id: students[i].degree}},
         level: students[i].level,
         entryYear: year
       })
   }
+
   } catch(e) {
     return ["Students failed to be created. Please check the formatting in the file."]
   }
@@ -458,7 +475,9 @@ async function addGrade(root, args, context) {
     )
 
     let student = await context.prisma.student({guid:studentlist[i]["EMPLID"]})
-    let studentDegree = await context.prisma.student({guid:studentlist[i]["EMPLID"]}).degreeID()
+    console.log(student)
+    let studentDegree = await context.prisma.student({guid:studentlist[i]["EMPLID"]}).degree()
+    console.log(studentDegree)
     let weight
     
   
@@ -516,5 +535,6 @@ module.exports = {
   checkGrade,
   addGrade,
   createOverallGradeGPA,
-  changeOverallGrade
+  changeOverallGrade,
+  changeDegreeGradesWeight
 }
