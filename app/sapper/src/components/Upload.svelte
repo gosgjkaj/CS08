@@ -310,7 +310,7 @@ function clearAll(){
       <button class="delete" on:click={() =>clearAll()} aria-label="close" />
     </header>
 
-    <section class="modal-card-body">
+    <section class="modal-card-body has-text-black">
 
         <div class="steps">
   <div class:is-active={componentsActive[0]} class:is-completed={componentsDone[0]} class="step-item">

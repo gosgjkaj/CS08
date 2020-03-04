@@ -28,7 +28,7 @@ type Query {
 
 type Mutation {
 	createPost(text: String!, userID: ID!, guid: Int!): Post
-	signup(email: String!, password: String!, name: String!): AuthPayload
+	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
   changeDegreeGradesWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!

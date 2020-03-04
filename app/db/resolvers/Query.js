@@ -190,9 +190,6 @@ async function getUsers(root, args,context) {
 async function getDegrees(root, args, context) {
 	return await context.prisma.degrees()
 }
-async function getStudents(root, args, context) {
-	return await context.prisma.students()
-}
 
 async function getWeight(root, args, context) {
 	return await context.prisma.courseDegreeWeights( {
