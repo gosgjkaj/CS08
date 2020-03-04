@@ -50,7 +50,7 @@ async function gradeFromCourseID(root, args, context) {
 }
 
 async function studentfromDegreeID(root, args, context){
-	let degreeStudent = await context.prisma.students({where: {degreeID: { id: args.id }}})
+	let degreeStudent = await context.prisma.students({where: {degree: { id: args.id }}})
 	return degreeStudent
 }
 
@@ -87,7 +87,7 @@ async function studentSearch(root, args, context) {
 		student.surname.toLowerCase().includes(searchStringArg));
 	}
 	
-	let degreeStudent = await context.prisma.students({where: {degreeID: { id: args.id }}})
+	let degreeStudent = await context.prisma.students({where: {degree: { id: args.id }}})
 	return degreeStudent
 	
 }

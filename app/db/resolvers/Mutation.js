@@ -5,7 +5,8 @@ const { convert } = require('../convertGrades')
 
 function createPost(root, args, context) {
 	return context.prisma.createPost({
-		text: args.text,
+    text: args.text,
+    guid: args.guid,
 		postedBy: {connect: {id: args.userID}}
 	})
 }
@@ -214,6 +215,16 @@ async function deleteStudentGrade(parent, args, context, info) {
   return deletedStudentGrade
 }
 
+function createOverallGradeGPA(root, args, context) {
+	return context.prisma.createOverallGrade({
+    student: {connect: {id: args.studentID}},
+    year: args.year,
+    studentLevel: args.studentLevel,
+    grade: args.grade
+    
+	})
+}
+
 async function createOverallGrade(parent, args, context, info) {
   let newOverallGrade = await context.prisma.createOverallGrade({
     student: args.data.student,
@@ -223,6 +234,22 @@ async function createOverallGrade(parent, args, context, info) {
 })
     return newOverallGrade
 }
+
+
+async function changeOverallGrade(parent,args,context, info){
+
+  let newGpa = await context.prisma.updateOverallGrade({
+    data:{
+      grade: args.grade,
+    },
+    where: {
+      id: args.id
+    }
+  }, info)
+  return newGpa
+}
+
+
 
 async function updateOverallGrade(parent, args, context, info) {
   let updatedOverallGrade = await context.prisma.updateOverallGrade({
@@ -487,5 +514,7 @@ module.exports = {
   updateCourseDegreeWeight,
   checkStudentNames,
   checkGrade,
-  addGrade
+  addGrade,
+  createOverallGradeGPA,
+  changeOverallGrade
 }

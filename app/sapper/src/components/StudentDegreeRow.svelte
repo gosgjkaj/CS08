@@ -43,7 +43,7 @@
   let total = 0;
   let fullAnonCode;
   let userID = $session.user.id;
-  let year = 2020;
+  var date = new Date().getFullYear();
   let finalGpa;
 
 
@@ -84,7 +84,9 @@
 				text
                 createdAt
                 postedBy{
+                  
                     name
+                    
                 }
 			}
 		}`
@@ -130,7 +132,10 @@
     grades = res.data.gradefromStudentID;
   });
   $: grades, console.log(grades);
+ let final22
+ let finalALPHA
  let finalGPA
+
   //Query for getting overallgrade (Gpa) from student
   let studentGpa = query(client(), {
     query: gql`
@@ -145,17 +150,19 @@
   let gpas;
   $studentGpa.then(res => {
     gpas = res.data.overallGradeFromId;
-    if(gpas != null){
-        finalGPA = gpas[0].grade
+    if(gpas[0] != null || gpas[0] != undefined){
+        final22 = gpas[0].grade
+        finalALPHA = convert(gpas[0].grade)
+    
     }
 
   });
-  $: gpas, console.log("GPAS: " + gpas);
+  $: gpas
   
- $:finalGPA, exportStudent = {
-    EMPLID: guid,
-    Name: `"${surname}, ${firstname}"`,
-    Grade: finalGPA
+  $:finalGPA, exportStudent = {
+    EMPLID: showAnon ? "anonymous" : guid,
+    Name: showAnon ? fullAnonCode : `"${surname}, ${firstname}"` ,
+    Grade:  alphanum ? finalALPHA : final22
   };
 
   //Function to calculate Gpa, total of weights
@@ -171,10 +178,8 @@
   async function getTotal(grades) {
     let total = 0;
     let gpa
-    
-    if(grades.length != null){
-        let gradeslength = grades.length;
-
+      if(grades != null || grades != undefined){
+        let gradeslength = grades.length;       
         let gradenum = 0;
 
         if (gradeslength == totalCourses) {
@@ -199,25 +204,30 @@
         ALPHA = convert(gpa);
         degreeClass = degreeClassification(ALPHA);
         gradeNum = gradenum;
+        console.log("GRADE:" + totalCourses)
   
         //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
         if ((gradeNum == totalCourses && level == "Fifth") || level == "Fourth") {
+          if(gpas != null || gpas != undefined){
             if (gpas.length == 0) {
+
                 let gpaMutation = mutate(client(), {
                     mutation: gql`
                         mutation{
-		                    createOverallGrade(studentID: "${studentId}", year: ${2020}, studentLevel: "${level}" , grade: ${GPA} )
+		                    createOverallGradeGPA(studentID: "${studentId}", year: ${date}, studentLevel: ${level} , grade: ${GPA} )
 		                {
 			                grade
 		                }
                         }`
                 });
             }
+          }
         }
-
-    }
+      }
+    
   }
   $: grades, getTotal(grades);
+
 
 
   async function toggleEdit() {
@@ -269,6 +279,8 @@
     gpaModalIsVisible = true;
   }
 </script>
+
+
 
 <div class="columns">
   {#if showAnon}
@@ -508,11 +520,13 @@
 
   {#if totalweight > 0.9998 && totalweight < 1.0001}
     <div class="column is-1">
-      {GPA}
+      
       {#if alphanum}
-        <strong>/</strong>
         {ALPHA}
+      {:else}
+        {GPA}
       {/if}
+
     </div>
 
     <div class="column is-1">{degreeClass}</div>
@@ -589,7 +603,13 @@
         <div class="column is-7">
 
           {#each result.data.overallGradeFromId as gpa}
-            {gpa.grade} &nbsp; &nbsp; &nbsp; &nbsp;
+            
+            {#if alphanum}
+                {convert(gpa.grade)}  &nbsp; &nbsp;
+            {:else}
+                {gpa.grade} &nbsp; &nbsp; 
+            {/if}
+
             <strong>
               class:&nbsp; {degreeClassification(convert(gpa.grade))}
             </strong>

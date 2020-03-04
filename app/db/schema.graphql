@@ -1,7 +1,7 @@
 # import * from './generated/prisma.graphql'
 
 type Query {
-	userPosts(userID: ID!): [Post!]!
+	userPosts(userID: ID!, guid: Int!): [Post!]!
 	checkPermission: String
   getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
   getYear(id: ID!): [CourseRun!]!
@@ -27,7 +27,7 @@ type Query {
 } 
 
 type Mutation {
-	createPost(text: String!, userID: ID!): Post
+	createPost(text: String!, userID: ID!, guid: Int!): Post
 	signup(email: String!, password: String!, name: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
@@ -56,6 +56,11 @@ type Mutation {
   checkGrade(guid: String!, year: Int!, course: ID!): String!
   addGrade(studentlist: [StudentListInput!]!, course: ID!, year: Int!, weights: [DegreeCourseWeightInput!]!): AddGradeResult!
   createStudent(data: studentInput!): Student!
+  createOverallGradeGPA(studentID: ID!, year: Int!, studentLevel: Level!, grade: Int!): OverallGrade
+  changeOverallGrade(grade: Float!, id: ID!): OverallGrade
+
+
+
 }
 
 type Course {

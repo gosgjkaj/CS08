@@ -26,6 +26,15 @@
   let allowEdits = false;
   let students;
 
+  function allowEditing(){
+
+      if (allowEdits == false){
+        allowEdits = true
+      }else if (allowEdits == true){
+        allowEdits = false
+      }
+
+  }
   //query for listing courses in degree
   let coursesByDegree = query(client(), {
     query: gql`
@@ -427,7 +436,7 @@
             <div class="level-item">
               <button
                 class="button is-danger"
-                on:click={() => (allowEdits = true)}>
+                on:click={() => (allowEditing())}>
                 Edit
               </button>
             </div>
