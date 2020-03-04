@@ -16,11 +16,13 @@
   import { gql } from "apollo-boost";
   import StudentDegreeRow from "../../components/StudentDegreeRow.svelte";
   import { downloadCSV } from "../../export-csv.js";
-
+  import currentYear  from '../../currentYear.js'
+	// hardcoded data
+  let year = currentYear
   let searchString = "";
 
-  let currentYear = new Date().getFullYear();
-  let selectedYear = currentYear;
+ 
+  let selectedYear = year;
   let selectedLevel = "";
   let finalizeGpa = false;
   let allowEdits = false;
@@ -119,13 +121,10 @@
   $: degCode, getCode(degCode);
 
   //sample year runs
-  let yearRuns = [
-    { id: 2004, text: "Year 2004-2005" },
-    { id: 2018, text: "Year 2018-2019" },
-    { id: 2019, text: "Year 2019-2020" },
-    { id: 2020, text: "Year 2020-2021" },
-    { id: 2021, text: "Year 2021-2022" }
-  ];
+  let yearRuns = [];
+  for (let  x= year-6; x <= year; x++) {
+    yearRuns.push({ id: x, text: `${x}-${x+1}` })
+  }
 
   //levels needed
   let levels = [
@@ -141,7 +140,7 @@
 
   //calculate differnce between current year and selected year
   function calculateDifference(selectedYear) {
-    yearDifference = selectedYear - currentYear;
+    yearDifference = selectedYear - year;
   }
 
   function gotoCourse() {
@@ -280,13 +279,11 @@
           <progress class="progress is-small is-info" max="100" />
         </div>
       {:then result}
-        <div class="buttons">
+        <div style="display:flex">
           {#each result.data.getCoursesByDegree as courseweight}
-            <button
-              on:click={gotoCourse(courseweight.course.courseID)}
-              class="button is-link is-light">
-              {courseweight.course.name}
-            </button>
+            <div class="button is-static is-info is-light" style="margin-right:5px">
+              <p>{courseweight.course.name}</p>
+            </div>
           {/each}
         </div>
       {/await}
@@ -332,13 +329,13 @@
       </div>
       <!-- select level showing -->
       <button
-        on:click={() => (selectedLevel = '')}
-        class="button is-large is-info is-outlined" style="margin-right:5px">
+        on:click={() => (selectedLevel = '')} 
+        class="button is-large is-info is-outlined"  style="margin-right:5px">
         Show All
       </button>
       {#each levels as level}
         <button
-          on:click={() => (selectedLevel = level.id)}
+          on:click={() => (selectedLevel = level.id)} 
           class="button is-large is-info is-outlined" style="margin-right:5px">
           {level.text}
         </button>
@@ -385,46 +382,25 @@
     </div>
   {:then result}
 
-    <div class="box ">
+    <!--conatiner for buttons-->
+    <div style="display:flex">
 
-      <nav class="level" style="margin: 5px 1.5%;">
-        <div class="level-left">
-          <div class="buttons">
-            <button
-              class="button is-link is-small"
-              on:click={() => toggleNames()}>
-              Names
-            </button>
-            <button
-              class="button is-primary is-small"
-              on:click={() => toggleAnon()}>
-              Anonymous
-            </button>
-          </div>
-        </div>
+      <div style="margin-right:auto; margin-left:2.5%">
+        <button class="button is-link" on:click={() => toggleNames()}>Names</button>
+        <button class="button is-primary" on:click={() => toggleAnon()}>Anonymous</button>
+      </div>
 
-        <div class="level-right">
-          <div class="level-item">
-            <button
-              class="button is-primary"
-              on:click={() => (finalizeGpa = true)}>
-              Finalize
-            </button>
-          </div>
-          {#if finalizeGpa == true}
-            <div class="level-item">
-              <button
-                class="button is-danger"
-                on:click={() => (allowEditing())}>
-                Edit
-              </button>
-            </div>
-          {/if}
-          <button on:click={() => exportStudents()}>Export</button>
-        </div>
+      <div style="margin-left:auto; margin-right:2.5%">
+        <button class="button is-primary" on:click={() => (finalizeGpa = true)}>Finalize</button>
+        {#if finalizeGpa == true}
+            <button class="button is-danger" on:click={() => (allowEditing())}>Edit</button>
+        {/if}
+        <button class="button is-danger" on:click={() => exportStudents()}>Export</button>
+      </div>
 
-      </nav>
+    </div>
 
+    <div class="box">
       <div class="columns has-text-weight-bold">
         <div class="column is-1">Firstname</div>
         <div class="column is-1">Surname</div>
@@ -454,44 +430,4 @@
 
   {/await}
 {/if}
-
-<!-- What Leo let out, showing courses in degree. Just in case you want it-->
-
-<!--
-
-    <select bind:value={year} on:change={()=>courses.refetch({year})} >
-	{#each yearRuns as yearRun}
-		<option value={yearRun.id}> {yearRun.text}</option>
-	{/each}
-		</select>
-    
-
-
-    {#await $courses}
-	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-	{:then results}
-        {#await $coursesByDegree}
-        <div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-        {:then result}  
-        <div class="box has-background-info">
-        <p class="title has-text-white">Courses in degree: (Click button to check course detail)</p>
-        </div>
-            <div class="box buttons">
-            {#each result.data.getCoursesByDegree as coursesFromDegree}
-                {#each results.data.coursesFromYear as course}
-                    {#if coursesFromDegree.course.courseID == course.courseID}
-                        <button class="button is-large is-info is-outlined">{course.courseID} </button>
-                    {/if}
-                {/each} 
-            {/each}
-            </div>
-            
-        {:catch}
-            <p class="content has-background-danger ">failed to load courses</p>
-        {/await}
-    {:catch}
-		<p class="content has-background-danger ">failed to load courses</p>
-	{/await}
-
--->
 

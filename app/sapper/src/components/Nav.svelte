@@ -59,7 +59,7 @@
     <a href="/">
       <img
         src="https://www.gla.ac.uk/3t4/img/university-of-glasgow.png"
-        width="295"
+        width="200"
         alt="University Of Glasgow"
         height="20" />
     </a>

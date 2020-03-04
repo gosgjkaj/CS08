@@ -21,6 +21,7 @@
 						name: "${name}"
 						email:"${email}"
 						password: "${password}"
+						role: Admin
 					) {
 						token
 					}

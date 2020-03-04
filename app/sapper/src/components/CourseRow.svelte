@@ -2,9 +2,11 @@
 import { query, mutate } from 'svelte-apollo'
 import { gql } from 'apollo-boost'
 import { client } from '../gqlClient'
+import currentYear  from '../currentYear.js'
+	// hardcoded data
+let year = currentYear
 
 export let degree
-let year = new Date().getFullYear();
 let coursesFromYear = query(client(), {query: gql`
             query{
                  coursesFromYear(id: "${ degree.id }", year: ${year}){
@@ -24,11 +26,15 @@ let coursesFromYear = query(client(), {query: gql`
 	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 {:then result}
     {#each result.data.coursesFromYear as course}
-        <div class="box" style="background-color:#EBF1F5; display:flex; flex-wrap:wrap">
+        <div class="box" style="background-color:#EBF1F5; display:flex; flex-direction:row">
             <div class="button is-info is-outlined is-medium" onclick="location.href='/courses/{course.id}'"> {course.name}</div>
-            <div class="container" style="margin-left:3%"> 
-                <p>Code : {course.courseID}</p>
-                <p>Info : {course.info}</p>
+            <div style="margin-left:3%"> 
+                <div>
+                    <p>Code : {course.courseID}</p>
+                </div>
+                <div>
+                    <p>Info : {course.info}</p>
+                </div>
             </div>
         </div>
     {/each}
