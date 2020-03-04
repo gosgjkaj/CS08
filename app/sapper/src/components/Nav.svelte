@@ -1,6 +1,7 @@
 <script>
 	import { checkPermission } from '../utils.js'
   import { stores } from '@sapper/app'
+  
   const { session } = stores()
   import { onMount } from "svelte";
   import menu from "../menu";
@@ -49,18 +50,18 @@
 
 <style>
   .selected {
-    background-color: #2366D1;
+    background-color: #003865;
   }
 </style>
 
-<nav class="navbar is-link" role="navigation" aria-label="main navigation">
+<nav class="navbar is-info" style="background-color: #003865" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">
     <a href="/">
       <img
-        src="https://www.gla.ac.uk/3t4/img/university-of-glasgow-min.png"
+        src="https://www.gla.ac.uk/3t4/img/university-of-glasgow.png"
         width="295"
         alt="University Of Glasgow"
-        height="28" />
+        height="20" />
     </a>
 
     <a
@@ -80,45 +81,32 @@
 	<div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
       {#each menu as item}
-      <a class={segment === item[0] ? 'navbar-item selected' : 'navbar-item'}
-        href={item[0]}>
+      <a class={segment === item[0] ? 'navbar-item selected' : 'navbar-item'} href={item[0]} style="font-size: 150%">
         {item[1]}
       </a>
     {/each}
       {#if $session.user != null && $session.user.role=="Admin"}
-      <a href="/admin" class="navbar-item">Admin Page</a>
+        <a href="/admin" class="navbar-item" style="font-size: 150%">Admin Page</a>
       {/if}
-    </div>
-
-     <div class="navbar-menu">
-      <div class="navbar">
-        <div class="buttons">
-        
-        </div>
-      </div>
     </div>
 
 
     <div class="navbar-end">
       <div class="navbar-item">
-        <div class="buttons">
           {#if $session.user != null}
-          
-          <Upload>
-          </Upload>
-
-          <button on:click={logout} class="button is-danger">
-            Log out
-          </button>
-
+            <div>
+              <p style="font-size: 110%; font-weight: 500">Hi <bold>{$session.user.name}</bold>, You have <bold>{$session.user.role}</bold> permission.</p>
+              <div style="display: flex; justify-content: center">
+                <Upload style="color: #0274AF"></Upload>
+                <button on:click={logout} class="button is-danger" style="margin-left: 5px">Log out</button>
+              </div>
+            </div>
           {:else}
-          <a href='/signup' class='button is light'>
-          register</a>
-          <a href="/login" class="button is-light">
-            Log in
-          </a>
+            <div>
+              <a href='/signup' class='button is-info is-medium'>register</a>
+              <a href="/login" class="button is-info is-medium">Log in</a>
+            </div>
           {/if}
-        </div>
       </div>
     </div>
   </div>
