@@ -53,7 +53,7 @@
 				{#each result.data.getDegrees as degree}
 					<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; width:47%; margin-right:2%">
 						<div style="display:flex; justify-content:center">
-							<button on:click={gotoDegree(degree.id)} class="button is-large is-info" style="width:90%">{degree.degreeCode}</button>
+							<button on:click={gotoDegree(degree.id)} class="button is-large is-primary" style="width:90%">{degree.degreeCode}</button>
 						</div>
 						<br>
 						<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>

@@ -203,6 +203,9 @@ async function getWeight(root, args, context) {
 		}
 	})
 }
+async function getCourseByID( root,args, context){
+	return await context.prisma.course( {id: args.id})
+}
 
 
 
@@ -230,4 +233,5 @@ module.exports = {
 	studentSearch,
 	getWeight, 
 	coursesFromYear,
+	getCourseByID
 }

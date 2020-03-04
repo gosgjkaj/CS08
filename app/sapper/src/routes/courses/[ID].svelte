@@ -14,6 +14,16 @@
     import StudentRowEditDisable from '../../components/StudentRowEditDisable.svelte'
     import currentYear  from '../../currentYear.js'
     let year = currentYear
+    let name
+    let course =  query(client(), {query: gql`
+    query{
+        getCourseByID(id: "${id}"){
+        
+            name
+        }
+    }`
+    })
+ 
 
     let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
@@ -68,7 +78,11 @@
 		<div class="hero-body">
 			<div class="container">
 				<h2 class="subtitle">Data for Course:</h2>
-                <h1 class="title">A</h1>
+                {#await $course}
+                <p>name</p>
+                {:then res}
+                <h1 class="title">{res.data.getCourseByID.name} </h1>
+                {/await}
 			</div>
 		</div>
   	</section>

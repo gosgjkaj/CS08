@@ -139,7 +139,7 @@
   let levels = [
     { id: 3, text: "Third" },
     { id: 4, text: "Fourth" },
-    { id: 5, text: "Master" }
+    { id: 5, text: "Fifth" }
   ];
 
   //set sorting level

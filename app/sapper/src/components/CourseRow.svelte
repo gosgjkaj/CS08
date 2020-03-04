@@ -27,7 +27,7 @@ let coursesFromYear = query(client(), {query: gql`
 {:then result}
     {#each result.data.coursesFromYear as course}
         <div class="box" style="background-color:#EBF1F5; display:flex; flex-direction:row">
-            <div class="button is-info is-outlined is-medium" onclick="location.href='/courses/{course.id}'"> {course.name}</div>
+            <div class="button is-primary is-outlined is-medium" onclick="location.href='/courses/{course.id}'"> {course.name}</div>
             <div style="margin-left:3%"> 
                 <div>
                     <p>Code : {course.courseID}</p>

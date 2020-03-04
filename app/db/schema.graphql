@@ -24,6 +24,7 @@ type Query {
   studentSearch(id: ID!, searchString: String) : [Student!]!
   coursesFromYear(year: Int!, id: ID!): [Course!]!
   getWeight(degree: ID!, course: ID!): [CourseDegreeWeight!]!
+  getCourseByID(id: ID!): Course!
 } 
 
 type Mutation {
