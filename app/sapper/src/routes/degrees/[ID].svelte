@@ -317,12 +317,12 @@
   </nav>
 
   <!-- This div select sorting values -->
-  <div class="container is-fluid">
-    <div class="notification">
+  <div class="container is-fluid notification">
+    <div style="display:flex; flex">
 
       <!-- select year showing -->
       <div class="select is-info is-large">
-        <select bind:value={selectedYear}>
+        <select bind:value={selectedYear} style="margin-right:10px">
           {#each yearRuns as yearRun}
             <option value={yearRun.id}>{yearRun.text}</option>
           {/each}
@@ -331,38 +331,18 @@
       <!-- select level showing -->
       <button
         on:click={() => (selectedLevel = '')}
-        class="button is-large is-info is-outlined">
+        class="button is-large is-info is-outlined" style="margin-right:5px">
         Show All
       </button>
       {#each levels as level}
         <button
           on:click={() => (selectedLevel = level.id)}
-          class="button is-large is-info is-outlined">
+          class="button is-large is-info is-outlined" style="margin-right:5px">
           {level.text}
         </button>
       {/each}
-
-    </div>
-  </div>
-
-  <!-- Title Bar -->
-  <div class="container is-fullhd ">
-    <div class="notification">
-
-      <nav class="level">
-        <!-- Left side -->
-        <div class="level-left">
-          <div class="level-item">
-            <p class="subtitle is-5">
-              <!-- Search String change -->
-              <strong>
-                Students for {searchString.trim().length > 0 ? 'search query ' + searchString : ' Degree ' + anonCode}
-              </strong>
-            </p>
-          </div>
-        </div>
-
-        <!-- Search  -->
+      
+      <div style="margin-left: auto; align-self: center">
         <div class="level-right">
           <div class="level-item">
             <div class="field">
@@ -378,9 +358,7 @@
                   <i class="fas fa-search" />
                 </span>
               </p>
-
             </div>
-
           </div>
           {#if searchString.trim().length > 0}
             <p class="level-item">
@@ -393,12 +371,11 @@
             </p>
           {/if}
         </div>
+      </div>
 
-        <!-- End of Search -->
-
-      </nav>
     </div>
   </div>
+
 
   {#await $studentsearch}
     <div class="section">

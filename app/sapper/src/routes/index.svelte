@@ -87,7 +87,7 @@
 			{#each result.data.getDegrees as degree}
 				<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; margin:10px; width:25%">
 					<div style="display:flex; justify-content:center">
-						<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined" style="width:50%">{degree.degreeCode}</button>
+						<button on:click={gotoDegree(degree.id)} class="button is-large is-info" style="width:50%">{degree.degreeCode}</button>
 					</div>
 					<br>
 					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
@@ -105,6 +105,11 @@
 
 	</div>
 
+{:else}
+
+	<div class="container" style="display:flex; jusity-content:center">
+		<h1 style="font-size: 55px; font-weight: bold; text-align: center; margin:20px" >Please log in to access this part of the database.</h1>
+	</div>
+
 {/if}
-	
 
