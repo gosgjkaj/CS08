@@ -277,13 +277,11 @@
           <progress class="progress is-small is-info" max="100" />
         </div>
       {:then result}
-        <div class="buttons">
+        <div style="display:flex">
           {#each result.data.getCoursesByDegree as courseweight}
-            <button
-              on:click={gotoCourse(courseweight.course.courseID)}
-              class="button is-link is-light">
-              {courseweight.course.name}
-            </button>
+            <div class="button is-static is-info is-light" style="margin-right:5px">
+              <p>{courseweight.course.name}</p>
+            </div>
           {/each}
         </div>
       {/await}
