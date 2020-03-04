@@ -70,20 +70,28 @@
 	<!--Leo's part-->
 	
 	<div>
-		<div class="box has-background-info">
-			<p class="title has-text-white"> Degrees</p>
-		</div>
+		<section class="hero is-info">
+			<div class="hero-body">
+				<div class="container">
+					<h1 class="title">School of Chemistry</h1>
+					<h2 class="subtitle">click a degree to enter Grade management:</h2>
+				</div>
+			</div>
+      	</section>
 
 		{#await $degrees}
 			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 		{:then result}
 
-		<div class="has-background-info">
+		<div style="display:flex; flex-wrap:wrap; margin-left:10px; margin-right:10px">
 			{#each result.data.getDegrees as degree}
-				<div class="box buttons">
-					<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined ">{degree.degreeCode} </button><br>
+				<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; margin:10px; width:25%">
+					<div style="display:flex; justify-content:center">
+						<button on:click={gotoDegree(degree.id)} class="button is-large is-info is-outlined" style="width:50%">{degree.degreeCode}</button>
+					</div>
+					<br>
 					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
-						<div class="box buttons">
+						<div class="box" style="display:flex; flex-wrap:wrap; width:30%">
 							<p>Courses in this degree: <br></p>
 							<CourseRow degree={degree} class="content"/>
 						</div>
