@@ -11,7 +11,7 @@
 	import { client } from '../../gqlClient' 
 	import { query } from 'svelte-apollo'
     import { gql } from 'apollo-boost'
-    import StudentRow from '../../components/StudentRow.svelte'
+    import StudentRowEditDisable from '../../components/StudentRowEditDisable.svelte'
     let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
             query{
@@ -89,18 +89,18 @@
 		    {#each result.data.gradeFromCourseID as student}
                 {#if SortingLevel == 3}
                     {#if student.student.level == "Third"}
-                        <StudentRow grade={student} class="content"/>
+                        <StudentRowEditDisable grade={student} class="content"/>
                     {/if}
                 {:else if SortingLevel == 4}
                     {#if student.student.level == "Fourth"}
-                        <StudentRow grade={student} class="content"/>
+                        <StudentRowEditDisable grade={student} class="content"/>
                     {/if}
                 {:else if SortingLevel == 5}
                     {#if student.student.level == "Fifth"}
-                        <StudentRow grade={student} class="content"/>
+                        <StudentRowEditDisable grade={student} class="content"/>
                     {/if}
 				{:else if SortingLevel == ""}                  
-                    <StudentRow grade={student} class="content"/>
+                    <StudentRowEditDisable grade={student} class="content"/>
                 {/if}
 		    {/each}
 		</div>

@@ -6,25 +6,6 @@
   	import { goto } from '@sapper/app'
 	import CourseRow from '../components/CourseRow.svelte'
 
-	// hardcoded data
-	let addpost = false
-	let year = 2019
-	let text
-	let guid = 2324137
-	let userID = "5e52c7c6410df80007deb449"
-
-	async function createpost() {
-		let postMutation  = await mutate(client(),{mutation: gql`
-      	mutation{
-			createPost(text: "${text}", guid: ${guid}, userID: "${userID}")
-		{
-			text
-		}
-      }`
-	})
-	}
-
-
 
 	function gotoCourse(idcourse) {
 		goto(`/courses/${idcourse}`)	
@@ -35,9 +16,6 @@
 
 	}
 
-	let yearRuns =[
-		{id:2019, text: "year 2019-2020"},
-		{id:2020, text: "year 2020-2021"}]
 
 	let degrees = query(client(), {query: gql`
 		query{
@@ -46,15 +24,6 @@
 				id
 				info
 				name
-			}
-		}`,
-	})
-
-	let edits = query(client(), {query: gql`
-		query{
-			postfromGUID(guid: ${guid}) {
-				text
-				createdAt
 			}
 		}`,
 	})

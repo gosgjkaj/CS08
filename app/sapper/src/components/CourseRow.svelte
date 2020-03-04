@@ -2,9 +2,11 @@
 import { query, mutate } from 'svelte-apollo'
 import { gql } from 'apollo-boost'
 import { client } from '../gqlClient'
+import currentYear  from '../currentYear.js'
+	// hardcoded data
+let year = currentYear
 
 export let degree
-let year = new Date().getFullYear();
 let coursesFromYear = query(client(), {query: gql`
             query{
                  coursesFromYear(id: "${ degree.id }", year: ${year}){

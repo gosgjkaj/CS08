@@ -18,12 +18,13 @@
 	
 	let email
 	let password
+	let warning = false
 	
 	let loading = false
 
 	async function login() {
 		loading = true
-
+	
 		const response = await fetch("/login",{
 			method: 'POST',
 			headers: {
@@ -32,12 +33,14 @@
 			},
 			body: JSON.stringify({ email, password })
 		})
-
+		
 		if(response.status == 201) {
 			session.set({ user: (await response.json()).user})
 			goto('/')
+			warning =false
 		} else {
-			console.log("ERROR")
+			warning = true
+			loading = false
 		}
 	
 	}
@@ -70,5 +73,9 @@
 
 	{#if loading} 
 		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
+	{/if}
+
+	{#if warning} 
+		<div class="box has-background-danger has-text-white "> Email or password is incorrect.</div>
 	{/if}
 </div>

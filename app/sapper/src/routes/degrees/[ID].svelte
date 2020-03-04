@@ -16,11 +16,13 @@
   import { gql } from "apollo-boost";
   import StudentDegreeRow from "../../components/StudentDegreeRow.svelte";
   import { downloadCSV } from "../../export-csv.js";
-
+  import currentYear  from '../../currentYear.js'
+	// hardcoded data
+  let year = currentYear
   let searchString = "";
 
-  let currentYear = new Date().getFullYear();
-  let selectedYear = currentYear;
+ 
+  let selectedYear = year;
   let selectedLevel = "";
   let finalizeGpa = false;
   let allowEdits = false;
@@ -119,13 +121,10 @@
   $: degCode, getCode(degCode);
 
   //sample year runs
-  let yearRuns = [
-    { id: 2004, text: "Year 2004-2005" },
-    { id: 2018, text: "Year 2018-2019" },
-    { id: 2019, text: "Year 2019-2020" },
-    { id: 2020, text: "Year 2020-2021" },
-    { id: 2021, text: "Year 2021-2022" }
-  ];
+  let yearRuns = [];
+  for (let  x= year-6; x <= year; x++) {
+    yearRuns.push({ id: x, text: `${x}-${x+1}` })
+  }
 
   //levels needed
   let levels = [
@@ -141,7 +140,7 @@
 
   //calculate differnce between current year and selected year
   function calculateDifference(selectedYear) {
-    yearDifference = selectedYear - currentYear;
+    yearDifference = selectedYear - year;
   }
 
   function gotoCourse(idcourse) {
@@ -330,13 +329,13 @@
       </div>
       <!-- select level showing -->
       <button
-        on:click={() => (selectedLevel = '')}
-        class="button is-large is-info is-outlined" style="margin-right:5px">
+        on:click={() => (selectedLevel = '')} 
+        class="button is-large is-info is-outlined"  style="margin-right:5px">
         Show All
       </button>
       {#each levels as level}
         <button
-          on:click={() => (selectedLevel = level.id)}
+          on:click={() => (selectedLevel = level.id)} 
           class="button is-large is-info is-outlined" style="margin-right:5px">
           {level.text}
         </button>

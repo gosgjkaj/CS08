@@ -28,9 +28,10 @@ type Query {
 
 type Mutation {
 	createPost(text: String!, userID: ID!, guid: Int!): Post
-	signup(email: String!, password: String!, name: String!): AuthPayload
+	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
+  changeDegreeGradesWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
   deleteCourse(id: ID!): Course! 
   createCourseRun(data: CourseRunInput!): CourseRun!
   updateCourseRun(id: ID!, data: CourseRunInput!): CourseRun!
@@ -40,7 +41,7 @@ type Mutation {
   createDegree(data: DegreeCreateInput!): Degree!
   updateDegree(id: ID!, data: DegreeUpdateInput!): Degree!
   deleteDegree(id: ID!): Degree
-  createStudentByUpload(data: studentInput!): Student!
+  createStudentByUpload(students: [StudentUploadInput!]!, entryYear: Int!): AddGradeResult!
   updateStudent(id: ID!, data: studentInput!): Student!
   deleteStudent(id: ID!): Student!
   createStudentGrade(data: StudentCourseGradeInput!) : StudentCourseGrade!
@@ -114,6 +115,15 @@ input studentInput {
   degree: ID!
   level: Level!
   entryYear: Int!
+}
+
+
+input StudentUploadInput {
+  EMPLID: String!
+  firstname: String!
+  surname: String!
+  degree: ID!
+  level: Level!
 }
 
 input updateCourseInput {

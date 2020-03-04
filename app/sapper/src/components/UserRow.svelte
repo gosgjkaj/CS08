@@ -21,16 +21,17 @@ async function deleteEntry(id){
         })
     afterDelete()
 }
-async function updateRole(id, role) {
+async function updateRole(id, newrole) {
     let userRole = await  mutate(client(), { mutation: gql`
             mutation{
-	           updateUserRole(id: "${id}", role: ${role}){
+	           updateUserRole(id: "${id}", role: ${newrole}){
                   role
                 }
             }`
         })
         editing= false
-        role = userRole.data.updateUserRole.role
+        console.log(userRole.data.updateUserRole.role)
+        role = newrole
 }
 async function resetRole() {
     editing = false
