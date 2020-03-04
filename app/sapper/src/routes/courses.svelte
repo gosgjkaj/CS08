@@ -70,8 +70,9 @@
 
   function validateCourse() {
     console.log("validateCourse:: currentCourseObject=", currentCourseObject);
+    console.log("currentCourseObject.year.length=", currentCourseObject.year.length);
     if (
-      !currentCourseObject.year ||
+      (currentCourseObject.year && currentCourseObject.year.length<1) ||
       !currentCourseObject.level ||
       currentCourseObject.courseID.length < 1 ||
       !currentCourseObject.name ||
@@ -281,9 +282,19 @@
 
 <svelte:head>
   <title>List of Courses</title>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.25.0/slimselect.min.js">
+
+  </script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.25.0/slimselect.min.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="../../node_modules/multi.js/dist/multi.min.css"> -->
+  <!-- <script src="../../node_modules/multi.js/dist/multi-es6.min.js"></script> -->
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" /> 
   -->
-  <style>
+  <!-- <style>
     .select position relative display inline-block margin-bottom 15px width 100%
         select display inline-block width 100% cursor pointer padding 10px 15px
         outline 0 border 0 border-radius 0 background $color--light-grey color
@@ -296,7 +307,7 @@
         transparent transparent .select select: hover ~& .select select: focus
         ~& border-top-color $color--black .select select: disabled ~&
         border-top-color $color--grey;
-  </style>
+  </style> -->
 </svelte:head>
 
 {#if $session.user}
@@ -310,7 +321,7 @@
           <div class="level-item">
             <p class="subtitle is-5">
               <strong>
-                List of Courses {searchString.trim().length > 0 ? ' for search query ' + searchString : ''}
+                Courses {searchString.trim().length > 0 ? ' for search query ' + searchString : ''}
               </strong>
             </p>
           </div>
@@ -428,13 +439,6 @@
               {#if searchString.trim().length > 0}
                 <div>
                   No Courses for the search query {searchString}.
-                  <a
-                    href="javascript:;"
-                    on:click={resetSearch}
-                    class="button is-success">
-                    Reset Search
-                  </a>
-
                 </div>
               {:else}
                 <p>No courses listed yet.</p>
@@ -483,10 +487,19 @@
               <LevelSelection bind:selected={currentCourseObject.level} />
             </div>
           </div>
-          <div class="column field">
+        </div>
+        <div class="columns is-desktop">
+          <div class="column">
             <label class="label">Year</label>
             <div class="control">
-              <YearSelection multiple={true} bind:selected={currentCourseObject.year} />
+              <!-- <YearSelection
+                multiple={true}
+                bind:selected={currentCourseObject.year} /> -->
+
+                 <YearSelection
+                  bind:selected={currentCourseObject.year}
+                multiple={true}
+                />
             </div>
           </div>
         </div>
@@ -547,7 +560,7 @@
       <section class="modal-card-body">
         <div class="field">
           <label class="label has-text-danger">
-            Please confirm you would like to delete the course "{currentCourseObject.name}"?
+            Please confirm you would like to delete this course?
           </label>
         </div>
       </section>

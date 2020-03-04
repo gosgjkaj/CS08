@@ -28,7 +28,7 @@
 
 
 
-    <strong> {createdAt} </strong>at <strong>{time} </strong>by {postedBy} <br/>
+    <strong> {createdAt} </strong>at <strong>{time} </strong>by <strong>{postedBy}</strong> <br/>
     <div class="box">{editNote.text}</div> 
     
    
