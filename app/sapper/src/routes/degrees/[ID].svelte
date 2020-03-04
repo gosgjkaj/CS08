@@ -16,10 +16,12 @@
   import { gql } from "apollo-boost";
   import StudentDegreeRow from "../../components/StudentDegreeRow.svelte";
   import { downloadCSV } from "../../export-csv.js";
-
+  import currentYear  from '../../currentYear.js'
+	// hardcoded data
+  let year = currentYear
   let searchString = "";
 
-  let currentYear = new Date().getFullYear();
+ 
   let selectedYear = currentYear;
   let selectedLevel = "";
   let finalizeGpa = false;
@@ -141,7 +143,7 @@
 
   //calculate differnce between current year and selected year
   function calculateDifference(selectedYear) {
-    yearDifference = selectedYear - currentYear;
+    yearDifference = selectedYear - year;
   }
 
   function gotoCourse(idcourse) {
@@ -452,44 +454,4 @@
 
   {/await}
 {/if}
-
-<!-- What Leo let out, showing courses in degree. Just in case you want it-->
-
-<!--
-
-    <select bind:value={year} on:change={()=>courses.refetch({year})} >
-	{#each yearRuns as yearRun}
-		<option value={yearRun.id}> {yearRun.text}</option>
-	{/each}
-		</select>
-    
-
-
-    {#await $courses}
-	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-	{:then results}
-        {#await $coursesByDegree}
-        <div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-        {:then result}  
-        <div class="box has-background-info">
-        <p class="title has-text-white">Courses in degree: (Click button to check course detail)</p>
-        </div>
-            <div class="box buttons">
-            {#each result.data.getCoursesByDegree as coursesFromDegree}
-                {#each results.data.coursesFromYear as course}
-                    {#if coursesFromDegree.course.courseID == course.courseID}
-                        <button class="button is-large is-info is-outlined">{course.courseID} </button>
-                    {/if}
-                {/each} 
-            {/each}
-            </div>
-            
-        {:catch}
-            <p class="content has-background-danger ">failed to load courses</p>
-        {/await}
-    {:catch}
-		<p class="content has-background-danger ">failed to load courses</p>
-	{/await}
-
--->
 
