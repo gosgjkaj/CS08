@@ -91,7 +91,7 @@
 					</div>
 					<br>
 					<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
-						<div class="box" style="display:flex; flex-wrap:wrap; width:30%">
+						<div class="box" style="display:flex; flex-direction:column; justify-content: space-between">
 							<p>Courses in this degree: <br></p>
 							<CourseRow degree={degree} class="content"/>
 						</div>

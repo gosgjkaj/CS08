@@ -24,9 +24,13 @@ let coursesFromYear = query(client(), {query: gql`
 	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 {:then result}
     {#each result.data.coursesFromYear as course}
-        <div class="box" onclick="location.href='/courses/{course.id}'"  style="cursor: pointer;"> {course.name}</div>
-        <div class="box"> <p>Code : {course.courseID}</p>
-         <p>Info : {course.info}</p></div>
+        <div class="box" style="background-color:#EBF1F5; display:flex; flex-wrap:wrap">
+            <div class="button is-info is-outlined is-medium" onclick="location.href='/courses/{course.id}'"> {course.name}</div>
+            <div class="container" style="margin-left:3%"> 
+                <p>Code : {course.courseID}</p>
+                <p>Info : {course.info}</p>
+            </div>
+        </div>
     {/each}
 {:catch}
 	<p class="content has-background-danger ">failed to load courses</p>
