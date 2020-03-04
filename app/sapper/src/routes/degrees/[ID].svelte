@@ -19,6 +19,7 @@
   import currentYear  from '../../currentYear.js'
 	// hardcoded data
   let year = currentYear
+  console.log(year)
   let searchString = "";
 
  
@@ -31,7 +32,7 @@
   function convertLevel(lev, entr){
     let levels = ["First", "Second","Third" ,"Fourth" ,"Fifth" ];
   if (selectedYear != year){
-     return levels [selectedYear-entr]
+     return levels[selectedYear-entr-1]
   }else{
     return lev
   }
