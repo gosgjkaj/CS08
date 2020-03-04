@@ -12,10 +12,13 @@
 	import { query } from 'svelte-apollo'
     import { gql } from 'apollo-boost'
     import StudentRowEditDisable from '../../components/StudentRowEditDisable.svelte'
+    import currentYear  from '../../currentYear.js'
+    let year = currentYear
+
     let cellnumber = 0
     let studentGrade = query(client(), {query: gql`
             query{
-                gradeFromCourseID(id: "${ id }"){
+                gradeFromCourseID(id: "${ id }", date: ${year} ){
                     student{
                         firstname
                         surname
