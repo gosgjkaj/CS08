@@ -187,9 +187,6 @@ async function getcourseDegreeWeights(root, args, context) {
 async function getUsers(root, args,context) {
 	return await context.prisma.users()
 }
-async function getDegrees(root, args, context) {
-	return await context.prisma.degrees()
-}
 
 async function getWeight(root, args, context) {
 	return await context.prisma.courseDegreeWeights( {

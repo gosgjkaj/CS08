@@ -31,7 +31,7 @@
   let componentsActive = [true,false,false,false]
   let componentsDone = [false,false,false,false]
   let weights=[]
-
+  $:weights,console.log(weights)
   for (let  x= currentyear-3; x <= currentyear+2; x++) {
     years.push(x)
   }
@@ -178,9 +178,12 @@ async function goNext(){
         break
       }else{
       for(let y=0; y<degreelist.length; y++){
+        console.log(degreelist)
         let weightpromise = await getWeights(degreelist[y].id,course.id)
         weightpromise.result().then(res=>{
-          if(res.data.getWeight.length==0){
+          console.log(res.data.getWeight)
+          if(res.data.getWeight==null){
+
             warning2 = true
           }else{
             let id = degreelist[y]['id']

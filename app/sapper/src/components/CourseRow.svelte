@@ -3,6 +3,7 @@ import { query, mutate } from 'svelte-apollo'
 import { gql } from 'apollo-boost'
 import { client } from '../gqlClient'
 import currentYear  from '../currentYear.js'
+
 	// hardcoded data
 let year = currentYear
 

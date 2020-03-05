@@ -795,3 +795,11 @@
 	</div>
 
 {/if}
+
+<footer class="footer">
+  <div class="content has-text-centered">
+    <p class="has-text-centered">
+    School of Chemistry, University of Glasgow
+    </p>
+  </div>
+</footer>

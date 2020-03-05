@@ -81,9 +81,11 @@
 	<div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
       {#each menu as item}
+      {#if  $session.user!=null }
       <a class={segment === item[0] ? 'navbar-item selected' : 'navbar-item'} href={item[0]} style="font-size: 150%">
         {item[1]}
       </a>
+      {/if}
     {/each}
       {#if $session.user != null && $session.user.role=="Admin"}
         <a href="/admin" class="navbar-item" style="font-size: 150%">Admin Page</a>

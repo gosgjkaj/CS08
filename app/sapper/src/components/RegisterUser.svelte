@@ -8,7 +8,7 @@
 	let email
 	let password
     let confirmPassword
-    let role
+    let role = 'Admin'
 
     let loading = false
     async function clearFields() {
@@ -16,12 +16,34 @@
         email=""
         password=""
         confirmPassword=""
-        role=""
+        role='Admin'
+	}
+	let passwordsNotMatching = false
+    let emailInvalid = false
+    let passwordInvalid = false
+    let incompleteFields = false
+	let reqError = false
+	
+	function validateEmail(email)  {
+        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
+    }
+
+    function validatePassword(password) {
+        // at least one number, one lowercase and one uppercase letter
+    // at least six characters
+    return /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(password)
+    }
+
+    function validateFieldsComplete() {
+        return !([name, role, email, password, confirmPassword].includes(""))
     }
 
 	async function register() {
 		loading = true
-
+		emailInvalid = !validateEmail(email)
+		passwordInvalid = !validatePassword(password)
+		incompleteFields= !validateFieldsComplete() 
+		if (!emailInvalid && !passwordInvalid && !incompleteFields){
 		try {
 			const signupMutation = await mutate(client(), { mutation: gql`
 				mutation {
@@ -39,9 +61,12 @@
             afterRegister()
             clearFields()
 		} catch(e) {
-			console.error(e)
+			reqError=true
 		} finally {
 			loading = false
+		}
+		}else{
+			loading=false
 		}
 
 	}
@@ -49,7 +74,7 @@
 </script>
 
 <div class="container">
-	<h1 style="font-size: 40px; font-weight: bold; text-align: center; margin:20px">Register</h1>
+	<h1 class="title is-1">Register</h1>
 
 
 	<div class="field is-horizontal">
@@ -94,7 +119,7 @@
 
                     <div class="select is-primary is-expanded">
                     <select bind:value={role} class="is-expanded" aria-placeholder="Normal" >
-                     <option value="Admin" >Admin </option>
+                     <option value="Admin" selected >Admin </option>
                      <option value="Normal"> Normal</option>
                      <option value="Restricted">Restricted(Read only)</option>
 					
@@ -140,11 +165,45 @@
 		</div>
 	</div>
 
-	<div class="field is-horizontal" style="justify-content:center">
-		<button class="button is-primary is-medium" on:click={register}>Register</button>
-	</div>
+	<button class="button is-primary" on:click={register}>Register</button>
 
 	{#if loading} 
 		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 	{/if}
+
+	{#if emailInvalid} 
+        <div class="container animated fadeInUp m-md">
+            <div class="notification is-danger">
+                <button class="delete" on:click={() => emailInvalid = false}></button>
+                Invalid email.
+            </div>
+        </div>
+    {/if}
+
+    {#if passwordInvalid} 
+        <div class="container animated fadeInUp m-md">
+            <div class="notification is-danger">
+                <button class="delete" on:click={() => passwordInvalid = false}></button>
+                Your password must be at least 6 characters long and contain at least one number, one uppercase letter, and one lowercase letter.
+            </div>
+        </div>
+    {/if}
+
+    {#if incompleteFields} 
+        <div class="container animated fadeInUp m-md">
+            <div class="notification is-danger">
+                <button class="delete" on:click={() => incompleteFields = false}></button>
+                Please complete all fields.
+            </div>
+        </div>
+    {/if}
+
+    {#if reqError} 
+        <div class="container animated fadeInUp m-md">
+            <div class="notification is-danger">
+                <button class="delete" on:click={() => reqError = false}></button>
+                Registration failed. You may have already registered.
+            </div>
+        </div>
+    {/if}
 </div>
