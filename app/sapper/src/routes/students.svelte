@@ -22,6 +22,13 @@
   import YearSelection from "../components/YearSelection.svelte";
   import DegreeSelection from "../components/DegreeSelection.svelte";
   import CourseSelection from "../components/CourseDegreeWtSelection.svelte";
+  import StatusSelection from "../components/StatusSelection.svelte";
+   function checkUser(){
+    if($session.user!=null){
+      return $session.user.role=="Restricted"
+  }
+}
+  let restricted =checkUser()
 
   let deleteContext = "",
     DeleteSubTitle = "";
@@ -73,7 +80,7 @@
     if (BtnText.includes(ShowBtnText.toLowerCase())) {
       document.getElementById(ButtonID).textContent = HideBtnText;
       document.querySelectorAll(TargetElementsClass).forEach(function(el) {
-        console.log("element type=", el.tagName);
+      
         el.style.display = "block";
         //el.setAttribute("hidden", "true")
         //el.hidden = false;
@@ -90,7 +97,7 @@
 
   //==========End of Generic functions ===========
 
-  //=======Student Overall Grade functions etc =======
+  //=======Student Overall Grade functions  =======
   //  let selected ,selectedOvSGLevel ;
   let OvSCRUDObject = { grade: 0, studentLevel: "First", year: "" };
   let isOvsGDataInvalid = false;
@@ -113,7 +120,7 @@
   }
 
   function saveOvSGrade() {
-    console.log("saveOvSGrade start:: OvSCRUDObject=", OvSCRUDObject);
+  
 
     if (validateOvSGrade(OvSCRUDObject)) {
       const EditOvSGObject = {
@@ -128,12 +135,7 @@
       if (OvSCRUDObject.id) {
         EditOvSGObject.id = OvSCRUDObject.id;
       }
-
-      console.log(
-        "SaveSGRecord before update call:: EditOvSGObject=",
-        EditOvSGObject
-      );
-
+  
       //if Id exists, then edit and save
       if (EditOvSGObject.id) {
         const courseEdit = mutate(client(), {
@@ -149,7 +151,7 @@
             console.error("Error during Edit of Overall Grade  : ", e);
           });
       } else {
-        //if Id does not exist, then insert
+        //if ID does not exist, then insert
         const courseAdd = mutate(client(), {
           mutation: ADD_S_OVERALL_GRADE_GQL,
           variables: EditOvSGObject
@@ -167,7 +169,6 @@
   }
 
   function validateOvSGrade(OvSCRUDObject) {
-    console.log("In validateOvSGrade:: OvSCRUDObject=", OvSCRUDObject);
     if (
       OvSCRUDObject.studentLevel.length < 1 ||
       OvSCRUDObject.year.length < 1 ||
@@ -190,17 +191,11 @@
       year: "",
       grade: 0
     };
-    console.log("In AddOvSGrade:: OvSCRUDObject=", OvSCRUDObject);
     openOvSGModal();
   }
 
   function EditOvSGrade(OvSGradeRecord, degreeid, studentid) {
-    console.log(
-      "In EditOvSGrade:: OvSGradeRecord=",
-      OvSGradeRecord,
-      ", degreeid=",
-      degreeid
-    );
+ 
     OvSCRUDObject = {
       id: OvSGradeRecord.id,
       student: studentid,
@@ -208,7 +203,8 @@
       studentLevel: OvSGradeRecord.studentLevel,
       grade: OvSGradeRecord.grade
     };
-    console.log("OvSCRUDObject=", OvSCRUDObject);
+
+    
 
     openOvSGModal();
   }
@@ -222,7 +218,7 @@
     deleteContext = "OVSGrade";
     DeleteSubTitle = " Overall Grade ";
     openDeleteModal();
-    console.log("In DeleteOvSGrade:: OvSGradeRecord=", OvSGradeRecord);
+    
   }
 
   function deleteOVSGRecord() {
@@ -236,7 +232,7 @@
         closeDeleteModal();
       })
       .catch(e => {
-        console.error("Error during Delete : ", e);
+        console.error("Error during Delete. ");
         DeleteError = e;
       });
   }
@@ -244,7 +240,7 @@
   // ===========End of Student Overall Grade functions etc ======
 
   //==========Grade functions etc ==========
-  let GradeObject = { weight: 0, grade: 0 };
+  let GradeObject = { weight: 0, grade: 0, status: "OK" };
   let isGradeDataInvalid = false;
   let buttonGradeSaveIsLoading = false;
   $: buttonGradeSaveClass =
@@ -274,13 +270,13 @@
       weight: 0,
       grade: 0,
       date: 0,
-      degreeID
+      degreeID,
+      status: "OK"
     };
     openGradeModal();
   }
 
   function EditGrade(sgrade, studentid, degreeID) {
-    console.log("Edit Grade::sgrade=", sgrade);
     GradeObject = {
       id: sgrade.id,
       student: studentid,
@@ -288,27 +284,21 @@
       weight: sgrade.weight,
       grade: sgrade.grade,
       date: sgrade.date,
+      status: sgrade.status,
       degreeID
     };
-    console.log("GradeObject=", GradeObject);
     openGradeModal();
   }
 
   function DeleteGrade(sgrade) {
     GradeObject.id = sgrade.id;
-    console.log(
-      "deletegrade  called: sgrade=",
-      sgrade,
-      ",GradeObject=",
-      GradeObject
-    );
+ 
     deleteContext = "Grade";
     DeleteSubTitle = " Grade ";
     openDeleteModal();
   }
 
   function deleteGradeRecord() {
-    console.log("Delete GradeObject:", GradeObject);
     const GradeRecordToDelete = mutate(client(), {
       mutation: DELETE_STUDENT_GRADE_GQL,
       variables: { id: `${GradeObject.id}` }
@@ -319,13 +309,13 @@
         closeDeleteModal();
       })
       .catch(e => {
-        console.error("Error during Grade Delete : ", e);
+        console.error("Error during Grade Delete.");
         DeleteError = e;
       });
   }
 
   function EditGradeRecord() {
-    console.log("EditGradeRecord gradeObject=", GradeObject);
+  
     if (validateGrade(GradeObject)) {
       const EditGradeVariables = {
         data: {
@@ -333,7 +323,8 @@
           course: GradeObject.courseID,
           weight: GradeObject.weight,
           grade: GradeObject.grade,
-          date: GradeObject.date
+          date: GradeObject.date,
+          status: GradeObject.status
         }
       };
 
@@ -354,7 +345,7 @@
             closeGradeModal();
           })
           .catch(e => {
-            console.error("Error during Edit of Grade  : ", e);
+            console.error("Error during Edit of Grade. ");
           });
       } else {
         //if Id does not exist, then insert
@@ -368,18 +359,19 @@
             closeGradeModal();
           })
           .catch(e => {
-            console.error("Error during Insertion of Grade  : ", e);
+            console.error("Error during Insertion of Grade. ");
           });
       }
     } //end of Validation
   }
   function validateGrade(gradeObject) {
-    console.log("In validateGrade:: gradeObject=", gradeObject);
+ 
     if (
       gradeObject.courseID.length < 1 ||
       !gradeObject.weight ||
       !gradeObject.grade ||
-      !gradeObject.date
+      !gradeObject.date ||
+      !gradeObject.status 
     ) {
       isGradeDataInvalid = true;
       return false;
@@ -404,12 +396,7 @@
   function SearchEvent(e) {
     let TargetValue = e.target.value;
     searchString = TargetValue;
-    console.log(
-      "e.target.value=",
-      e.target.value,
-      ", searchString=",
-      searchString
-    );
+ 
     GET_STUDENTS_LIST.refetch({ searchString });
   }
   function TitleBarChangeEvent() {
@@ -421,7 +408,7 @@
   }
 
   function validateStudent(studentObject) {
-    console.log("In validateStudent:: studentObject=", studentObject);
+
     if (
       studentObject.degreeID.length < 1 ||
       studentObject.level.length < 1 ||
@@ -442,7 +429,7 @@
 
   //=============  APOLLO cLIENT cALLS ====================
   function EditStudent() {
-    console.log("EditStudent studentObject=", studentObject);
+    
     if (validateStudent(studentObject)) {
       const EditObject = {
         id: studentObject.id,
@@ -455,7 +442,7 @@
           entryYear: studentObject.entryYear
         }
       };
-      console.log("EditObject=", EditObject);
+    
 
       const courseEdit = mutate(client(), {
         mutation: EDIT_STUDENT_GQL,
@@ -467,7 +454,7 @@
           closeModal();
         })
         .catch(e => {
-          console.error("Error during Edit Student : ", e);
+          console.error("Error during Edit Student. ");
         });
     }
   }
@@ -483,7 +470,7 @@
         closeDeleteModal();
       })
       .catch(e => {
-        console.error("Error during Delete : ", e);
+        console.error("Error during Delete. ");
         DeleteError = e;
       });
   }
@@ -500,7 +487,7 @@
           entryYear: studentObject.entryYear
         }
       };
-      console.log("Student InsertObject=", InsertObject);
+     
 
       const studentCreate = mutate(client(), {
         mutation: ADD_STUDENT_GQL,
@@ -512,7 +499,7 @@
           closeModal();
         })
         .catch(e => {
-          console.error("Error during Insert Student : ", e);
+          console.error("Error during Insert Student. ");
         });
     }
   }
@@ -534,7 +521,7 @@
   function onItemClick(item) {
     studentObject = item;
     studentObject.degreeID = item.degree.id;
-    console.log("onItemClick:: studentObject=", studentObject);
+
     openModal();
   }
 
@@ -660,6 +647,7 @@
                 </a>
               </p>
             {/if}
+            {#if !restricted}
             <p class="level-item">
               <a
                 href="javascript:;"
@@ -668,7 +656,7 @@
                 Add New Student
               </a>
             </p>
-
+            {/if}
           </div>
 
         </div>
@@ -714,7 +702,7 @@
                     </tr>
                   </tbody>
                 </table>
-
+                {#if !restricted}
                 <!-- Student Buttons -->
                 <div class="columns is-centered">
                   <div class="column">
@@ -740,7 +728,7 @@
                     </a>
                   </div>
 
-                  {#if student['mygrades'].length <= 0}
+                  {#if student['mygrades'].length >= 0}
                     <div class="column">
                       <a
                         href="javascript:;"
@@ -756,16 +744,16 @@
                 </div>
                 <hr />
                 <!-- End of Student Buttons -->
-
+                  {/if}
                 <!-- Grades Start here -->
-                {#if student['mygrades'].length > 0}
+                {#if student['mygrades'].length >= 0 }  
                   <div class="columns">
                     <div class="column is-one-third">
                       <span class="tag is-primary is-large">
                         {student['mygrades'].length} Grades
                       </span>
                     </div>
-                                        <div class="column is-one-third">
+                      <div class="column is-one-third">
                       <button
                         id={student.degree.id}
                         class="button"
@@ -773,6 +761,7 @@
                         {ShowBtnText}
                       </button>
                     </div>
+                    {#if !restricted}
                     <div class="column is-one-third">
                       <a
                         href="javascript:;"
@@ -784,6 +773,7 @@
                         </span><span>Add Grade</span>
                       </a>
                     </div>
+                    {/if}
 
 
                   </div>
@@ -803,22 +793,33 @@
                       <div class="column is-one-sixth">
                         <strong>Date</strong>
                       </div>
+                      <div class="column is-one-sixth">
+                        <strong>Status</strong>
+                      </div>
                       <div class="column is-one-sixth" />
                       <div class="column is-one-sixth" />
                     </div>
                   </div>
-                {/if}
+                 {/if}
+                
                 <div
                   class="{GradesDiv}{student.degree.id}"
-                  style="display: none;">
-                  {#each student['mygrades'] as sgrade, i}
+                  style="display: none;">        
+                {#each student['mygrades'] as sgrade, i}
                     <div class="columns">
                       <div class="column is-one-sixth">
                         {sgrade.course.name}
                       </div>
                       <div class="column is-one-sixth">{sgrade.weight}</div>
-                      <div class="column is-one-sixth">{sgrade.grade}</div>
+                      <div class="column is-one-sixth">
+                      {#if sgrade.status == "OK"}
+                      {sgrade.grade}
+                      {:else}Please fix status.{/if}
+                      </div>
+
                       <div class="column is-one-sixth">{sgrade.date}</div>
+                      <div class="column is-one-sixth">{sgrade.status}</div>
+                      {#if !restricted}
                       <div class="column is-one-sixth">
                         <a
                           class="button is-success"
@@ -839,13 +840,16 @@
                           </span>
                         </a>
                       </div>
+                      {/if}
                     </div>
                   {/each}
+        
+                  
 
                   <!-- End of Student Grades -->
 
                   <!-- Student Overall Grade starts here -->
-                  {#if student['mygrades'].length > 0 && student['myoverallgrades'].length <= 0}
+                  {#if student['mygrades'].length > 0 && student['myoverallgrades'].length <= 0 && !restricted}
                     <p>
                       <a
                         href="javascript:;"
@@ -862,8 +866,9 @@
                   {#if student['myoverallgrades'].length > 0}
                     <p>
                       <span class="tag is-primary is-large">
-                        Overall Grades
+                        {student['myoverallgrades'].length} Overall Grades
                       </span>
+                       {#if !restricted}
                       <a
                         href="javascript:;"
                         on:click={() => AddOvSGrade(student.degree.id, student.id)}
@@ -872,6 +877,7 @@
                           <i class="fas fa-plus" />
                         </span>
                       </a>
+                      {/if}
                     </p>
                     <div class="columns">
                       <div class="column is-one-fifth">
@@ -898,6 +904,7 @@
                       <div class="column is-one-fifth">
                         {overallGradeReadObject.grade}
                       </div>
+                       {#if !restricted}
                       <div class="column is-one-fifth">
                         <a
                           class="button is-success"
@@ -918,6 +925,7 @@
                           </span>
                         </a>
                       </div>
+                      {/if}
                     </div>
                   {/each}
                 </div>
@@ -1095,8 +1103,14 @@
               <input
                 class="input"
                 type="number"
-                placeholder="GrDateade"
+                placeholder="Date"
                 bind:value={GradeObject.date} />
+            </div>
+          </div>
+          <div class="column field">
+            <label class="label">Status*</label>
+            <div class="control">
+            <StatusSelection bind:selected={GradeObject.status} />
             </div>
           </div>
         </div>
@@ -1183,13 +1197,13 @@
     <div class="modal-background" />
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title is-danger">Delete this student?</p>
+        <p class="modal-card-title is-danger">Delete this record?</p>
         <button class="delete" aria-label="close" on:click={closeDeleteModal} />
       </header>
       <section class="modal-card-body">
         <div class="field">
           <label class="label has-text-danger">
-            Are you sure you would like to delete the student "{studentObject.firstname}"?
+            Are you sure you would like to delete this record?
           </label>
         </div>
 

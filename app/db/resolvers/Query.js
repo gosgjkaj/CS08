@@ -19,6 +19,7 @@ async function getYear(root, args, context) {
 	return year
 }
 
+//return all courses for the mainpage that are current courses and are included  in a degree
 async function coursesFromYear(root, args, context) {
 	let allCourseRuns = await context.prisma.courseRuns()
 	let filtered = allCourseRuns.filter(courseRun => (courseRun.year).includes(args.year))
@@ -27,21 +28,21 @@ async function coursesFromYear(root, args, context) {
 	if(filtered!=null){
 	for(let i=0; i<filtered.length; i++){
 		ids.push(filtered[i].id)
-		console.log("dfgf\n")
+
 	}
 	}
-	console.log(ids)
+
 	let courses = await context.prisma.courseRuns({where: {
 		id_in: ids
 	}}).course()
 	
 	courses = courses.map(item => item.course.id)
-	console.log(courses, "sdfg")
+
 	let coursesByDegree = await context.prisma.courseDegreeWeights({where: {degree: {id: args.id }}}).course()
 	coursesByDegree = coursesByDegree.map(item => item.course)
-	console.log(coursesByDegree, "ertg\n")
+
 	let result = coursesByDegree.filter(course => courses.indexOf(course.id)>=0)
-	console.log(result)
+
 	return result
 }
 
@@ -62,7 +63,7 @@ async function namefromDegreeID(root, args, context){
 }
 
 async function gradefromStudentID(root, args, context){
-	return await context.prisma.studentCourseGrades({where: {student: {guid: args.id}}})
+	return await context.prisma.studentCourseGrades({where: {student: {id: args.id}}})
 }
 
 async function postfromGUID(root, args, context){
@@ -79,7 +80,7 @@ async function yearfromStudentGrade(root, args, context){
 }
 
 
-
+//filter students 
 async function studentSearch(root, args, context) {
 	if (args.searchString.trim().length > 0) {
 		let searchStringArg = args.searchString.toLowerCase();
@@ -109,12 +110,12 @@ async function getOverallGrade(root, args, context) {
 	})
 }
 
+//extract course-run objects for  the listing of years available for a course
 async function getCourseRuns(root, args, context) {
 	if (args.searchString && args.searchString.trim().length > 0) {
 		let coursejoined ="";
 		const indexOfSearchItems = (allCourses, searchStringArg) => allCourses.reduce(
 				(acc, eachCourse, i) => {
-					//console.log("eachcourse=", eachCourse);
 					coursejoined = Object.values(eachCourse.course).join("")
 					return coursejoined.toLowerCase().includes(searchStringArg) ? [...acc, i] : acc
 				},
@@ -124,17 +125,9 @@ async function getCourseRuns(root, args, context) {
 	let allCourseRuns = await context.prisma.courseRuns();
 	let allCourses = await context.prisma.courseRuns().course();
 	let MatchedIndices = indexOfSearchItems(allCourses,searchStringArg);
-	//console.log("MatchedIndices=", MatchedIndices);
+
 	return await allCourseRuns.filter( (courseRun, index) => MatchedIndices.indexOf(index)>=0)
-	// return await allCourses.filter((course) => {
-	// 	let tempcourse = course.course();
-	// 	//coursejoined= Object.values(course.course).join("");
-	// 	console.log("============");
-	// 	console.log("getCourseRuns::course=", course);
-	// 	console.log("getCourseRuns::coursejoined=", coursejoined);
-	// 	console.log("============");
-	// 	return tempcourse.toLowerCase().includes(searchStringArg)
-	// });
+
 }
 return await context.prisma.courseRuns();
 }

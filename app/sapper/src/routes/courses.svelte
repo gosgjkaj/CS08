@@ -5,6 +5,9 @@
   import yearRuns from "../utils/js/YearRuns";
   import { session } from "../stores";
 
+
+
+
   import {
     GET_COURSERUNS_GQL,
     ADD_COURSERUN_GQL,
@@ -15,6 +18,13 @@
   //import TitleBar from '../components/TitleBar.svelte'
   import LevelSelection from "../components/LevelSelection.svelte";
   import YearSelection from "../components/YearSelection.svelte";
+  
+  function checkUser(){
+    if($session.user!=null){
+      return $session.user.role=="Restricted"
+  }
+}
+  let restricted =checkUser()
 
   let currentCourseObject = {};
   let isDataInvalid = false;
@@ -51,26 +61,20 @@
   function SearchEvent(e) {
     let TargetValue = e.target.value;
     searchString = TargetValue;
-    console.log(
-      "e.target.value=",
-      e.target.value,
-      ", searchString=",
-      searchString
-    );
+   
     GET_COURSERUNS_LIST.refetch({ searchString });
   }
   function OnYearDropDownChange() {
-    //console.log("OnYearDropDownChange called");
+   
     RefreshYearData();
   }
   function onNewCourseClick() {
-    //console.log("TitleBarclickEvent called");
+    
     initNewCourseItem();
   }
 
   function validateCourse() {
-    console.log("validateCourse:: currentCourseObject=", currentCourseObject);
-    console.log("currentCourseObject.year.length=", currentCourseObject.year.length);
+   
     if (
       (currentCourseObject.year && currentCourseObject.year.length<1) ||
       !currentCourseObject.level ||
@@ -101,7 +105,7 @@
           info: currentCourseObject.info
         }
       };
-      console.log("EditObject=", EditObject);
+     
 
       const courseEdit = mutate(client(), {
         mutation: EDIT_COURSERUN_GQL,
@@ -111,15 +115,13 @@
           ResetCourseObject();
           GET_COURSERUNS_LIST.refetch();
         })
-        .catch(e => {
-          console.error("Error during Edit Course : ", e);
-        });
+        
       closeModal();
     }
   }
 
   function deleteRecord() {
-    console.log("deleteRecord::currentCourseObject=", currentCourseObject);
+    
     const courseDelete = mutate(client(), {
       mutation: DELETE_COURSERUN_GQL,
       variables: {
@@ -131,9 +133,7 @@
         ResetCourseObject();
         GET_COURSERUNS_LIST.refetch();
       })
-      .catch(e => {
-        console.error("Error during Delete : ", e);
-      });
+      
     closeDeleteModal();
   }
 
@@ -148,7 +148,7 @@
           info: currentCourseObject.info
         }
       };
-      //console.log("InsertObject=", InsertObject);
+   
 
       const courseCreate = mutate(client(), {
         mutation: ADD_COURSERUN_GQL,
@@ -158,9 +158,8 @@
           ResetCourseObject();
           GET_COURSERUNS_LIST.refetch();
         })
-        .catch(e => {
-          console.error("Error during Insert Course : ", e);
-        });
+        
+        
       closeModal();
     }
   }
@@ -178,9 +177,7 @@
   }
   //
   function RefreshYearData() {
-    //    alert(`Year: ${selectedYear.id}  `);
-    console.log("RefreshYearData called", `Year: ${selectedYear.text}  `);
-    //console.log("RefreshYearData called");
+  
     ReloadCourses();
   }
 
@@ -198,22 +195,16 @@
       name: EditItemObject.course.name,
       info: EditItemObject.course.info
     };
-    console.log(
-      "onEditCourseClick:: currentCourseObject object temp:",
-      coursetemp
-    );
+   
 
     currentCourseObject = coursetemp;
-    console.log(
-      "onEditCourseClick:: currentCourseObject object:",
-      currentCourseObject
-    );
+    
 
     openModal();
   }
   async function onDeleteClick(item) {
     currentCourseObject = item;
-    console.log("onDeleteClick::currentCourseObject=", currentCourseObject);
+   
     openDeleteModal();
   }
 
@@ -237,10 +228,7 @@
 
   function initNewCourseItem() {
     ResetCourseObject();
-    console.log(
-      "initNewCourseItem:: currentCourseObject object=",
-      currentCourseObject
-    );
+   
     openModal();
   }
 
@@ -261,10 +249,7 @@
       buttonSaveIsLoading = true;
       //logic here
 
-      console.log(
-        "onSaveCourseClick:: currentCourseObject object::",
-        currentCourseObject
-      );
+     
       if (currentCourseObject.id) {
         EditCourse();
       } else {
@@ -281,7 +266,7 @@
 </script>
 
 <svelte:head>
-  <title>List of Courses</title>
+  <title>Courses</title>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.25.0/slimselect.min.js">
 
@@ -356,7 +341,7 @@
                 &nbsp;
               </p>
             {/if}
-
+            {#if !restricted}
             <p>
               <a
                 href="javascript:;"
@@ -365,7 +350,7 @@
                 Add Course
               </a>
             </p>
-
+            {/if}
           </div>
         </div>
 
@@ -406,6 +391,7 @@
                     <td>{currentCourseObject.course.info}</td>
                   </tr>
                 </table>
+                {#if !restricted}
                 <footer class="card-footer">
                   <div class="columns is-centered">
                     <div class="column">
@@ -432,6 +418,7 @@
                     </div>
                   </div>
                 </footer>
+                {/if}
               </Card>
             </div>
           {:else}
@@ -441,7 +428,7 @@
                   No Courses for the search query {searchString}.
                 </div>
               {:else}
-                <p>No courses listed yet.</p>
+                <p>No courses</p>
               {/if}
 
             </p>
@@ -574,17 +561,8 @@
     </div>
   </div>
   <!-- End of Delete Modal -->
-{:else}
+{:else}Please log in to access this part of the database.{/if}
 
-	<div class="container" style="display:flex; jusity-content:center">
-		<h1 style="font-size: 55px; font-weight: bold; text-align: center; margin:20px" >Please log in to access this part of the database.</h1>
-	</div>
 
-{/if}
-<footer class="footer">
-  <div class="content has-text-centered">
-    <p class="has-text-centered">
-    School of Chemistry, University of Glasgow
-    </p>
-  </div>
-</footer>
+
+             

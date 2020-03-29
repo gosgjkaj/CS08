@@ -6,7 +6,7 @@ export let gpa
 
 let gradeid = gpa.id
 let valueOfGrade = gpa.grade
-
+export let gpaReload = () => {}
 let editing = false
 let color = "has-text-black"
 let invalid = false
@@ -24,7 +24,7 @@ async function updateGpa(gradeid, newgrade){
             }`
         })
         
-
+    gpaReload()
     editing = false
     color = "has-text-black"
     valueOfGrade = updategpa.data.changeOverallGrade.grade
@@ -64,10 +64,10 @@ async function updateGpa(gradeid, newgrade){
 
     {#if editing}
 
-        <input class="column is-1 level-1 has-text-danger" bind:value={newgrade} placeholder={valueOfGrade}/>
-        <div class="box">
+        <input class="input column is-2" bind:value={newgrade} placeholder={valueOfGrade.toFixed(1)}/>
+        &nbsp;&nbsp;&nbsp;
         <div class="buttons">
-        <button class="button is-success level-1 is-block " on:click={updateGpa(gradeid,newgrade)} >
+        <button class="button is-success level-1 is-block " on:click={()=>updateGpa(gradeid,newgrade)} >
             <span class="icon is-small">
             <i class="fas fa-check"></i>
             </span>
@@ -90,7 +90,6 @@ async function updateGpa(gradeid, newgrade){
 
         {/if}
 
-        </div>
 
     {:else}
         <div class="column is-2 {color}"> {valueOfGrade}</div>

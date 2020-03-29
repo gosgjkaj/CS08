@@ -15,6 +15,13 @@
   } from "../utils/gql/gqloperations";
   import Card from "../components/Card.svelte";
   import CourseSelection from "../components/CourseSelection.svelte";
+  function checkUser(){
+    if($session.user!=null){
+      return $session.user.role=="Restricted"
+  }
+}
+  let restricted =checkUser()
+
 
   let degree = {};
   let isDataInvalid = false;
@@ -82,7 +89,6 @@
     modalSDWeightIsVisible = false;
   }
   function validateSDWeight() {
-    console.log("validateSDWeight::SDWeightEditObject=", SDWeightEditObject);
     if (!SDWeightEditObject.courseid || !SDWeightEditObject.weight) {
       isSDWeightDataInvalid = true;
       return false;
@@ -97,16 +103,12 @@
     SDWeightEditObject.weight = 0;
     SDWeightEditObject.courseid = "";
 
-    console.log("EditCourseDegreeWeight::degreeObject=", degreeObject);
-    console.log(
-      "EditCourseDegreeWeight::SDWeightEditObject=",
-      SDWeightEditObject
-    );
+   
     openSDWeightModal();
   }
 
   function EditCDWeightClick(coursedetails) {
-    console.log("EditCourseDegreeWeight::coursedetails=", coursedetails);
+  
     SDWeightEditObject = coursedetails;
     SDWeightEditObject.courseid = SDWeightEditObject.course.id;
     openSDWeightModal();
@@ -114,7 +116,7 @@
 
   function DeleteCDWeightClick(coursedetails) {
     SDWeightEditObject = coursedetails;
-    console.log("DeleteCourseDegreeWeight::coursedetails=", SDWeightEditObject);
+   
     deleteContext = "SDWeight";
     openDeleteModal();
   }
@@ -129,7 +131,7 @@
         },
         where: { id: SDWeightEditObject.id }
       };
-      console.log("CDWeight UpdateObject=", UpdateObject);
+     
 
       const SDWeightUpdate = mutate(client(), {
         mutation: EDIT_CDWEIGHT_GQL,
@@ -141,7 +143,7 @@
           closeSDWeightModal();
         })
         .catch(e => {
-          console.error("Error during UPDATE CDWeight : ", e);
+          console.error("Error during UPDATE CDWeight. ");
         });
     }
   }
@@ -171,7 +173,7 @@
           weight: SDWeightEditObject.weight
         }
       };
-      console.log("CDWeight InsertObject=", InsertObject);
+     
 
       const SDWeightCreate = mutate(client(), {
         mutation: ADD_CDWEIGHT_GQL,
@@ -183,14 +185,14 @@
           closeSDWeightModal();
         })
         .catch(e => {
-          console.error("Error during Insert CDWeight : ", e);
+          console.error("Error during Insert CDWeight. ");
         });
     }
   }
 
   function deleteSDWeightRecord() {
     let deleteArguments = { id: `${SDWeightEditObject.id}` };
-    console.log("deleteSDWeightRecord:: delete arguments=", deleteArguments);
+
 
     const degreeSDWtDelete = mutate(client(), {
       mutation: DELETE_CDWEIGHT_GQL,
@@ -202,7 +204,7 @@
         closeDeleteModal();
       })
       .catch(e => {
-        console.error("Error during Delete : ", e);
+        console.error("Error during Delete. ");
         DeleteError = e;
       });
   }
@@ -216,12 +218,7 @@
   }
 
   function SearchEvent(e) {
-    console.log(
-      "e.target.value=",
-      e.target.value,
-      ", searchString=",
-      searchString
-    );
+  
     GET_DEGREES_LIST.refetch({ searchString });
   }
   function TitleBarChangeEvent() {
@@ -259,7 +256,7 @@
           info: degree.info
         }
       };
-      console.log("EditObject=", EditObject);
+     
 
       const courseEdit = mutate(client(), {
         mutation: EDIT_DEGREE_GQL,
@@ -271,7 +268,7 @@
           closeModal();
         })
         .catch(e => {
-          console.error("Error during Edit Degree : ", e);
+          console.error("Error during Edit Degree. ");
         });
     }
   }
@@ -297,7 +294,7 @@
         closeDeleteModal();
       })
       .catch(e => {
-        console.error("Error during Delete : ", e);
+        console.error("Error during Delete. ");
         DeleteError = e;
       });
   }
@@ -311,7 +308,7 @@
           info: degree.info
         }
       };
-      console.log("Degree InsertObject=", InsertObject);
+      
 
       const degreeCreate = mutate(client(), {
         mutation: ADD_DEGREE_GQL,
@@ -323,7 +320,7 @@
           closeModal();
         })
         .catch(e => {
-          console.error("Error during Insert Degree : ", e);
+          console.error("Error during Insert Degree. ");
         });
     }
   }
@@ -454,7 +451,7 @@
               </p>
 
             </div>
-
+            {#if !restricted}
             <div class="level-right">
               <p class="level-item">
                 <a
@@ -464,8 +461,10 @@
                   Add New Degree
                 </a>
               </p>
-            </div>
+            </div> 
+           {/if}
           </div>
+        
 
           {#if searchString.trim().length > 0}
             <p class="level-item">
@@ -512,7 +511,7 @@
                     <td>{degree.info}</td>
                   </tr>
                 </table>
-
+                {#if !restricted}
                 <!-- Degree Action buttons -->
                 <div class="columns is-centered">
                   <div class="column">
@@ -550,7 +549,7 @@
                     </a>
                   </div>
                 </div>
-
+                {/if}
                 <!-- End of Degree Action buttons -->
 
                 <!-- Courses Start here -->
@@ -584,6 +583,7 @@
                         <div class="column is-one-fourth">
                           {courseDegreeWeightsdetails.weight}
                         </div>
+                         {#if !restricted}
                         <div class="column is-one-fourth">
                           <a
                             href="javascript:;"
@@ -600,6 +600,7 @@
                             Delete
                           </a>
                         </div>
+                        {/if}
                       </div>
                     {/each}
                   </div>
@@ -762,14 +763,13 @@
     <div class="modal-background" />
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title is-danger">Delete this degree?</p>
+        <p class="modal-card-title is-danger">Delete this record?</p>
         <button class="delete" aria-label="close" on:click={closeDeleteModal} />
       </header>
       <section class="modal-card-body">
         <div class="field">
-          <label class="label is-danger">
-            Are you sure you would like to delete the degree named "{degree.name}"
-            ?
+          <label class="label has-text-danger">
+            Are you sure you would like to delete this record?
           </label>
         </div>
         <div>

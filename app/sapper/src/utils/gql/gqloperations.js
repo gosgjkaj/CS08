@@ -184,7 +184,8 @@ query($searchString: String){
       id
       weight
       grade
-      date 
+      date
+      status 
       course {
         id
         name

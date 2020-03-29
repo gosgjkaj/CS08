@@ -5,6 +5,7 @@
   import { query, mutate } from "svelte-apollo";
   import { gql } from "apollo-boost";
   import  Papa  from 'papaparse'
+  import currentYear  from '../currentYear.js'
 
 
   let courses = query(client(), {
@@ -23,7 +24,7 @@
   let uploadResults 
   let files = []
   let review = []
-  let currentyear = new Date().getFullYear()
+  let currentyear =currentYear
   let year
   let years=[]
   let loading =false
@@ -31,14 +32,14 @@
   let componentsActive = [true,false,false,false]
   let componentsDone = [false,false,false,false]
   let weights=[]
-  $:weights,console.log(weights)
+
   for (let  x= currentyear-3; x <= currentyear+2; x++) {
     years.push(x)
   }
 
   function readFile(uploadedfile) {
     if(uploadedfile!=null){
-    //check if xlsx or cvs
+
     let filenameArray = (uploadedfile["name"]).split(".")
     let type = filenameArray[filenameArray.length -1]
 
@@ -52,7 +53,7 @@
       })
       }
    else {
-    console.log("wrong file format uploaded")
+
   }
     }
   }
@@ -141,8 +142,8 @@ if(review.length!=0){
     review.forEach(w => { 
     let names = w['Name'].split(",")
     studentinput += `{ EMPLID: "${w['EMPLID']}",
-                      firstname: "${names[0]}",
-                      surname: "${names[1]}",
+                      firstname: "${names[1]}",
+                      surname: "${names[0]}",
                       degree: "${w['degree']}",
                       level: ${w['level']}
                       },`
@@ -161,7 +162,7 @@ if(review.length!=0){
         
       }`
     })
-  console.log(created.data.createStudentByUpload.failed )
+  
  
 }
 }
@@ -178,14 +179,16 @@ async function goNext(){
         break
       }else{
       for(let y=0; y<degreelist.length; y++){
-        console.log(degreelist)
+       
         let weightpromise = await getWeights(degreelist[y].id,course.id)
         weightpromise.result().then(res=>{
-          console.log(res.data.getWeight)
-          if(res.data.getWeight==null){
+         
+          if(res.data.getWeight==null || res.data.getWeight.length<=0 ){
 
             warning2 = true
           }else{
+            
+           
             let id = degreelist[y]['id']
             let course_weight =  res.data.getWeight[0].weight
             weights.push({degree: id, weight: course_weight})
@@ -211,7 +214,7 @@ async function goNext(){
   }
 }
 }
-$:weights, console.log(weights)
+
 async function getWeights(degreeid, courseid){
   return await query(client(), {
     query: gql`
@@ -240,7 +243,7 @@ async function uploadGrades(){
     studentsInput = studentsInput.substring(0, studentsInput.length-1) // removes the last comma
     studentsInput += "]"
     
-    console.log(weights)
+ 
      
      let failedGrades = await mutate(client(),{mutation: gql`
        mutation {
@@ -256,7 +259,7 @@ async function uploadGrades(){
        
      })
          failed = failedGrades.data.addGrade.failed
-        console.log(failed)
+
          if(failed.length != 0){
             warning2 = true
         }
@@ -282,7 +285,7 @@ function clearAll(){
   resetFile()}
   warning = false
   active = false
-  warning=false
+  warning2 = false
   weights=[]
   componentsActive[0] = true
   componentsActive[1] = false
@@ -301,7 +304,7 @@ function clearAll(){
 
 <div>
   <button class="button modal-button is-info" on:click={() => (active = true)}>
-    Upload
+    Upload Grades
   </button>
 </div>
 
@@ -351,6 +354,7 @@ function clearAll(){
     {:then result} 
    {#if componentsActive[0]}
     <div>
+    <div class="box"> Please upload files that have data in columns EMPLID, Name and Grade.</div>
     <div class="columns">
       <div class="column is-2 is-offset-2"> Course: </div>
         <div class="column is-4 ">

@@ -21,7 +21,6 @@
 
   afterUpdate(() => {
     if (multiple) {
-      //console.log("afterUpdate::selected values=", selected);
       MultiSelectControl.set(selected);
     }
   });
@@ -37,12 +36,14 @@
       {/each}
     </select>
   {:else}
-    <select bind:value={selected}>
+    <div class="select is-primary ">
+        <select bind:value={selected}>
       <option value="" disabled>-- Select--</option>
       {#each list as item}
         <option value={item.id}>{item.text}</option>
       {/each}
     </select>
+    </div>
   {/if}
 
 {:catch}

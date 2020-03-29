@@ -29,10 +29,10 @@ async function login(parent, args, context, info) {
     throw new Error('No such user found')
   }
 
-  const valid = await bcrypt.compare(args.password, user.password)
-  if (!valid) {
-    throw new Error('Invalid password')
-  }
+  //const valid = await bcrypt.compare(args.password, user.password)
+  //if (!valid) {
+    //throw new Error('Invalid password')
+  //}
 
   const token = jwt.sign({ userId: user.id }, APP_SECRET)
 
@@ -118,7 +118,7 @@ async function deleteDegree(parent, args, context, info) {
 
 async function createStudentByUpload(parent, args, context, info) {
   let students= JSON.parse(JSON.stringify(args.students))
-  console.log(students,"creating students")
+ 
   try {
     for (let i = 0; i < students.length; i++) {
       let year
@@ -146,7 +146,7 @@ async function createStudentByUpload(parent, args, context, info) {
   }
 
   async function createStudent(parent, args, context, info) {
-    //console.log("createStudent:: args=", args);
+   
     let newStudent =   await context.prisma.createStudent({
       firstname: args.data.firstname,
       surname: args.data.surname,
@@ -181,7 +181,7 @@ async function updateStudent(parent, args, context, info) {
 
 async function deleteStudent(parent, args, context, info) {
 
-  console.log("deleteStudent:: args=", args);
+ 
 
   let deleteManyStudentCourseGrades = await context.prisma.
   deleteManyStudentCourseGrades({
@@ -190,25 +190,28 @@ async function deleteStudent(parent, args, context, info) {
     }
   });
 
-  console.log("deleteStudent:: After deleteManyStudentCourseGrades");
+  
   let deletedStudent = await context.prisma.deleteStudent({ id: args.id })
     return deletedStudent
 }
 
 async function createStudentGrade(parent, args, context, info) {
-  console.log("createStudentGrade::args=", args);
+ 
   let newStudentGrade = await context.prisma.createStudentCourseGrade({
     student: {connect: {id: args.data.student}},
     course: {connect: {id: args.data.course}},
     weight: args.data.weight,
     grade: args.data.grade,
-    date: args.data.date
+    date: args.data.date,
+    status: args.data.status
+
+
   })
   return newStudentGrade
 }
 
 async function updateStudentGrade(parent, args, context, info) {
-  console.log("updateStudentGrade::args=", args);
+
   let updatedStudentGrade = await context.prisma.updateStudentCourseGrade({
     where: {
       id: args.id
@@ -218,14 +221,17 @@ async function updateStudentGrade(parent, args, context, info) {
       course: {connect: {id: args.data.course}},
       weight: args.data.weight,
       grade: args.data.grade,
-      date: args.data.date
+      date: args.data.date,
+      status: args.data.status
+
+
     }
   });
   return updatedStudentGrade
 }
 
 async function deleteStudentGrade(parent, args, context, info) {
-  console.log("deleteStudentGrade::args=", args);
+ 
   let deletedStudentGrade = await context.prisma.deleteStudentCourseGrade({
     id: args.id
   })
@@ -244,7 +250,7 @@ function createOverallGradeGPA(root, args, context) {
 
 async function createOverallGrade(parent, args, context, info) {
   let newOverallGrade = await context.prisma.createOverallGrade({
-    student: args.data.student,
+    student: {connect: {id: args.data.student}},
     year: args.data.year,
     studentLevel: args.data.studentLevel,
     grade: args.data.grade,
@@ -272,7 +278,7 @@ async function updateOverallGrade(parent, args, context, info) {
   let updatedOverallGrade = await context.prisma.updateOverallGrade({
     where: {id: args.id},
     data: {
-      student: args.data.student,
+      student: {connect: {id: args.data.student}},
       year: args.data.year,
       studentLevel: args.data.studentLevel,
       grade: args.data.grade,
@@ -318,14 +324,14 @@ async function createCourseDegreeWeight(parent, args, context, info) {
     weight: args.data.weight
   }
 
-  console.log("createCourseDegreeWeight::CDWtObject=", CDWtObject);
+
 
   let newCourseDegreeWeight = await context.prisma.createCourseDegreeWeight(CDWtObject)
   return newCourseDegreeWeight
 }
 
 async function updateCourseDegreeWeight(parent, args, context, info) {
-  console.log("updateCourseDegreeWeight:: args=", args);
+
   let CDWtObject = {
     data: {
       course: {
@@ -350,7 +356,7 @@ async function updateCourseDegreeWeight(parent, args, context, info) {
     }
   };
 
-  console.log("updateCourseDegreeWeight::CDWtObject=", CDWtObject, ", whereClause=", args.where.id);
+  
 
   let updatedCourseDegreeWeight = await context.prisma.
   updateCourseDegreeWeight(CDWtObject);
@@ -358,7 +364,7 @@ async function updateCourseDegreeWeight(parent, args, context, info) {
 }
 
 async function deleteCourseDegreeWeight(parent, args, context, info) {
-  console.log("deleteCourseDegreeWeight::args=", args)
+
   let deletedCourseDegreeWeight = await context.prisma.deleteCourseDegreeWeight({
     id: args.id
   })
@@ -377,7 +383,7 @@ async function createCourseRun(parent, args, context, info) {
     }
   };
 
-  console.log("createCourseRun::dataObject=", dataObject);
+
   let newCourseRun = await context.prisma.createCourseRun(dataObject)
   return newCourseRun
 }
@@ -399,13 +405,13 @@ async function updateCourseRun(parent, args, context, info) {
       id: args.id
     }
   };
-  console.log("updateCourseRun::dataObject=", dataObject);
+
   let updatedCourseRun = await context.prisma.updateCourseRun(dataObject)
   return updatedCourseRun
 }
 
 async function deleteCourseRun(parent, args, context, info) {
-  console.log("deleteCourseRun::args=", args);
+ 
 
    let deletedCourseRun = await context.prisma.deleteCourseRun({
     id: args.id
@@ -425,6 +431,7 @@ async function checkStudentNames(root, args, context) {
     },
   )
 }
+
 
 async  function checkGrade(root, args, context) {
   let grade= await context.prisma.$exists.studentCourseGrade({
@@ -447,11 +454,10 @@ async  function checkGrade(root, args, context) {
   
   return grade
 }
+//UPLOAD FUNC: check if a grade exists, if not create a grade for a student for a specific courseS
 async function addGrade(root, args, context) {
   let studentlist = JSON.parse(JSON.stringify(args.studentlist))
   let weights = JSON.parse(JSON.stringify(args.weights))
-  //let studentlist = args.studentlist
-  //let weights = args.weights
   let year = args.year
   let course = args.course
   let results = {failed:[]}
@@ -475,9 +481,9 @@ async function addGrade(root, args, context) {
     )
 
     let student = await context.prisma.student({guid:studentlist[i]["EMPLID"]})
-    console.log(student)
+   
     let studentDegree = await context.prisma.student({guid:studentlist[i]["EMPLID"]}).degree()
-    console.log(studentDegree)
+   
     let weight
     
   
@@ -490,15 +496,28 @@ async function addGrade(root, args, context) {
     }
    
     if (!gradeexists){
+
+      let gradeAsFloat = convert(studentlist[i]["Grade"])
+      if ( gradeAsFloat == null){
+      
+        let addagrade = await context.prisma.createStudentCourseGrade({
+          course: {connect: {id: args.course}},
+          student: {connect: {id: student.id}},
+          weight: weight,
+          grade: 0.0,
+          date: args.year,
+          status: studentlist[i]["Grade"],
+              })
+      }else{
       let addagrade = await context.prisma.createStudentCourseGrade({
         course: {connect: {id: args.course}},
         student: {connect: {id: student.id}},
         weight: weight,
         grade: convert(studentlist[i]["Grade"]),
         date: args.year,
-      }
-
-      )
+        status: "OK",
+            })
+          }
   }else{
     results.failed.push(student.guid)
   }

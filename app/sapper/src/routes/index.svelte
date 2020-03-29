@@ -44,6 +44,7 @@
 	<title>School of Chemistry Database</title>
 </svelte:head>
 
+<!-- checking if logged in -->
 {#if $session.user}
 
 	<section class="hero is-info">
@@ -54,23 +55,29 @@
 			</div>
 		</div>
     </section>
-	
+		
+		<!-- checking degree codes in database and list them here -->
 		{#await $degrees}
 			<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 		{:then result}
-
+			<!-- if degree code exist: -->
 			<div style="display:flex; flex-wrap: wrap; margin-top:2%; margin-left:2%; justify-content:space-between">
 				{#each result.data.getDegrees as degree}
+					<!-- for each degree code, create a container -->
 					<div class="box" style="display:flex; flex-direction:column; background-color:#EBF1F5; width:47%; margin-right:2%">
+						<!-- button redirect to degree page for final calculation -->
 						<div style="display:flex; justify-content:center">
-							<button on:click={gotoDegree(degree.id)} class="button is-large is-primary" style="width:90%">{degree.degreeCode}</button>
+							<button on:click={gotoDegree(degree.id)} class="button is-large is-info" style="width:90%">{degree.name}</button>
 						</div>
 						<br>
-						<p>Name: {degree.name}<br>Infomation: {degree.info}<br></p><br>
+						<p class="has-text-centered">Code: {degree.degreeCode}<br>Infomation: {degree.info}<br></p><br>
+						
+							<!-- container for courses belongs to this degree code -->
 							<div class="box" style="display:flex; flex-direction:column; justify-content: space-between">
 								<div style="margin-bottom:5px">
-									<p>Courses in this degree:</p>
+									
 								</div>
+								<!-- for each course, create a course row -->
 								<CourseRow degree={degree} class="content"/>
 							</div>
 					</div>		
@@ -78,16 +85,20 @@
 			</div>
 
 		{:catch}
-				<p class="content has-background-danger ">failed to load degrees</p>
+			<!-- if no degree exist or something goes wrong -->
+			<p class="content has-background-danger ">failed to load degrees</p>
 		{/await}
 
 {:else}
 
+	<!-- if user not logged in -->
 	<div class="container" style="display:flex; jusity-content:center">
 		<h1 style="font-size: 55px; font-weight: bold; text-align: center; margin:20px" >Please log in to access this part of the database.</h1>
 	</div>
 
 {/if}
+
+<!-- footer -->
 <footer class="footer">
   <div class="content has-text-centered">
     <p class="has-text-centered">

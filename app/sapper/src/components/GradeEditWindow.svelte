@@ -3,7 +3,7 @@ import { query, mutate } from 'svelte-apollo'
 import { gql } from 'apollo-boost'
 import { client } from '../gqlClient'
 export let grade
-
+export let gradesReload = () => {}
 let gradeid = grade.id
 let valueOfGrade = grade.grade
 let weightOfGrade = grade.weight
@@ -22,7 +22,7 @@ async function updateEntry(gradeid, newgrade, weight){
 
         if(newgrade <= 22 && newgrade>= 0){
 
-            if(0 < weight && weight < 1){
+            if(0 <= weight && weight <= 1){
 
             let updategrade = await mutate(client(), { mutation: gql`
                 mutation{
@@ -32,12 +32,7 @@ async function updateEntry(gradeid, newgrade, weight){
                     }
                 }`
             })
-        
-
-
-
-
-
+            gradesReload()
             editing = false
             color = "has-text-black"
             valueOfGrade = updategrade.data.changeDegreeGradesWeight.grade
@@ -84,9 +79,8 @@ async function updateEntry(gradeid, newgrade, weight){
 
     {#if editing}
 
-        <input class="column is-1 level-1 has-text-danger" bind:value={newgrade} placeholder={valueOfGrade}/>
-        <input class="column is-1 level-2 has-text-danger" bind:value={newweight} placeholder={weightOfGrade}/>
-        <div class="box">
+        <input class="input column is-2" bind:value={newgrade} placeholder={valueOfGrade}/>
+        <input class="input column is-2" bind:value={newweight} placeholder={weightOfGrade}/>
         <div class="buttons">
         <button class="button is-success level-1 is-block " on:click={updateEntry(gradeid,newgrade,newweight)} >
             <span class="icon is-small">
@@ -103,7 +97,6 @@ async function updateEntry(gradeid, newgrade, weight){
         </div>
     
 
-        </div>
 
         {#if gradeInvalid == true}
           

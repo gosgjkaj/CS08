@@ -4,13 +4,22 @@ enum Role {
   Restricted
 }
 
+enum Status {
+  OK
+  MV
+  CR
+  CW
+}
+
 enum Level {
   First
   Second
   Third
   Fourth
   Fifth
+  Graduated
 }
+
 
 type User {
   id: ID! @id
@@ -26,7 +35,7 @@ type Post {
 	createdAt: DateTime! @createdAt
 	updatedAt: DateTime! @updatedAt
 	postedBy: User! @relation(link: INLINE)
-  guid: Int!
+  guid: String!
 }
 
 type Course {
@@ -37,18 +46,19 @@ type Course {
   info: String @default(value: "")
 }
 
-type CourseRun { 
-  id: ID! @id
-  course: Course! @relation(link: INLINE)
-  year: [Int!]!
-}
-
 type CourseDegreeWeight {
   id: ID! @id
   course: Course! @relation(link: INLINE)
   degree: Degree! @relation(link: INLINE)
   weight: Float!
 }
+
+type CourseRun { 
+  id: ID! @id
+  year: [Int!]!
+  course: Course! @relation(link: INLINE)
+}
+
 
 type StudentCourseGrade {
   id: ID! @id
@@ -57,6 +67,7 @@ type StudentCourseGrade {
   weight: Float!
   grade: Float!
   date: Int!
+  status: Status!
 }
 
 type Student {

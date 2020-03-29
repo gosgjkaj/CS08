@@ -15,10 +15,10 @@
   var map = new Map();
 
   afterUpdate(() => {
-    console.log("CourseDegreeWtSelection::afterUpdate, degreeID=", degreeID);
+   
     if (degreeID) {
       courses.refetch({ where: { degree: degreeID } });
-      console.log("CourseDegreeWtSelection:: after refetch");
+     
     }
   });
   let courses = query(client(), {
@@ -31,8 +31,8 @@
   {#await $courses}
     Loading courses for degree {degreeID}
   {:then result}
-    <p style="color: red">{errorMessage}</p>
-    <select name="test" bind:value={selectedCourse}  on:change="{() => setWeight(selectedCourse)}" >
+    <p style="color: red">{errorMessage}</p> <div class="select is-primary ">
+        <select  name="test" bind:value={selectedCourse}  on:change="{() => setWeight(selectedCourse)}" >
       <option value="" disabled>-- Select--</option>
       {#each result.data.getcourseDegreeWeights as CDWeight}
          { map.set(CDWeight.course.id, CDWeight.weight) } 
@@ -41,6 +41,7 @@
         {errorMessage="Courses for this degree has not been created yet. Please create courses."}
       {/each}
     </select>
+    </div>
   {:catch error}
     Error: {error}
   {/await}

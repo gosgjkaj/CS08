@@ -6,7 +6,7 @@
   export let selectedCourse="", 
   degreeID = "";
 
-  console.log("degreeID=", degreeID);
+ 
   const courses = query(client(), {
     query: GET_COURSES_GQL 
   });
@@ -15,13 +15,14 @@
 <div>
   {#await $courses}
     Loading courses for degree {degreeID}
-  {:then result}
-      <select bind:value={selectedCourse}>
+  {:then result} <div class="select is-primary ">
+        <select bind:value={selectedCourse}>
       <option value="" disabled>-- Select--</option>
         {#each result.data.getCourses as course}
           <option value={course.id}>{course.name} </option>
         {/each}
       </select>
+      </div>
   {:catch error}
     Error: {error}
   {/await}

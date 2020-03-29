@@ -1,7 +1,6 @@
 # import * from './generated/prisma.graphql'
-
 type Query {
-	userPosts(userID: ID!, guid: Int!): [Post!]!
+	userPosts(userID: ID!, guid: String!): [Post!]!
 	checkPermission: String
   getCoursesByDegree(id: ID!): [CourseDegreeWeight!]!
   getYear(id: ID!): [CourseRun!]!
@@ -19,16 +18,15 @@ type Query {
   gradefromStudentID(id: ID!): [StudentCourseGrade!]!
   yearfromStudentGrade(id: ID!): [OverallGrade!]!
   namefromDegreeID(id: ID!): [Degree!]!
-  postfromGUID(guid: Int!): [Post!]!
+  postfromGUID(guid: String!): [Post!]!
   overallGradeFromId(id: ID!): [OverallGrade!]!
   studentSearch(id: ID!, searchString: String) : [Student!]!
   coursesFromYear(year: Int!, id: ID!): [Course!]!
   getWeight(degree: ID!, course: ID!): [CourseDegreeWeight!]!
   getCourseByID(id: ID!): Course!
 } 
-
 type Mutation {
-	createPost(text: String!, userID: ID!, guid: Int!): Post
+	createPost(text: String!, userID: ID!, guid: String!): Post
 	signup(email: String!, password: String!, name: String!, role: Role!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   changeGradeWeight(grade: Float!, weight: Float!, id: ID!): StudentCourseGrade!
@@ -60,11 +58,7 @@ type Mutation {
   createStudent(data: studentInput!): Student!
   createOverallGradeGPA(studentID: ID!, year: Int!, studentLevel: Level!, grade: Float!): OverallGrade
   changeOverallGrade(grade: Float!, id: ID!): OverallGrade
-
-
-
 }
-
 type Course {
   id: ID!
   level: Level
@@ -72,13 +66,11 @@ type Course {
   name: String
   info: String
 }
-
 type CourseRun {
   id: ID!
   course: Course!
   year: [Int!]!
 }
-
 input CourseRunInput {
   id: ID
   level: Level
@@ -87,7 +79,6 @@ input CourseRunInput {
   info: String
   year: [Int!]!
 }
-
 type Degree {
   id: ID!
   degreeCode: String!
@@ -96,7 +87,6 @@ type Degree {
   courses: [Course!]
   courseDegreeWeights: [CourseDegreeWeight!]
 }
-
 type Student {
   id: ID!
   firstname: String!
@@ -108,7 +98,6 @@ type Student {
   mygrades: [StudentCourseGrade!]
   myoverallgrades: [OverallGrade!]
 }
-
 input studentInput { 
   firstname: String!
   surname: String!
@@ -117,16 +106,13 @@ input studentInput {
   level: Level!
   entryYear: Int!
 }
-
-
 input StudentUploadInput {
   EMPLID: String!
   firstname: String!
   surname: String!
   degree: ID!
-  level: Level!
+  level: Level
 }
-
 input updateCourseInput {
   level: Level
   year: Int
@@ -135,29 +121,22 @@ input updateCourseInput {
   info: String
   degrees: [ID!]
 }
-
 input StudentListInput {
   EMPLID: String
   Name: String
   Grade: String
 }
-
 type AddGradeResult {
   failed: [String]
 }
-
 input DegreeCourseWeightInput {
   degree: ID!
   weight: Float!
 }
-
-
 type AuthPayload {
   token: String
   user: User
 }
-
-
 type StudentCourseGrade {
   id: ID!
   course: Course!
@@ -165,18 +144,18 @@ type StudentCourseGrade {
   weight: Float!
   grade: Float!
   date: Int!
+  status: Status!
   #updatedAt: DateTime!
   #createdAt: DateTime!
 }
-
 input StudentCourseGradeInput {
   student: ID!
   course: ID!
   weight: Float!
   grade: Float!
   date: Int!
+  status: Status!
 }
-
 type OverallGrade {
   id: ID!
   student: Student!
@@ -186,31 +165,26 @@ type OverallGrade {
   #updatedAt: DateTime!
   #createdAt: DateTime!
 }
-
 input OverallGradeInput {
   student: ID!
   year: Int!
   studentLevel: Level!
   grade: Float!
 }
-
 input degreeInput {
   degreeCode: String!
   name: String!
   info: String!
 }
-
 type CourseDegreeWeight {
   id: ID!
   course: Course!
   degree: Degree!
   weight: Float!
 }
-
 input MyCourseDegreeWeightWhereInput {
   degree: ID!
 }
-
 input MyCourseDegreeWeightInput {
   course: ID!
   degree: ID!

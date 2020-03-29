@@ -1,10 +1,10 @@
 <script context="module">
 	import { checkPermission } from '../utils.js'
-
+	
 	export async function preload(page, session) {
 		const perm = await checkPermission()
 		
-		if (perm != null) {
+		if (perm != null && session.user!=null) {
 			return this.redirect(302, '/')
 		}
 
@@ -46,9 +46,11 @@
 	}
 </script>
 
+<!-- simple login page -->
 <div class="container" style="width:35%; margin-top:5%">
 	<h1 style="font-size: 40px; font-weight: bold; text-align: center; margin:20px">Log in</h1>
 
+	<!-- email entry -->
 	<div class="field">
 		<div class="control has-icons-left has-icons-right">
 			<input bind:value={email} class="input is-primary" type="email" placeholder="Email" value="">
@@ -58,6 +60,7 @@
 		</div>
 	</div>
 	
+	<!-- password entry -->
 	<div class="field">
 		<div class="control has-icons-left has-icons-right">
 			<input bind:value={password} class="input is-primary" type="password" placeholder="Password" value="">
@@ -67,6 +70,7 @@
 		</div>
 	</div>
 
+	<!-- log in button -->
 	<div class="field is-horizontal" style="justify-content:center">
 		<button class="button is-success is-medium" on:click={login}>Log in</button>
 	</div>
@@ -75,7 +79,8 @@
 		<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 	{/if}
 
-	{#if warning} 
+	{#if warning}
+		<!-- if error occur -->
 		<div class="box has-background-danger has-text-white "> Email or password is incorrect.</div>
 	{/if}
 </div>

@@ -6,20 +6,35 @@
   import { onMount } from "svelte";
   import menu from "../menu";
   import Upload from '../components/Upload.svelte'
+  import StudentUpload from '../components/StudentUpload.svelte'
+  import { goto } from '@sapper/app'
+
 
   export let segment
 
   onMount(async () => { enableResponsibleMenu(); });
 
   let permission = checkPermission()
+   function checkUser(){
+    if($session.user!=null){
+      return $session.user.role=="Restricted"
+  }
+}
+  let restricted =checkUser()
+
 
   function logout() {
+   
     fetch("/logout", {
       method: 'POST'
-    })
+    }) 
+   
     // TODO: handle potential logout errors
+    
     session.set({ user: null })
-    permission = checkPermission()
+    permission = checkPermission() 
+    goto("/login")
+   
   }
 
   function enableResponsibleMenu() {
@@ -54,8 +69,10 @@
   }
 </style>
 
+<!-- Nav bar -->
 <nav class="navbar is-info" style="background-color: #003865" role="navigation" aria-label="main navigation">
-	<div class="navbar-brand">
+	<!-- UofG Logo -->
+  <div class="navbar-brand">
     <a href="/">
       <img
         src="https://www.gla.ac.uk/3t4/img/university-of-glasgow.png"
@@ -77,7 +94,7 @@
     </a>
   </div>
 
-
+  <!-- nav bar items as button -->
 	<div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
       {#each menu as item}
@@ -92,21 +109,19 @@
       {/if}
     </div>
 
-
+    <!-- showing user login information and upload buttons -->
     <div class="navbar-end">
       <div class="navbar-item">
           {#if $session.user != null}
             <div>
               <p style="font-size: 110%; font-weight: 500">Hi <bold>{$session.user.name}</bold>, You have <bold>{$session.user.role}</bold> permission.</p>
               <div style="display: flex; justify-content: center">
+              {#if !restricted}
+              <StudentUpload style="color: #0274AF"></StudentUpload>
                 <Upload style="color: #0274AF"></Upload>
+                {/if}
                 <button on:click={logout} class="button is-danger" style="margin-left: 5px">Log out</button>
               </div>
-            </div>
-          {:else}
-            <div>
-              <a href='/signup' class='button is-info is-medium'>register</a>
-              <a href="/login" class="button is-info is-medium">Log in</a>
             </div>
           {/if}
       </div>

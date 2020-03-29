@@ -9,8 +9,40 @@
 // ***********************************************
 //
 //
+
+
+//Set up login value here
+export const username = '2'
+export const password = '2'
+
+
 // -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
+Cypress.Commands.add("loginByUI", () => { 
+    cy.visit('/login')
+    cy.get('input[type=email]').type(username)
+    cy.get('input[type=password]').type(password)
+    cy.get('button')
+        .should('have.class','is-success')
+        .click()
+    cy.hash().should('eq','')
+    cy.contains('You have')
+    cy.contains('permission')
+})
+
+
+
+Cypress.Commands.add("login", () => { 
+    cy.request({
+        method:'POST',
+        url:'http://localhost:3000/login',
+        body:{
+            email:username,
+            password:password
+        }
+    }).then((resp) => {
+        window.localStorage.setItem('jwt', resp.body.user.token)
+    })
+})
 //
 //
 // -- This is a child command --

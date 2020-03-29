@@ -30,7 +30,7 @@ async function updateRole(id, newrole) {
             }`
         })
         editing= false
-        console.log(userRole.data.updateUserRole.role)
+ 
         role = newrole
 }
 async function resetRole() {
@@ -44,12 +44,14 @@ let newrole
     <p class=" has-text-weight-semibold"> {user.name}</p>
     <p>email: {user.email}</p>
     {#if editing}
-      <p>Role:</p>
-      <select  class="select" bind:value={newrole}>
+      <p>Role:</p> 
+      <div class="select is-primary is-small ">
+        <select bind:value={newrole}>
           <option value="Admin" >Admin </option>
           <option value="Normal"> Normal</option>
           <option value="Restricted">Restricted(Read only)</option>
       </select>
+      </div>
         <div class="level-right">
           <button class="button is-success" on:click="{updateRole(user.id, newrole)}" > Save </button>
           <button class="button" on:click="{()=>resetRole()}" > Cancel </button>

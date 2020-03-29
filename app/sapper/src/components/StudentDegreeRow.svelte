@@ -1,35 +1,43 @@
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js">
   import { query, mutate } from "svelte-apollo";
   import { gql } from "apollo-boost";
   import { client } from "../gqlClient";
   import {
     convert,
-    degreeClassification
+    degreeClassification,
+    exportClassification
   } from "../components/convertGrades.js";
   import GradeEditWindow from "../components/GradeEditWindow.svelte";
   import EditNotesWindow from "../components/EditNotesWindow.svelte";
   import GpaEditWindow from "../components/GpaEditWindow.svelte";
   import currentYear  from '../currentYear.js'
+  import DesignatedSelect from "../components/DesignatedSelect.svelte";
+  import {degreeToAcademic} from "../components/convertCode.js";
+
   let date = currentYear
   import { session } from "../stores";
   export let exportStudent;
-  export let selectedYear;
+  export let restricted;
   export let firstname;
   export let guid;
+  export let save
   export let surname;
   export let alphanum;
-  export let showingLevel;
   export let anonCode;
   export let showAnon;
   export let showNames;
   export let totalCourses;
   export let finalizeGpa;
   export let allowEdits;
-  export let level 
-  
-  export let studentId;
+  export let level;
 
+  export let selectedYear;
+  export let selectedLevel;
+  
+$:selectedLevel, guid=guid
+  
+  export let studentID;
+  export let reload 
   let editing = false;
   let addEdit = false;
   let text;
@@ -44,8 +52,108 @@
   let total = 0;
   let fullAnonCode;
   let userID = $session.user.id;
+  let hasValidGrades = true;
+  let designatedDegree
+  let hasDesDegree = false
+  let gpas=[]
  
   let finalGpa;
+  let academicPlan = degreeToAcademic(anonCode)
+
+
+
+//stages to execute:
+/*
+1. get student grades
+2. calculate
+3. if there is no overall create it
+4 of there is overall grade display it
+5. set the entry text to red if the overall grade is  not equal to the calculations
+
+*/
+
+//QUERIES
+ let editRes;
+let edits = query(client(), {
+    query: gql`
+		query($guid: String!){
+			postfromGUID(guid: $guid) {
+				text
+                createdAt
+                postedBy{
+                  
+                    name
+                    
+                }
+			}
+		}`,variables:{guid}
+  });
+ 
+  $edits.then(res => {
+    editRes = res.data.postfromGUID;
+  });
+
+  let grades=[]
+  let studentGrades = query(client(), {
+    query: gql`
+    query($studentID: ID!){
+        gradefromStudentID(id: $studentID ){
+            grade
+            weight
+            id
+            course{
+                courseID
+            }
+            status        
+        }
+    }`,
+    variables:{ studentID }
+  });
+
+  $studentGrades.then(res => {
+    if( res.data.gradefromStudentID!=null){
+    grades = res.data.gradefromStudentID;
+    }
+  });
+
+
+   //Query for getting overallgrade (Gpa) from student
+
+
+  let final22
+  let finalALPHA
+  let finalGradeStatus
+  let gpaINDB // OVERALL GRADE STORED IN  DB IF PRESENT
+  let studentGpa = query(client(), {
+    query: gql`
+    query($studentID: ID!){
+        overallGradeFromId(id: $studentID){
+            grade
+            id
+        }
+    
+    }`,variables:{ studentID }
+  });
+ 
+  $studentGpa.then(res => {
+    gpas = res.data.overallGradeFromId;
+  
+    if( gpas.length!=0){
+
+        final22 = gpas[0].grade
+        gpaINDB = gpas[0].grade
+        finalALPHA = convert(gpas[0].grade)
+        if(final22 < 6){
+          hasDesDegree = true
+        }
+    
+    }else{
+      gpaINDB= ""
+    }
+
+  });
+
+
 
 
 
@@ -62,44 +170,42 @@
   }
   $: anonCode, createAnonCode(anonCode);
 
+
+
+
+
+
+
+
+
+
+  //PART ONE -NOTES FOR EDITS
   //Function to crate edit notes
   async function createpost() {
     addEdit = false;
     let postMutation = await mutate(client(), {
       mutation: gql`
-      mutation{
-		createPost(text: "${text}", guid: ${guid}, userID: "${userID}")
+      mutation($guid: String!){
+		createPost(text: "${text}", guid: $guid, userID: "${userID}")
 		{
 			text
 		}
-      }`
+      }`,variables:{guid}
     });
+
+    await edits.refetch({guid}).then(res => {
+    editRes = res.data.postfromGUID;
+  });
+
   }
 
   //Function + query to check if student has been edited (has edit notes)
   //hasedits == 2 if student has edit notes, hasedits == 1 if there are no edit notes
-  let edits = query(client(), {
-    query: gql`
-		query{
-			postfromGUID(guid: ${guid}) {
-				text
-                createdAt
-                postedBy{
-                  
-                    name
-                    
-                }
-			}
-		}`
-  });
-  let editRes;
-  $edits.then(res => {
-    editRes = res.data.postfromGUID;
-  });
-  $: editRes, console.log(editRes);
+  
+
 
   let hasEdits;
-  async function checkEdits(editRes) {
+  async function checkEdits() {
     let res = 0;
     if (editRes != null) {
       if (editRes.length == 0) {
@@ -111,77 +217,139 @@
       hasEdits = res;
     }
   }
-  $: editRes, checkEdits(editRes);
+  $: editRes, checkEdits();
 
-  //Query for student grades
-  let studentGrades = query(client(), {
-    query: gql`
-    query{
-        gradefromStudentID(id: "${guid}"){
-            grade
-            weight
-            id
-            course{
-                courseID
-            }        
-        }
-    }`
-  });
 
-  let grades;
-  $studentGrades.then(res => {
-    grades = res.data.gradefromStudentID;
-  });
-  $: grades, console.log(grades);
 
- let final22
- let finalALPHA
- let finalGPA
 
-  //Query for getting overallgrade (Gpa) from student
-  let studentGpa = query(client(), {
-    query: gql`
-    query{
-        overallGradeFromId(id: "${studentId}"){
-            grade
-            id
-        }
-    
-    }`
-  });
-  let gpas;
-  $studentGpa.then(res => {
-    gpas = res.data.overallGradeFromId;
-    if(gpas[0] != null || gpas[0] != undefined){
-        final22 = gpas[0].grade
-        finalALPHA = convert(gpas[0].grade)
-    
-    }
 
-  });
-  $: gpas
+  //PART TWO CALCULATIONS
   
-  $:finalGPA, exportStudent = {
-    EMPLID: showAnon ? "anonymous" : guid,
-    Name: showAnon ? fullAnonCode : `"${surname}, ${firstname}"` ,
-    Grade:  alphanum ? finalALPHA : final22
-  };
 
+ 
+  //Query for student grades
+  
+  //$: grades, console.log("grades for :",reload, guid, grades);
+  //$: gpas, console.log("gpas for :", reload, guid, gpas);
+
+ 
+ 
+  
   //Function to calculate Gpa, total of weights
   let totalweight;              //sum of all student grade weights
-  let GPA;                      //Gpa in 22point format
+  let GPA;                      //Gpa in 22point format  created from the calculations
   let ALPHA;                    //Gpa in alpha numeric format
   let degreeClass;              //degree classification
   let gradeNum;                 //number of grades
   let hasAllGrades = false;     //boolean for if a student has all it's grades
-
+  let exportValue;
   let finalClass;
-  console.log("GRADES:" + grades)
-  async function getTotal(grades) {
+
+  let warning = "has-text-black"
+$:save, saveCalc()
+  async function saveCalc(){
+    let calc = parseFloat(GPA)
+    if(save!=0 && GPA <= 22 && GPA>= 0 && gpas.length!=0){
+      let gradeid = gpas[0].id
+      
+
+        let updategpa = await mutate(client(), { mutation: gql`
+            mutation($calc: Float!, $gradeid: ID!){
+	            changeOverallGrade(grade: $calc, id: $gradeid){
+                    grade
+                    
+                }
+            }`, variables:{calc, gradeid}
+        })
+    gpaINDB= GPA
+    final22 =calc
+    finalALPHA = convert(calc)
+    if(final22 < 6){
+          hasDesDegree = true
+        }
+    warning = "has-text-black"
+    gpaReload()
     
-    let total = 0;
+
+    }
+  }
+
+  function RowIsNotSaved(){
+    if( GPA != gpaINDB){
+      warning =  "has-text-danger"
+    }else{
+      warning= "has-text-black"
+    }
+  }
+  $: gpas
+
+  $: GPA, RowIsNotSaved()
+
+  $: selectedLevel, reloadEntities()
+  $: selectedYear, reloadGrades()
+
+async function reloadGrades(){
+  await studentGrades.refetch({studentID}).then(res => {
+  
+     if(res.data.gradefromStudentID!=null){
+      grades = res.data.gradefromStudentID;
+      gradeNum= grades.length
+     }
+     else{
+       grades=[]
+       gradesNum=0
+     }
+  });
+}
+ async function reloadEntities(){
+    hasValidGrades = true;
+   designatedDegree
+   hasDesDegree = false
+   totalweight=0
+   hasAllGrades = false
+   gpas=[]
+   await edits.refetch({guid}).then(res => {
+    editRes = res.data.postfromGUID;
+    hasEdits=editRes.length
+  });
+  await studentGpa.refetch({studentID}).then(res => {
+    gpas = res.data.overallGradeFromId;
+
+    if(gpas.length!=0){
+
+        final22 = gpas[0].grade
+        gpaINDB = gpas[0].grade
+        finalALPHA = convert(gpas[0].grade)
+        if(final22 < 6){
+          hasDesDegree = true
+        }
     
-      if(grades != null || grades != undefined){
+    }
+    else{gpaINDB =""}
+
+  });
+   await studentGrades.refetch({studentID}).then(res => {
+    
+     if(res.data.gradefromStudentID!=null){
+      grades = res.data.gradefromStudentID;
+     }
+     else{
+       grades=[]
+     }
+  });
+  
+ 
+  
+  getTotal(grades, reload)
+   }
+   
+
+
+  async function getTotal(grades, executemut) {
+   
+    let total = 0
+    gradeNum=grades.length
+      if(grades.length!=0 && level !="Third"&& level !="Graduated"){
         let gradeslength = grades.length;       
         let gradenum = 0;
         let gpa = 0
@@ -189,54 +357,130 @@
             
             hasAllGrades = true;
             for (let i = 0; i < gradeslength; i++) {
+                let gradeStatus = grades[i].status;
+                let finalGradeStatus = grades[i].status;
                 gradenum += 1;
                 total += grades[i].weight;
                 gpa += grades[i].weight * grades[i].grade;
+
+                if(gradeStatus == "MV" || gradeStatus == "CR" || gradeStatus == "CW"){
+                  hasValidGrades= false
+                }
             }
         } else {
             for (let i = 0; i < gradeslength; i++) {
+                let gradeStatus = grades[i].status;
+                let finalGradeStatus = grades[i].status;
                 gradenum += 1;
                 total += grades[i].weight;
-                
+                if(gradeStatus == "MV" || gradeStatus == "CR" || gradeStatus == "CW"){
+                  hasValidGrades= false
+                }     
             }
         }
 
         totalweight = total;
-        console.log("WEIGHT:" + totalweight)
-        GPA = parseInt(Math.round(gpa * 10.0) / 10.0).toFixed(1);
+   
+        GPA = ((gpa.toFixed(1) ));
+        RowIsNotSaved()
         ALPHA = convert(gpa);
         degreeClass = degreeClassification(ALPHA);
         gradeNum = gradenum;
-        console.log("GRADES:" + gradeslength)
-        console.log("COURSES:" + gradenum)
-        console.log("GPA:" + GPA)
-        console.log("gpa:" + gpa)
-      console.log("TYPE: " + typeof GPA)
-        //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
-        if ((gradeNum == totalCourses && level == "Fifth") || level == "Fourth") {
-          if(gpas != null || gpas != undefined){
-            if (gpas.length == 0) {
-              
-                let gpaMutation = mutate(client(), {
-                    mutation: gql`
-                        mutation{
-		                    createOverallGradeGPA(studentID: "${studentId}", year: ${date}, studentLevel: ${level} , grade: ${GPA} )
-		                {
-			                grade
-		                }
-                        }`
-                });
-            }
-          }
-        }
-        }
-    }
+   
     
+        //Function to check Gpa exists. If not, set the Gpa previously calculated above as the student's overall grade
 
-  $: grades,getTotal(grades)
+        if(hasValidGrades == true){
+          let exportValue = final22
+        } else if (hasValidGrades == false){
+          let exportValue = "TBC"
+        }
+        
+          if ((gradeNum == totalCourses && level == "Fifth") || (level == "Fourth" && gradeNum == totalCourses)) {
+          if(gpas != null || gpas != undefined){
+              if (!reload && gpas.length == 0 &&  totalweight > 0.9998 && totalweight < 1.0001)  {
 
-  //console.log("GRADES: " + grades.length)
-  //console.log("COURSES" + totalCourses)
+                
+              
+                  let gpaMutation = await mutate(client(), {
+                      mutation: gql`
+                          mutation($studentID: ID!){
+		                      createOverallGradeGPA(studentID: $studentID, year: ${date}, studentLevel: ${level} , grade: ${gpa} )
+		                  {
+			                  grade
+		                  }
+                          }`,variables:{studentID}
+                    });
+                   
+                     gpas = [gpaMutation.data.createOverallGradeGPA]
+                    final22 = gpas[0].grade
+                    gpaINDB = gpas[0].grade
+                    finalALPHA = convert(gpas[0].grade)
+                    if(final22 < 6){
+                    hasDesDegree = true
+        }
+                    color = "has-text-black"
+                  
+
+
+              }}
+
+
+
+
+
+
+                  
+                  
+                
+              }
+            
+          }
+    
+  } 
+async function gradesReload(){
+ await studentGrades.refetch({studentID}).then(res => {
+
+     if(res.data.gradefromStudentID!=null){
+      grades = res.data.gradefromStudentID;
+     }
+     else{
+       grades=[]
+     }
+  });
+  getTotal(grades,false)
+}
+async function gpaReload(){
+ await studentGpa.refetch({studentID}).then(res => {
+    gpas = res.data.overallGradeFromId;
+
+    if(gpas.length!=0){
+
+        final22 = gpas[0].grade
+        gpaINDB = gpas[0].grade
+        finalALPHA = convert(gpas[0].grade)
+        if(final22 < 6){
+          hasDesDegree = true
+        }
+    
+    }
+    else{gpaINDB =""}
+
+  })
+                 
+}
+
+  $: grades,exportStudent = {
+    EMPLID: showAnon ? "anonymous" : guid,
+    Name: showAnon ? fullAnonCode : `"${surname},${firstname}"` ,
+    AcadPlan: `"${anonCode}"`,
+    DegreeHonors: hasValidGrades ? (hasDesDegree ? designatedDegree : exportClassification(degreeClassification(convert(final22)))) : "TBC",
+
+
+   
+  };
+
+
 
 
 
@@ -255,8 +499,11 @@
   let modalIsVisible = false;
   $: modalClass = modalIsVisible === true ? "modal is-active" : "modal";
 
-  function closeModal() {
+  async function closeModal() {
     modalIsVisible = false;
+    await studentGrades.refetch().then(res => {
+    grades = res.data.gradefromStudentID;
+  });
   }
 
   export function openModal() {
@@ -288,11 +535,13 @@
   function openGpaModal() {
     gpaModalIsVisible = true;
   }
+
+
 </script>
 
 
 
-<div class="columns">
+<div  class="columns {warning}">
   {#if showAnon}
     <div class="column is-2">{fullAnonCode}</div>
   {:else if showNames}
@@ -304,6 +553,7 @@
 
     <div class="column is-1">{level}</div>
  
+ {#if grades!=null}
 
   {#await $studentGrades}
 
@@ -329,35 +579,48 @@
           </div>
 
           {#each result.data.gradefromStudentID as grade}
-            <GradeEditWindow {grade} class="content" />
+            <GradeEditWindow  gradesReload={()=>gradesReload()} {grade} class="content" />
           {/each}
-
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button is-success" on:click={() => closeModal()}>
-            <span>Finish</span>
-          </button>
-
+          <div class="columns">
+          <div class="column is-3">
           <button class="button is-warning" on:click={() => (addEdit = true)}>
             Add edit note
-          </button>
-
+          </button></div>
           {#if addEdit}
+        
             <input
-              class="column is-5 level-1 has-text-danger"
+              class="column is-5 has-text-danger"
               bind:value={text}
               placeholder={'Add post...'} />
-
+      
+            <div class="column is-2">
             <button
-              class="button is-success level-1 is-block "
-              on:click={createpost}>
+              class="button is-success is-block "
+              on:click={()=>createpost()}>
               <span class="icon is-small">
                 <i class="fas fa-check" />
               </span>
               <span>Save</span>
             </button>
+            </div>
+          <div class="column is-2">
+          <button class="button level-1 is-danger is-outlined is-block " on:click={()=>text=""}>
+            <span>Cancel</span>
+            <span class="icon is-small">
+            <i class="fas fa-times"></i>
+            </span>
+          </div>
           {/if}
+        </div>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button is-success" on:click={() => closeModal()}>
+            <span>Close</span>
+          </button>
 
+         
+
+          
         </footer>
       </div>
     </div>
@@ -392,162 +655,183 @@
         </div>
       </div>
     </div>
-
-    <div class="column is-2">
+  {#if !restricted}
+    <div class="column is-1">
       <button on:click={() => openModal()} class="button is-light is-danger">
-        Edit grades
+        Edit
       </button>
     </div>
-  {/await}
-
-  {#if totalweight > 0.9998 && totalweight < 1.0001}
-    {#if hasAllGrades == true}
-      <div class="column is-1">
-        <span class="icon has-text-success">
-          <i class="fas fa-check-square" />
-        </span>
-      </div>
-    {:else if hasAllGrades == false}
-      <div class="column is-2">
-        <div class="dropdown is-hoverable">
-          <div class="dropdown-trigger">
-            <button
-              class="button"
-              aria-haspopup="true"
-              aria-controls="dropdown-menu">
-              <span class="icon has-text-warning">
-                <i class="fas fa-exclamation-triangle" />
-              </span>
-              <span>Error</span>
-              <span class="icon is-small">
-                <i class="fas fa-angle-down" aria-hidden="true" />
-              </span>
-            </button>
-          </div>
-
-          <div class="dropdown-menu" id="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-              <div class="dropdown-item">
-                <p>
-                  <strong>Warning</strong>
-                  student has correct weight but not all course grades.
-                </p>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     {/if}
-  {/if}
+  {/await}
+ 
+        {#if hasValidGrades == true}
+         {#if level=="Third"||level=="Graduated" }
+          <div class="column is-3">Calculations are not available for this level</div>
+          {:else}
+ 
+            {#if totalweight > 0.9998 && totalweight < 1.0001}
+              {#if hasAllGrades == true}
+                <div class="column is-1">
+                  <span class="icon has-text-success">
+                    <i class="fas fa-check-square" />
+                  </span>
+                </div>
+              {:else if hasAllGrades == false}
+                <div class="column is-2">
+                  <div class="dropdown is-hoverable">
+                    <div class="dropdown-trigger">
+                      <button
+                        class="button"
+                        aria-haspopup="true"
+                        aria-controls="dropdown-menu">
+                        <span class="icon has-text-warning">
+                          <i class="fas fa-exclamation-triangle" />
+                        </span>
 
-  {#if totalweight < 0.9998}
-    <div class="column is-2">
-      <div class="dropdown is-hoverable">
-        <div class="dropdown-trigger">
-          <button
-            class="button"
-            aria-haspopup="true"
-            aria-controls="dropdown-menu">
+                      </button>
+                    </div>
+
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                      <div class="dropdown-content">
+                        <div class="dropdown-item">
+                          <p>
+                            <strong>Warning</strong>
+                            student has correct weight but not all course grades.
+                          </p>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            {/if}
+
+            {#if totalweight < 0.9998}
+              <div class="column is-2">
+                <div class="dropdown is-hoverable">
+                  <div class="dropdown-trigger">
+                    <button
+                      class="button"
+                      aria-haspopup="true"
+                      aria-controls="dropdown-menu">
+                      <span class="icon has-text-warning">
+                        <i class="fas fa-exclamation-triangle" />
+                      </span>
+          
+
+                    </button>
+                  </div>
+
+                  <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                      <div class="dropdown-item">
+                        {#if totalweight == 0}
+                          <p>
+                            <strong>Warning</strong>
+                            student does not have grades.
+                          </p>
+                        {/if}
+
+                        {#if totalweight > 0}
+                          <p>
+                            <strong>Warning</strong>
+                            student is missing grade(s)
+                            <strong>or</strong>
+                            has incorrect weight(s).
+                          </p>
+                          <hr class="dropdown-divider" />
+                          <p>
+                            Accumulated weight:
+                            <strong>{totalweight}</strong>
+                          </p>
+                        {/if}
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
+
+            {#if totalweight > 1.0001}
+              <div class="column is-3">
+                <div class="dropdown is-hoverable">
+                  <div class="dropdown-trigger">
+                    <button
+                      class="button"
+                      aria-haspopup="true"
+                      aria-controls="dropdown-menu4">
+                      <span class="icon has-text-warning">
+                        <i class="fas fa-exclamation-triangle" />
+                      </span>
+                      <span>Error</span>
+                      <span class="icon is-small">
+                        <i class="fas fa-angle-down" aria-hidden="true" />
+                      </span>
+                    </button>
+                  </div>
+                  <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+                    <div class="dropdown-content">
+                      <div class="dropdown-item">
+                        <p>
+                          <strong>Warning</strong>
+                          student has incorrect weights.
+                        </p>
+                        <hr class="dropdown-divider" />
+                        <p>
+                          Accumulated weight: <strong> {totalweight}</strong> 
+                          <strong />
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/if}
+   {/if}
+        {/if}
+
+        {#if hasValidGrades == false}
+          <div class="column is-1">
             <span class="icon has-text-warning">
               <i class="fas fa-exclamation-triangle" />
             </span>
-            <span>Error</span>
-            <span class="icon is-small">
-              <i class="fas fa-angle-down" aria-hidden="true" />
-            </span>
-          </button>
-        </div>
+          </div>
+          <div class="column is-1">
+            TBC
+          </div>
 
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
-          <div class="dropdown-content">
-            <div class="dropdown-item">
-              {#if totalweight == 0}
-                <p>
-                  <strong>Warning</strong>
-                  student does not have grades.
-                </p>
-              {/if}
-
-              {#if totalweight > 0}
-                <p>
-                  <strong>Warning</strong>
-                  student is missing grade(s)
-                  <strong>or</strong>
-                  has incorrect weight(s).
-                </p>
-                <hr class="dropdown-divider" />
-                <p>
-                  Accumulated weight:
-                  <strong>{totalweight}</strong>
-                </p>
-              {/if}
-
+          
+          <div class="column is-3">
+            <div class="notification is-warning">
+                  <strong>{firstname}</strong> is awaiting confirmation.
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  {/if}
-
-  {#if totalweight > 1.0001}
-    <div class="column is-3">
-      <div class="dropdown is-hoverable">
-        <div class="dropdown-trigger">
-          <button
-            class="button"
-            aria-haspopup="true"
-            aria-controls="dropdown-menu4">
-            <span class="icon has-text-warning">
-              <i class="fas fa-exclamation-triangle" />
-            </span>
-            <span>Error</span>
-            <span class="icon is-small">
-              <i class="fas fa-angle-down" aria-hidden="true" />
-            </span>
-          </button>
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu4" role="menu">
-          <div class="dropdown-content">
-            <div class="dropdown-item">
-              <p>
-                <strong>Warning</strong>
-                student has incorrect weights.
-              </p>
-              <hr class="dropdown-divider" />
-              <p>
-                Accumulated weight: <strong> {totalweight}</strong> 
-                <strong />
-              </p>
-            </div>
+        {/if}
+         {#if level=="Third"||level=="Graduated" }
+          <div class="column is-3"></div>
+          {:else}
+        {#if totalweight > 0.9998 && totalweight < 1.0001}
+          <div class="column is-1">
+            {#if alphanum}
+              {ALPHA}
+            {:else}
+              {GPA}
+            {/if}
           </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+        
 
-  {#if totalweight > 0.9998 && totalweight < 1.0001}
-    <div class="column is-1">
-      
-      {#if alphanum}
-        {ALPHA}
+          <div class="column is-1">{degreeClass}</div>
+
       {:else}
-        {GPA}
-      {/if}
+          <div class="column is-1"></div>
 
-    </div>
 
-    <div class="column is-1">{degreeClass}</div>
-  {/if}
+        {/if}
+        {/if}
 
-  {#await $studentGpa}
-
-    <div class="section">
-      <progress class="progress is-small is-info" max="100" />
-    </div>
-
-  {:then result}
-
+  {#if gpas.length!=0}
     <div class={gpaModalClass}>
       <div class="modal-background" />
       <div class="modal-card">
@@ -562,8 +846,8 @@
 
           </div>
 
-          {#each result.data.overallGradeFromId as gpa}
-            <GpaEditWindow {gpa} class="content" />
+          {#each gpas as gpa}
+            <GpaEditWindow {gpa} gpaReload={() => gpaReload()} class="content" />
           {/each}
 
         </section>
@@ -585,7 +869,7 @@
 
             <button
               class="button is-success level-1 is-block "
-              on:click={createpost}>
+              on:click={()=>createpost()}>
               <span class="icon is-small">
                 <i class="fas fa-check" />
               </span>
@@ -596,31 +880,34 @@
         </footer>
       </div>
     </div>
-  {/await}
+    {/if}
 
-  {#await $studentGpa}
 
-    <div class="section">
-      <progress class="progress is-small is-info" max="100" />
-    </div>
 
-  {:then result}
-
-    {#if level == 'Fifth' && hasAllGrades == true}
+    {#if level == 'Fifth' || level == 'Fourth' && hasAllGrades == true && ( totalweight > 0.9998 && totalweight < 1.0001)}
       {#if finalizeGpa == true}
         <div class="column is-7">
 
-          {#each result.data.overallGradeFromId as gpa}
-            
-            {#if alphanum}
-                {convert(gpa.grade)}  &nbsp; &nbsp;
-            {:else}
-                {gpa.grade} &nbsp; &nbsp; 
+          {#each gpas as gpa}
+
+            {#if gpa.grade <= 5 }
+
+                 <DesignatedSelect bind:selected={designatedDegree} /> 
+
+            {:else if gpa.grade > 5}
+
+                {#if alphanum}
+                    {convert(gpa.grade)}  &nbsp; &nbsp;
+                {:else}
+                    {gpa.grade.toFixed(1)} &nbsp; &nbsp; 
+                {/if}
+
+                <strong>
+                  class:&nbsp; {degreeClassification(convert(gpa.grade))} ({exportClassification(degreeClassification(convert(gpa.grade)))})
+                </strong>
+
             {/if}
 
-            <strong>
-              class:&nbsp; {degreeClassification(convert(gpa.grade))}
-            </strong>
           {/each}
 
           {#if allowEdits == true}
@@ -644,7 +931,7 @@
       {/if}
     {/if}
 
-  {/await}
+
 
   {#await $edits}
 
@@ -704,4 +991,15 @@
     </div>
 
   {/await}
+  
+  
+
+  {:else}
+  <div>The student  has no grades. Please upload or add them in the Students page.</div>
+  
+  
+  {/if}
 </div>
+
+
+

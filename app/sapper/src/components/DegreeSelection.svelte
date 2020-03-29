@@ -15,19 +15,21 @@
     Loading...
   {:then result}
     {#if multiSelect}
+
       <select bind:value={selectedDegrees} multiple>
             <option value="" disabled>-- Select--</option>
         {#each result.data.getDegrees as degree,i}
           <option value={degree.id}>{degree.name}</option>
         {/each}
       </select>
-    {:else}
-      <select bind:value={selectedDegrees}>
+    {:else} <div class="select is-primary ">
+        <select bind:value={selectedDegrees}>
             <option value="" disabled>-- Select--</option>
         {#each result.data.getDegrees as degree}
           <option value={degree.id}>{degree.name}</option>
         {/each}
       </select>
+      </div>
     {/if}
   {:catch error}
     Error: {error}

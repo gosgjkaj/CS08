@@ -19,19 +19,28 @@
   import currentYear  from '../../currentYear.js'
 	// hardcoded data
   let year = currentYear
-  console.log(year)
+  let save= 0 //used to save calcuations into db
   let searchString = "";
+   function checkUser(){
+    if($session.user!=null){
+      return $session.user.role=="Restricted"
+  }
+}
+  let restricted =checkUser()
 
- 
+  let reload = false 
   let selectedYear = year;
   let selectedLevel = "";
-  let finalizeGpa = false;
+  let finalizeGpa = true;
   let allowEdits = false;
   let students;
 
   function convertLevel(lev, entr){
-    let levels = ["First", "Second","Third" ,"Fourth" ,"Fifth" ];
+    let levels = ["First", "Second", "Third" ,"Fourth" ,"Fifth" ];
   if (selectedYear != year){
+    if(lev=="Graduated"){
+      return "Graduated"
+    }
      return levels[selectedYear-entr-1]
   }else{
     return lev
@@ -46,6 +55,7 @@
       }
 
   }
+ 
   //query for listing courses in degree
   let coursesByDegree = query(client(), {
     query: gql`
@@ -65,7 +75,7 @@
   $coursesByDegree.then(res => {
     allCourses = res.data.getCoursesByDegree;
   });
-  $: allCourses, console.log(allCourses);
+
 
   let totalCourses;
 
@@ -100,15 +110,18 @@
 
   $: student.result().then(res => {
     students = res.data.studentfromDegreeID;
+  
   });
   let displayStudents = [];
-  $: students, (displayStudents = students);
+   $: students, (displayStudents = students);
+   $: students, displayEntries();
 
   let degreeName = query(client(), {
     query: gql`
         query{
             namefromDegreeID(id: "${id}"){
                 degreeCode
+                name
             }
         }`
   });
@@ -117,7 +130,7 @@
   $degreeName.then(res => {
     degCode = res.data.namefromDegreeID;
   });
-  $: degCode, console.log(degCode);
+
 
   let anonCode;
   async function getCode(degCode) {
@@ -142,20 +155,6 @@
     { id: 5, text: "Fifth" }
   ];
 
-  //set sorting level
-  function setSortingLevel(id) {
-    sortingLevel = id;
-  }
-
-  //calculate differnce between current year and selected year
-  function calculateDifference(selectedYear) {
-    yearDifference = selectedYear - year;
-  }
-
-  function gotoCourse() {
-    goto(`http://localhost:3000//courses`);
-  }
-
   let showAnon = false;
   let showNames = true;
 
@@ -178,6 +177,15 @@
     displayEntries();
   }
 
+  function clickedButton(lvl){
+    selectedLevel= lvl
+    if (selectedLevel==""){
+      reload=false
+    }else{
+    reload = true
+  }
+  }
+
   let studentsearch = query(client(), {
     query: gql`
             query($searchString: String!){
@@ -194,63 +202,89 @@
   });
 
   let exportList = [];
-  $:exportList,console.log(exportList)
-  $:displayStudents, console.log(displayStudents)
+
+
   function displayEntries() {
     if (students != null) {
-      if (searchString.trim().length > 0) {
+
         let searchStringArg = searchString.toLowerCase();
-        console.log("SEARCH STRING: "+ searchStringArg)
 
+        if(currentYear== selectedYear){
         if (selectedLevel == "") {
+          
           displayStudents = students.filter(
             student =>
-              2 < selectedYear - student.entryYear &&
+             ( 
+             (2 < selectedYear - student.entryYear &&
               selectedYear - student.entryYear < 6 &&
-              selectedYear >= student.entryYear &&
+              selectedYear >= student.entryYear && student.level !="Graduated" )
+               ||(selectedYear==student.entryYear && student.level=="Fifth") 
+               ) &&
               (student.firstname.toLowerCase().includes(searchStringArg) ||
-                student.surname.toLowerCase().includes(searchStringArg))
+                student.surname.toLowerCase().includes(searchStringArg) || 
+                student.guid.toLowerCase().includes(searchStringArg))
           );
         } else {
           displayStudents = students.filter(
             student =>
-              selectedYear - student.entryYear == selectedLevel &&
-              selectedYear >= student.entryYear &&
+             ( (2 < selectedYear-student.entryYear &&
+             selectedYear - student.entryYear == selectedLevel &&
+              selectedYear >= student.entryYear && student.level !="Graduated" ) ||(selectedYear==student.entryYear && selectedLevel==5 &&student.level =="Fifth")) &&
               (student.firstname.toLowerCase().includes(searchStringArg) ||
                 student.surname.toLowerCase().includes(searchStringArg))
           );
         }
-      } else {
-        if (selectedLevel == "") {
+        }else{
+
+          if (selectedLevel == "") {
+          
           displayStudents = students.filter(
             student =>
-              2 < selectedYear - student.entryYear &&
+             ( 
+            ( (2 < selectedYear - student.entryYear &&
               selectedYear - student.entryYear < 6 &&
-              selectedYear >= student.entryYear
-          );
+              selectedYear >= student.entryYear)||(selectedYear==student.entryYear &&student.level=="Graduated" ))
+              &&
+              (student.firstname.toLowerCase().includes(searchStringArg) ||
+                student.surname.toLowerCase().includes(searchStringArg) || 
+                student.guid.toLowerCase().includes(searchStringArg))
+             ))
         } else {
           displayStudents = students.filter(
             student =>
-              selectedYear - student.entryYear == selectedLevel &&
-              selectedYear >= student.entryYear
+             (( (2 < selectedYear-student.entryYear && selectedYear - student.entryYear == selectedLevel ) 
+                ||(selectedLevel==5 && student.level =="Fifth")
+               ||(selectedYear==student.entryYear &&student.level=="Graduated") )
+               &&
+              (student.firstname.toLowerCase().includes(searchStringArg) ||
+                student.surname.toLowerCase().includes(searchStringArg))
+             )
           );
         }
+
+        }
+      
       }
-    }
+    
 
+    displayStudents=displayStudents
     if (displayStudents != null) {
       exportList = Array.from(displayStudents);
     }
   }
   $: selectedYear, displayEntries();
-  $: selectedYear, console.log(selectedYear);
+
   $: selectedLevel, displayEntries();
+  $: searchString, displayEntries();
+  $:save, displayStudents=displayStudents
 
   function exportStudents() {
     let headers = {
-      EMPLID: "EMPLID",
+      EMPLID: "StudentID",
       Name: "Name",
-      Grade: "Grade"
+      AcPlan : "Acad Plan",
+      DegreeHonors: "Degree Honors",
+
     };
 
     let fileName = `"${anonCode}_${selectedYear}"`;
@@ -271,7 +305,7 @@
         <div class="hero-body">
           <div class="container">
             <h2 class="subtitle">Students in degree:</h2>
-            <h1 class="title">{degree.degreeCode}</h1>
+            <h1 class="title">{degree.name}</h1>
           </div>
         </div>
       </section>
@@ -282,7 +316,8 @@
     <div class="level-left">
 
       <h1>Courses in degree: &nbsp; &nbsp;</h1>
-
+      
+      <!-- showing courses belongs to this degree -->
       {#await $coursesByDegree}
         <div class="section">
           <progress class="progress is-small is-info" max="100" />
@@ -299,29 +334,7 @@
 
     </div>
 
-    <div class="level-right">
-
-      <div class="level-item">
-        <label class="radio">
-          <input
-            type="radio"
-            name="answer"
-            on:click={() => (alphanum = false)}
-            value="22pt"
-            checked />
-          <span>in 22pt</span>
-        </label>
-
-        <label class="radio">
-          <input
-            type="radio"
-            name="answer"
-            on:click={() => (alphanum = true)}
-            value="alpha" />
-          <span>in Alpha#</span>
-        </label>
-      </div>
-    </div>
+   
   </nav>
 
   <!-- This div select sorting values -->
@@ -329,7 +342,7 @@
     <div style="display:flex; flex">
 
       <!-- select year showing -->
-      <div class="select is-info is-large">
+      <div class="select is-info is-medium ">
         <select bind:value={selectedYear} style="margin-right:10px">
           {#each yearRuns as yearRun}
             <option value={yearRun.id}>{yearRun.text}</option>
@@ -338,18 +351,19 @@
       </div>
       <!-- select level showing -->
       <button
-        on:click={() => (selectedLevel = '')} 
-        class="button is-large is-info is-outlined"  style="margin-right:5px">
+        on:click={() =>  clickedButton("")} 
+        class="button is-medium is-info is-outlined"  style="margin-right:5px">
         Show All
       </button>
       {#each levels as level}
         <button
-          on:click={() => (selectedLevel = level.id)} 
-          class="button is-large is-info is-outlined" style="margin-right:5px">
+          on:click={() =>  clickedButton(level.id)} 
+          class="button is-medium is-info is-outlined" style="margin-right:5px">
           {level.text}
         </button>
       {/each}
       
+      <!--  -->
       <div style="margin-left: auto; align-self: center">
         <div class="level-right">
           <div class="level-item">
@@ -357,7 +371,7 @@
               <p class="control has-icons-right">
                 <input
                   id="searchStringElement"
-                  on:input={displayEntries}
+                  on:input={()=>displayEntries()}
                   bind:value={searchString}
                   class="input is-rounded"
                   type="text"
@@ -398,10 +412,35 @@
         <button class="button is-link" on:click={() => toggleNames()}>Names</button>
         <button class="button is-primary" on:click={() => toggleAnon()}>Anonymous</button>
       </div>
+       <div class="level-right">
+
+      <div class="level-item">
+        <label class="radio">
+          <input
+            type="radio"
+            name="answer"
+            on:click={() => (alphanum = false)}
+            value="22pt"
+            checked />
+          <span>in 22pt</span>
+        </label>
+
+        <label class="radio">
+          <input
+            type="radio"
+            name="answer"
+            on:click={() => (alphanum = true)}
+            value="alpha" />
+          <span>in Alpha#</span>
+        </label>
+      </div>
+    </div>
 
       <div style="margin-left:auto; margin-right:2.5%">
-        <button class="button is-primary" on:click={() => (finalizeGpa = true)}>Finalize</button>
-        {#if finalizeGpa == true}
+      {#if !restricted}
+         <button class="button is-primary" on:click={() => (save = save+1)}>Save All</button>
+        {/if}
+        {#if finalizeGpa == true && !restricted}
             <button class="button is-danger" on:click={() => (allowEditing())}>Edit</button>
         {/if}
         <button class="button is-danger" on:click={() => exportStudents()}>Export</button>
@@ -409,13 +448,13 @@
 
     </div>
 
-    <div class="box">
+    <div class="box has-offset-1">
       <div class="columns has-text-weight-bold">
         <div class="column is-1">Firstname</div>
         <div class="column is-1">Surname</div>
         <div class="column is-1">GUID</div>
         <div class="column is-1">Level</div>
-        <div class="column is-3">Grade details</div>
+        <div class="column is-2">Grade details</div>
         <div class="column is-1">GPA status</div>
         <div class="column is-1">
           <p>
@@ -431,8 +470,8 @@
       {#if displayStudents != null}
         <!-- Apply all the conditions here -->
         {#each displayStudents as { id, firstname, surname,entryYear, guid, level }, i}
-          <StudentDegreeRow bind:exportStudent={exportList[i]}  level={convertLevel(level,entryYear)} studentId={id} {firstname} {surname} {guid}
-            showingLevel={''} {allowEdits} {finalizeGpa} {totalCourses} {showAnon} {showNames} {anonCode} {id} {twentyTwo} {alphanum} class="content" />
+          <StudentDegreeRow bind:exportStudent={exportList[i]} {restricted} level={convertLevel(level,entryYear)} studentID={id} {firstname} {surname} {guid}
+            showingLevel={''} {allowEdits} {restricted} {save} bind:selectedYear={selectedYear} bind:reload={reload} bind:selectedLevel={selectedLevel} {finalizeGpa} {totalCourses} {showAnon} {showNames} {anonCode} {id} {twentyTwo} {alphanum} class="content" />
         {/each}
       {/if}
     </div>

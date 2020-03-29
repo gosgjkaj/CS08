@@ -78,6 +78,18 @@ let classification = {
     "H":'Fail'
 }
 
+let exportClass = {
+
+    '1' : "01",
+    '2:1' : "0U",
+    '2:2' : "0L",
+    '3rd' : "33",
+    'Pass' : "GC"
+
+
+
+}
+
 
 
 
@@ -100,4 +112,8 @@ export function degreeClassification( grade ){
 
     return classification[grade]
 
+}
+
+export function exportClassification( grade ) {
+    return exportClass[grade]
 }

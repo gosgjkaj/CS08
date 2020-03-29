@@ -27,14 +27,14 @@ let coursesFromYear = query(client(), {query: gql`
 	<div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
 {:then result}
     {#each result.data.coursesFromYear as course}
-        <div class="box" style="background-color:#EBF1F5; display:flex; flex-direction:row">
-            <div class="button is-primary is-outlined is-medium" onclick="location.href='/courses/{course.id}'"> {course.name}</div>
+        <div class="box is-light" style="background-color:#F0F8FF; display:flex; flex-direction:row"onclick="location.href='/courses/{course.id}'">
+            <div class="button is-info is-light is-medium" > {course.name}</div>
             <div style="margin-left:3%"> 
                 <div>
-                    <p>Code : {course.courseID}</p>
+                    <p>Code: {course.courseID}</p>
                 </div>
                 <div>
-                    <p>Info : {course.info}</p>
+                    <p>Info: {course.info}</p>
                 </div>
             </div>
         </div>

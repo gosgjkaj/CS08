@@ -13,19 +13,34 @@
     import { gql } from 'apollo-boost'
     import StudentRowEditDisable from '../../components/StudentRowEditDisable.svelte'
     import currentYear  from '../../currentYear.js'
+    import { downloadCSV } from "../../export-csv.js";
+    import {convert} from "../../components/convertGrades.js";
+
+    let exportList = []
+    let displayStudents = []
+    let students=[]
+    let Alpha= true 
     let year = currentYear
     let name
+    let courseInfo={name: "name"}
     let course =  query(client(), {query: gql`
     query{
         getCourseByID(id: "${id}"){
         
             name
+            courseID
         }
     }`
     })
- 
+    $course.then(res => {
+    courseInfo = res.data.getCourseByID;
+    })
 
-    let cellnumber = 0
+  function convertLevel(lev){
+    let levels = ["First", "Second", "Third" ,"Fourth" ,"Fifth" ];
+    return levels[lev]
+  }
+    
     let studentGrade = query(client(), {query: gql`
             query{
                 gradeFromCourseID(id: "${ id }", date: ${year} ){
@@ -34,19 +49,53 @@
                         surname
                         guid
                         level
-                    }
-                    course{
-                        courseID
+                    
                     }
                     grade
-                    id
-                    weight
+                    status
                 }
             }`
         })
+    $studentGrade.then(res => {
+    students = res.data.gradeFromCourseID;
+    if(students!=null){
+        displayStudents=Array.from(students)
+        convertGrades()
+        createExportList()
+    }
+  });
+
+  function createExportList(){
+      if(displayStudents!=null){
+        exportList= Array.from(displayStudents)
+        for(let i=0; i<displayStudents.length; i++){
+            exportList[i] = {
+                EMPLID: displayStudents[i].student.guid,
+                Name: `"${displayStudents[i].student.surname},${displayStudents[i].student.firstname}"`,
+                Grade: displayStudents[i].grade
+
+            }
+        }
+    }
+  }
+ 
+  function exportStudents() {
+     
+    let headers = {
+      EMPLID: "EMPLID",
+      Name: "Name",
+      Grade: "Grade"
+    };
+    createExportList() 
     
-    
+    let fileName = `"${courseInfo.courseID}_${currentYear}"`;
+
+    downloadCSV(headers, exportList, fileName);
+  }
+
+  
     let SortingLevel = ""
+    
 
     function viewall(){
         SortingLevel = ""
@@ -64,66 +113,89 @@
         SortingLevel = 5
     }
 
+    function display(){
+        if(SortingLevel!=""){
+        displayStudents = students.filter(
+            entry =>
+                 (
+                     entry.student.level==SortingLevel)
+          );
+        }else{
+            displayStudents=students
+        }
+
+ 
+    }
+
+function convertGrades(){
+    if(displayStudents!=null){
+     for(let i=0; i<displayStudents.length; i++){
+            let grade = displayStudents[i].grade
+            if(displayStudents[i].status=="OK" ){
+               displayStudents[i].grade=convert(grade)
+            }else{
+                 displayStudents[i].grade=displayStudents[i].status
+            }
+     }
+    }
+
+}
+
+$:SortingLevel, display()
+$:Alpha, convertGrades()
 
 </script>
 
 
-{#if $session.user}
-
-	{#await $studentGrade}
-	    <div class="section"><progress class="progress is-small is-info" max="100"></progress></div>
-	{:then result}
+ {#if $session.user}
     
     <section class="hero is-info">
 		<div class="hero-body">
 			<div class="container">
 				<h2 class="subtitle">Data for Course:</h2>
-                {#await $course}
-                <p>name</p>
-                {:then res}
-                <h1 class="title">{res.data.getCourseByID.name} </h1>
-                {/await}
+
+                <h1 class="title">{courseInfo.name} </h1>
+                 <p>Grades displayed only for the current academic year.</p>
+
 			</div>
 		</div>
   	</section>
 
     <div class= "box buttons">
-        <button on:click={viewall} class="button is-large is-info is-outlined">All</button>
-        <button on:click={sortlevel3} class="button is-large is-info is-outlined">Level3</button>
-        <button on:click={sortlevel4} class="button is-large is-info is-outlined">Level4</button>
-        <button on:click={sortlevel5} class="button is-large is-info is-outlined">Level5</button>
-    </div>
+        <button  on:click={() => (Alpha = !Alpha)} class="button  is-primary is-outlined">Change Grade Display</button>
+        <button  on:click={() => (SortingLevel = '')} class="button  is-info is-outlined">All</button>
+        <button on:click={() => (SortingLevel = "Third")} class="button  is-info is-outlined">Third</button>
+        <button on:click={() => (SortingLevel = "Fourth")} class="button  is-info is-outlined">Fourth</button>
+        <button on:click={() => (SortingLevel = "Fifth")} class="button  is-info is-outlined">Fifth</button>
+        <button on:click={() =>exportStudents()} class="button  is-danger is-outlined">Export</button>
+    </div> 
+    
 
     <div class="content">
 		<div class="box ">
             <div class="columns has-text-weight-bold">
-               <div class="column is-1">Firstname</div>
-                <div class="column is-1">Surname</div>
-                <div class="column is-1">GUID</div>
-                <div class="column is-1">Grade</div>
-                <div class="column is-1">Weight</div>
+               <div class="column is-2">Firstname</div>
+                <div class="column is-2">Surname</div>
+                <div class="column is-2">GUID</div>
+                 <div class="column is-2">Level</div>
+                <div class="column is-2">Grade</div>
+             
             </div>
-		    {#each result.data.gradeFromCourseID as student}
-                {#if SortingLevel == 3}
-                    {#if student.student.level == "Third"}
-                        <StudentRowEditDisable grade={student} class="content"/>
-                    {/if}
-                {:else if SortingLevel == 4}
-                    {#if student.student.level == "Fourth"}
-                        <StudentRowEditDisable grade={student} class="content"/>
-                    {/if}
-                {:else if SortingLevel == 5}
-                    {#if student.student.level == "Fifth"}
-                        <StudentRowEditDisable grade={student} class="content"/>
-                    {/if}
-				{:else if SortingLevel == ""}                  
-                    <StudentRowEditDisable grade={student} class="content"/>
-                {/if}
-		    {/each}
+             {#if displayStudents!=null}
+             
+                {#each displayStudents as { student, grade, status }, i}
+                            <StudentRowEditDisable  {student}  {grade} {status} class="content"/>
+
+
+                {/each}
+                
+               
+            {/if} 
 		</div>
 	</div>
-	{/await}
+
 {/if}
+
 <footer class="footer">
   <div class="content has-text-centered">
     <p class="has-text-centered">
