@@ -20,7 +20,7 @@
     "connect-redis": "^4.0.3",
     "express-session": "^1.17.0",
     "graphql": "^14.5.8",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "papaparse": "^5.1.1",
     "polka": "^1.0.0-next.9",
     "redis": "^2.8.0",
